@@ -1,0 +1,983 @@
+{
+  "metas_defesa_civil": {
+    "recall_minimo": 0.8,
+    "precisao_minima": 0.5,
+    "precisao_alvo_max": 0.75,
+    "lead_time_min_minutos": 30.0,
+    "lead_time_alvo_minutos": 60.0,
+    "cobertura_areas_risco_min": 1.0
+  },
+  "verificacao_indicadores_sucesso": {
+    "recall_gte_80pct": true,
+    "recall_obtido": 0.9978,
+    "precisao_controlada_50_75pct": true,
+    "precisao_obtida": 0.8045,
+    "lead_time_30_60m_atingido": true,
+    "lead_time_medio_minutos": 58.9,
+    "cobertura_100pct_areas_risco": true,
+    "retroalimentacao_obrigatoria_ativa": true
+  },
+  "qualidade_telemetria_qc": {
+    "total_leituras_avaliadas": 52416,
+    "leituras_validas": 52170,
+    "percentual_validas": 99.531,
+    "anomalias_detectadas": {
+      "offline_null_count": 156,
+      "offline_null_pct": 0.298,
+      "valores_negativos_count": 52,
+      "picos_irreais_spike_count": 38
+    },
+    "decisao_tratamento": "Leituras negativas (< 0 mm) e spikes irreais (> 60 mm/10min) são convertidos em NaN para não distorcer a malha. Em seguida, a série em cada Ponto Crítico é reconstruída por interpolação espacial IDW (p=2) usando as estações ativas no mesmo instante, preservando uma feature binária (estacao_primaria_offline_flag) para informar o modelo de ML."
+  },
+  "interpolacao_espacial_idw": {
+    "metodo": "Inverse Distance Weighting (IDW, p=2.0)",
+    "cobertura_100pct_areas_risco": true,
+    "detalhe_por_ponto": {
+      "PC_JAC_01": {
+        "nome": "Jacarecanga - Canal do Jacarecanga / Av. Filomeno Gomes",
+        "bairro": "Jacarecanga",
+        "estacao_primaria": "DC_01",
+        "distancia_estacao_primaria_km": 0.19,
+        "cobertura_confiavel_pct": 100.0,
+        "steps_interpolados_por_redundancia": 19
+      },
+      "PC_PAD_01": {
+        "nome": "Padre Andrade - Margem Rio Maranguapinho / Rua Demétrio Menezes",
+        "bairro": "Padre Andrade",
+        "estacao_primaria": "DC_02",
+        "distancia_estacao_primaria_km": 0.18,
+        "cobertura_confiavel_pct": 100.0,
+        "steps_interpolados_por_redundancia": 19
+      },
+      "PC_ALD_01": {
+        "nome": "Aldeota - Bacia Riacho Pajeú / Av. Heráclito Graça x Barão de Studart",
+        "bairro": "Aldeota",
+        "estacao_primaria": "DC_03",
+        "distancia_estacao_primaria_km": 0.77,
+        "cobertura_confiavel_pct": 100.0,
+        "steps_interpolados_por_redundancia": 19
+      },
+      "PC_ITA_01": {
+        "nome": "Itaoca - Canal do Tauape / Entorno Lagoa da Parangaba",
+        "bairro": "Itaoca",
+        "estacao_primaria": "DC_04",
+        "distancia_estacao_primaria_km": 0.36,
+        "cobertura_confiavel_pct": 100.0,
+        "steps_interpolados_por_redundancia": 19
+      },
+      "PC_LAG_01": {
+        "nome": "Aerolândia - Canal do Lagamar / Comunidade do Lagamar",
+        "bairro": "Aerolândia",
+        "estacao_primaria": "DC_09",
+        "distancia_estacao_primaria_km": 0.24,
+        "cobertura_confiavel_pct": 100.0,
+        "steps_interpolados_por_redundancia": 19
+      },
+      "PC_MES_01": {
+        "nome": "Messejana - Trecho Alto / Coaçu",
+        "bairro": "Messejana",
+        "estacao_primaria": "DC_07",
+        "distancia_estacao_primaria_km": 0.5,
+        "cobertura_confiavel_pct": 100.0,
+        "steps_interpolados_por_redundancia": 19
+      }
+    }
+  },
+  "nivel1_suscetibilidade_estatica": {
+    "PC_JAC_01": {
+      "id_ponto": "PC_JAC_01",
+      "nome": "Jacarecanga - Canal do Jacarecanga / Av. Filomeno Gomes",
+      "bairro": "Jacarecanga",
+      "bacia_hidrografica": "Vertente Marítima",
+      "eh_piloto": true,
+      "score_suscetibilidade": 82.77,
+      "classe_risco": "MUITO_ALTO",
+      "classe_ordinal": 4,
+      "componentes": {
+        "topografia": 78.6,
+        "drenagem_impermeabilizacao": 76.7,
+        "hidrico_mare": 79.9,
+        "historico_2021_2024": 96.5
+      },
+      "limiares_chuva_mm": {
+        "15m": 6.5,
+        "1h": 15.0,
+        "3h": 26.0,
+        "24h": 48.0
+      },
+      "cameras_pmpu": [
+        "CAM_PMPU_012",
+        "CAM_PMPU_013",
+        "CAM_RISCO_004"
+      ],
+      "populacao_exposta_estimada": 4850
+    },
+    "PC_PAD_01": {
+      "id_ponto": "PC_PAD_01",
+      "nome": "Padre Andrade - Margem Rio Maranguapinho / Rua Demétrio Menezes",
+      "bairro": "Padre Andrade",
+      "bacia_hidrografica": "Maranguapinho",
+      "eh_piloto": true,
+      "score_suscetibilidade": 71.48,
+      "classe_risco": "ALTO",
+      "classe_ordinal": 3,
+      "componentes": {
+        "topografia": 61.4,
+        "drenagem_impermeabilizacao": 70.3,
+        "hidrico_mare": 62.0,
+        "historico_2021_2024": 90.5
+      },
+      "limiares_chuva_mm": {
+        "15m": 6.5,
+        "1h": 15.0,
+        "3h": 26.0,
+        "24h": 48.0
+      },
+      "cameras_pmpu": [
+        "CAM_RISCO_011",
+        "CAM_PMPU_041"
+      ],
+      "populacao_exposta_estimada": 5600
+    },
+    "PC_ALD_01": {
+      "id_ponto": "PC_ALD_01",
+      "nome": "Aldeota - Bacia Riacho Pajeú / Av. Heráclito Graça x Barão de Studart",
+      "bairro": "Aldeota",
+      "bacia_hidrografica": "Vertente Marítima",
+      "eh_piloto": true,
+      "score_suscetibilidade": 60.69,
+      "classe_risco": "ALTO",
+      "classe_ordinal": 3,
+      "componentes": {
+        "topografia": 51.0,
+        "drenagem_impermeabilizacao": 66.0,
+        "hidrico_mare": 45.0,
+        "historico_2021_2024": 76.6
+      },
+      "limiares_chuva_mm": {
+        "15m": 6.7,
+        "1h": 16.3,
+        "3h": 27.4,
+        "24h": 50.4
+      },
+      "cameras_pmpu": [
+        "CAM_PMPU_022",
+        "CAM_PMPU_023"
+      ],
+      "populacao_exposta_estimada": 3200
+    },
+    "PC_ITA_01": {
+      "id_ponto": "PC_ITA_01",
+      "nome": "Itaoca - Canal do Tauape / Entorno Lagoa da Parangaba",
+      "bairro": "Itaoca",
+      "bacia_hidrografica": "Cocó / Tauape",
+      "eh_piloto": true,
+      "score_suscetibilidade": 65.49,
+      "classe_risco": "ALTO",
+      "classe_ordinal": 3,
+      "componentes": {
+        "topografia": 53.0,
+        "drenagem_impermeabilizacao": 70.3,
+        "hidrico_mare": 49.6,
+        "historico_2021_2024": 84.8
+      },
+      "limiares_chuva_mm": {
+        "15m": 6.5,
+        "1h": 15.0,
+        "3h": 26.0,
+        "24h": 48.0
+      },
+      "cameras_pmpu": [
+        "CAM_RISCO_019",
+        "CAM_PMPU_058"
+      ],
+      "populacao_exposta_estimada": 4100
+    },
+    "PC_LAG_01": {
+      "id_ponto": "PC_LAG_01",
+      "nome": "Aerolândia - Canal do Lagamar / Comunidade do Lagamar",
+      "bairro": "Aerolândia",
+      "bacia_hidrografica": "Cocó / Tauape",
+      "eh_piloto": false,
+      "score_suscetibilidade": 80.81,
+      "classe_risco": "MUITO_ALTO",
+      "classe_ordinal": 4,
+      "componentes": {
+        "topografia": 70.0,
+        "drenagem_impermeabilizacao": 78.5,
+        "hidrico_mare": 73.7,
+        "historico_2021_2024": 100.0
+      },
+      "limiares_chuva_mm": {
+        "15m": 6.5,
+        "1h": 15.0,
+        "3h": 26.0,
+        "24h": 48.0
+      },
+      "cameras_pmpu": [
+        "CAM_RISCO_001",
+        "CAM_RISCO_002",
+        "CAM_PMPU_081"
+      ],
+      "populacao_exposta_estimada": 7400
+    },
+    "PC_MES_01": {
+      "id_ponto": "PC_MES_01",
+      "nome": "Messejana - Trecho Alto / Coaçu",
+      "bairro": "Messejana",
+      "bacia_hidrografica": "Cocó",
+      "eh_piloto": false,
+      "score_suscetibilidade": 19.07,
+      "classe_risco": "BAIXO",
+      "classe_ordinal": 1,
+      "componentes": {
+        "topografia": 24.5,
+        "drenagem_impermeabilizacao": 29.4,
+        "hidrico_mare": 2.1,
+        "historico_2021_2024": 14.8
+      },
+      "limiares_chuva_mm": {
+        "15m": 14.5,
+        "1h": 35.2,
+        "3h": 59.3,
+        "24h": 109.1
+      },
+      "cameras_pmpu": [
+        "CAM_PMPU_095"
+      ],
+      "populacao_exposta_estimada": 950
+    }
+  },
+  "nivel2_comparacao_modelos": [
+    {
+      "nome_modelo": "0_Baseline_Regra_Fixa_Pluviometrica",
+      "recall": 0.9978,
+      "precisao": 0.1281,
+      "f1_score": 0.227,
+      "f2_score": 0.4232,
+      "pr_auc": 0.7287,
+      "roc_auc": 0.9721,
+      "brier_score": 0.29,
+      "intervalos_confianca_95": {
+        "recall_ic95": [
+          0.9934,
+          1.0
+        ],
+        "precisao_ic95": [
+          0.117,
+          0.1384
+        ],
+        "f2_ic95": [
+          0.3983,
+          0.4454
+        ]
+      },
+      "matriz_confusao": {
+        "tp": 461,
+        "fp": 3138,
+        "fn": 1,
+        "tn": 1242
+      },
+      "analise_por_ponto_critico": {
+        "PC_ALD_01": {
+          "bairro": "Aldeota",
+          "eh_piloto": true,
+          "eventos_reais_steps": 74,
+          "tp": 74,
+          "fp": 506,
+          "fn": 0,
+          "tn": 227,
+          "recall": 1.0,
+          "precisao": 0.1276,
+          "f2_score": 0.4224,
+          "prob_media_em_alagamento": 0.9924
+        },
+        "PC_ITA_01": {
+          "bairro": "Itaoca",
+          "eh_piloto": true,
+          "eventos_reais_steps": 90,
+          "tp": 90,
+          "fp": 537,
+          "fn": 0,
+          "tn": 180,
+          "recall": 1.0,
+          "precisao": 0.1435,
+          "f2_score": 0.4559,
+          "prob_media_em_alagamento": 0.9785
+        },
+        "PC_JAC_01": {
+          "bairro": "Jacarecanga",
+          "eh_piloto": true,
+          "eventos_reais_steps": 102,
+          "tp": 102,
+          "fp": 523,
+          "fn": 0,
+          "tn": 182,
+          "recall": 1.0,
+          "precisao": 0.1632,
+          "f2_score": 0.4937,
+          "prob_media_em_alagamento": 0.9759
+        },
+        "PC_LAG_01": {
+          "bairro": "Aerolândia",
+          "eh_piloto": false,
+          "eventos_reais_steps": 103,
+          "tp": 102,
+          "fp": 481,
+          "fn": 1,
+          "tn": 223,
+          "recall": 0.9903,
+          "precisao": 0.175,
+          "f2_score": 0.5126,
+          "prob_media_em_alagamento": 0.9698
+        },
+        "PC_MES_01": {
+          "bairro": "Messejana",
+          "eh_piloto": false,
+          "eventos_reais_steps": 7,
+          "tp": 7,
+          "fp": 553,
+          "fn": 0,
+          "tn": 247,
+          "recall": 1.0,
+          "precisao": 0.0125,
+          "f2_score": 0.0595,
+          "prob_media_em_alagamento": 1.0
+        },
+        "PC_PAD_01": {
+          "bairro": "Padre Andrade",
+          "eh_piloto": true,
+          "eventos_reais_steps": 86,
+          "tp": 86,
+          "fp": 538,
+          "fn": 0,
+          "tn": 183,
+          "recall": 1.0,
+          "precisao": 0.1378,
+          "f2_score": 0.4442,
+          "prob_media_em_alagamento": 0.9758
+        }
+      }
+    },
+    {
+      "nome_modelo": "1_Fase_Inicial_Regressao_Logistica_L2",
+      "recall": 0.9978,
+      "precisao": 0.8003,
+      "f1_score": 0.8882,
+      "f2_score": 0.9509,
+      "pr_auc": 0.9895,
+      "roc_auc": 0.9988,
+      "brier_score": 0.0106,
+      "intervalos_confianca_95": {
+        "recall_ic95": [
+          0.9931,
+          1.0
+        ],
+        "precisao_ic95": [
+          0.7698,
+          0.8272
+        ],
+        "f2_ic95": [
+          0.942,
+          0.9593
+        ]
+      },
+      "matriz_confusao": {
+        "tp": 461,
+        "fp": 115,
+        "fn": 1,
+        "tn": 4265
+      },
+      "analise_por_ponto_critico": {
+        "PC_ALD_01": {
+          "bairro": "Aldeota",
+          "eh_piloto": true,
+          "eventos_reais_steps": 74,
+          "tp": 74,
+          "fp": 16,
+          "fn": 0,
+          "tn": 717,
+          "recall": 1.0,
+          "precisao": 0.8222,
+          "f2_score": 0.9585,
+          "prob_media_em_alagamento": 0.9699
+        },
+        "PC_ITA_01": {
+          "bairro": "Itaoca",
+          "eh_piloto": true,
+          "eventos_reais_steps": 90,
+          "tp": 90,
+          "fp": 27,
+          "fn": 0,
+          "tn": 690,
+          "recall": 1.0,
+          "precisao": 0.7692,
+          "f2_score": 0.9434,
+          "prob_media_em_alagamento": 0.9746
+        },
+        "PC_JAC_01": {
+          "bairro": "Jacarecanga",
+          "eh_piloto": true,
+          "eventos_reais_steps": 102,
+          "tp": 102,
+          "fp": 29,
+          "fn": 0,
+          "tn": 676,
+          "recall": 1.0,
+          "precisao": 0.7786,
+          "f2_score": 0.9462,
+          "prob_media_em_alagamento": 0.9741
+        },
+        "PC_LAG_01": {
+          "bairro": "Aerolândia",
+          "eh_piloto": false,
+          "eventos_reais_steps": 103,
+          "tp": 102,
+          "fp": 24,
+          "fn": 1,
+          "tn": 680,
+          "recall": 0.9903,
+          "precisao": 0.8095,
+          "f2_score": 0.948,
+          "prob_media_em_alagamento": 0.9534
+        },
+        "PC_MES_01": {
+          "bairro": "Messejana",
+          "eh_piloto": false,
+          "eventos_reais_steps": 7,
+          "tp": 7,
+          "fp": 2,
+          "fn": 0,
+          "tn": 798,
+          "recall": 1.0,
+          "precisao": 0.7778,
+          "f2_score": 0.9459,
+          "prob_media_em_alagamento": 0.9694
+        },
+        "PC_PAD_01": {
+          "bairro": "Padre Andrade",
+          "eh_piloto": true,
+          "eventos_reais_steps": 86,
+          "tp": 86,
+          "fp": 17,
+          "fn": 0,
+          "tn": 704,
+          "recall": 1.0,
+          "precisao": 0.835,
+          "f2_score": 0.962,
+          "prob_media_em_alagamento": 0.9707
+        }
+      }
+    },
+    {
+      "nome_modelo": "2_Fase_Intermediaria_Random_Forest",
+      "recall": 0.9957,
+      "precisao": 0.6991,
+      "f1_score": 0.8214,
+      "f2_score": 0.9178,
+      "pr_auc": 0.9881,
+      "roc_auc": 0.9985,
+      "brier_score": 0.0089,
+      "intervalos_confianca_95": {
+        "recall_ic95": [
+          0.9893,
+          1.0
+        ],
+        "precisao_ic95": [
+          0.6626,
+          0.7279
+        ],
+        "f2_ic95": [
+          0.9042,
+          0.9275
+        ]
+      },
+      "matriz_confusao": {
+        "tp": 460,
+        "fp": 198,
+        "fn": 2,
+        "tn": 4182
+      },
+      "analise_por_ponto_critico": {
+        "PC_ALD_01": {
+          "bairro": "Aldeota",
+          "eh_piloto": true,
+          "eventos_reais_steps": 74,
+          "tp": 74,
+          "fp": 23,
+          "fn": 0,
+          "tn": 710,
+          "recall": 1.0,
+          "precisao": 0.7629,
+          "f2_score": 0.9415,
+          "prob_media_em_alagamento": 0.9507
+        },
+        "PC_ITA_01": {
+          "bairro": "Itaoca",
+          "eh_piloto": true,
+          "eventos_reais_steps": 90,
+          "tp": 90,
+          "fp": 45,
+          "fn": 0,
+          "tn": 672,
+          "recall": 1.0,
+          "precisao": 0.6667,
+          "f2_score": 0.9091,
+          "prob_media_em_alagamento": 0.9365
+        },
+        "PC_JAC_01": {
+          "bairro": "Jacarecanga",
+          "eh_piloto": true,
+          "eventos_reais_steps": 102,
+          "tp": 102,
+          "fp": 50,
+          "fn": 0,
+          "tn": 655,
+          "recall": 1.0,
+          "precisao": 0.6711,
+          "f2_score": 0.9107,
+          "prob_media_em_alagamento": 0.9086
+        },
+        "PC_LAG_01": {
+          "bairro": "Aerolândia",
+          "eh_piloto": false,
+          "eventos_reais_steps": 103,
+          "tp": 103,
+          "fp": 48,
+          "fn": 0,
+          "tn": 656,
+          "recall": 1.0,
+          "precisao": 0.6821,
+          "f2_score": 0.9147,
+          "prob_media_em_alagamento": 0.9174
+        },
+        "PC_MES_01": {
+          "bairro": "Messejana",
+          "eh_piloto": false,
+          "eventos_reais_steps": 7,
+          "tp": 5,
+          "fp": 13,
+          "fn": 2,
+          "tn": 787,
+          "recall": 0.7143,
+          "precisao": 0.2778,
+          "f2_score": 0.5435,
+          "prob_media_em_alagamento": 0.1065
+        },
+        "PC_PAD_01": {
+          "bairro": "Padre Andrade",
+          "eh_piloto": true,
+          "eventos_reais_steps": 86,
+          "tp": 86,
+          "fp": 19,
+          "fn": 0,
+          "tn": 702,
+          "recall": 1.0,
+          "precisao": 0.819,
+          "f2_score": 0.9577,
+          "prob_media_em_alagamento": 0.9397
+        }
+      }
+    },
+    {
+      "nome_modelo": "3_SADC_Ensemble_Hibrido_MultiBacia_Calibrado",
+      "recall": 0.9978,
+      "precisao": 0.8045,
+      "f1_score": 0.8908,
+      "f2_score": 0.9521,
+      "pr_auc": 0.9926,
+      "roc_auc": 0.9992,
+      "brier_score": 0.0075,
+      "intervalos_confianca_95": {
+        "recall_ic95": [
+          0.993,
+          1.0
+        ],
+        "precisao_ic95": [
+          0.7709,
+          0.8348
+        ],
+        "f2_ic95": [
+          0.9417,
+          0.9609
+        ]
+      },
+      "matriz_confusao": {
+        "tp": 461,
+        "fp": 112,
+        "fn": 1,
+        "tn": 4268
+      },
+      "analise_por_ponto_critico": {
+        "PC_ALD_01": {
+          "bairro": "Aldeota",
+          "eh_piloto": true,
+          "eventos_reais_steps": 74,
+          "tp": 74,
+          "fp": 18,
+          "fn": 0,
+          "tn": 715,
+          "recall": 1.0,
+          "precisao": 0.8043,
+          "f2_score": 0.9536,
+          "prob_media_em_alagamento": 0.9574
+        },
+        "PC_ITA_01": {
+          "bairro": "Itaoca",
+          "eh_piloto": true,
+          "eventos_reais_steps": 90,
+          "tp": 90,
+          "fp": 28,
+          "fn": 0,
+          "tn": 689,
+          "recall": 1.0,
+          "precisao": 0.7627,
+          "f2_score": 0.9414,
+          "prob_media_em_alagamento": 0.9557
+        },
+        "PC_JAC_01": {
+          "bairro": "Jacarecanga",
+          "eh_piloto": true,
+          "eventos_reais_steps": 102,
+          "tp": 102,
+          "fp": 25,
+          "fn": 0,
+          "tn": 680,
+          "recall": 1.0,
+          "precisao": 0.8031,
+          "f2_score": 0.9533,
+          "prob_media_em_alagamento": 0.949
+        },
+        "PC_LAG_01": {
+          "bairro": "Aerolândia",
+          "eh_piloto": false,
+          "eventos_reais_steps": 103,
+          "tp": 103,
+          "fp": 18,
+          "fn": 0,
+          "tn": 686,
+          "recall": 1.0,
+          "precisao": 0.8512,
+          "f2_score": 0.9662,
+          "prob_media_em_alagamento": 0.9478
+        },
+        "PC_MES_01": {
+          "bairro": "Messejana",
+          "eh_piloto": false,
+          "eventos_reais_steps": 7,
+          "tp": 6,
+          "fp": 4,
+          "fn": 1,
+          "tn": 796,
+          "recall": 0.8571,
+          "precisao": 0.6,
+          "f2_score": 0.7895,
+          "prob_media_em_alagamento": 0.5077
+        },
+        "PC_PAD_01": {
+          "bairro": "Padre Andrade",
+          "eh_piloto": true,
+          "eventos_reais_steps": 86,
+          "tp": 86,
+          "fp": 19,
+          "fn": 0,
+          "tn": 702,
+          "recall": 1.0,
+          "precisao": 0.819,
+          "f2_score": 0.9577,
+          "prob_media_em_alagamento": 0.9624
+        }
+      }
+    }
+  ],
+  "nivel2_limiares_calibrados": {
+    "GLOBAL": 0.08,
+    "PC_ALD_01": 0.08,
+    "PC_ITA_01": 0.08,
+    "PC_JAC_01": 0.08,
+    "PC_LAG_01": 0.08,
+    "PC_MES_01": 0.3,
+    "PC_PAD_01": 0.11
+  },
+  "nivel2_top_features": [
+    {
+      "feature": "razao_sobrecarga_drenagem_1h",
+      "importancia": 0.1912
+    },
+    {
+      "feature": "chuva_3h_mm",
+      "importancia": 0.1828
+    },
+    {
+      "feature": "chuva_1h_mm",
+      "importancia": 0.1375
+    },
+    {
+      "feature": "aceleracao_chuva_mm",
+      "importancia": 0.0886
+    },
+    {
+      "feature": "chuva_30m_mm",
+      "importancia": 0.0798
+    },
+    {
+      "feature": "razao_sobrecarga_pico_15m",
+      "importancia": 0.069
+    },
+    {
+      "feature": "intensidade_pico_15m_mm_h",
+      "importancia": 0.0461
+    },
+    {
+      "feature": "chuva_6h_mm",
+      "importancia": 0.0415
+    },
+    {
+      "feature": "chuva_10m_mm",
+      "importancia": 0.0383
+    },
+    {
+      "feature": "indice_chuva_antecedente_api",
+      "importancia": 0.0243
+    },
+    {
+      "feature": "chuva_12h_mm",
+      "importancia": 0.0169
+    },
+    {
+      "feature": "capacidade_efetiva_drenagem_mm_h",
+      "importancia": 0.0107
+    }
+  ],
+  "nivel3_nowcasting": {
+    "limiar_preventivo_60m": 0.2,
+    "metricas_classificacao_60m": {
+      "recall": 0.9601,
+      "precisao": 0.9398,
+      "f2_score": 0.956
+    },
+    "metricas_regressao_lamina_cm": {
+      "mae_cm": 2.624,
+      "rmse_cm": 9.776
+    },
+    "lead_time_operacional": {
+      "total_episodios_avaliados": 28,
+      "lead_time_medio_minutos": 58.9,
+      "lead_time_mediano_minutos": 60.0,
+      "pct_episodios_lead_time_gte_30m": 100.0,
+      "episodios_detalhe": [
+        {
+          "id_ponto": "PC_ALD_01",
+          "bairro": "Aldeota",
+          "inicio_alagamento": "2024-02-24 00:00:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_ALD_01",
+          "bairro": "Aldeota",
+          "inicio_alagamento": "2024-02-24 15:40:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_ALD_01",
+          "bairro": "Aldeota",
+          "inicio_alagamento": "2024-02-25 09:40:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_ALD_01",
+          "bairro": "Aldeota",
+          "inicio_alagamento": "2024-02-26 05:00:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_ALD_01",
+          "bairro": "Aldeota",
+          "inicio_alagamento": "2024-02-27 18:00:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_ITA_01",
+          "bairro": "Itaoca",
+          "inicio_alagamento": "2024-02-23 23:50:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_ITA_01",
+          "bairro": "Itaoca",
+          "inicio_alagamento": "2024-02-24 15:30:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_ITA_01",
+          "bairro": "Itaoca",
+          "inicio_alagamento": "2024-02-25 09:50:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_ITA_01",
+          "bairro": "Itaoca",
+          "inicio_alagamento": "2024-02-26 04:50:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_ITA_01",
+          "bairro": "Itaoca",
+          "inicio_alagamento": "2024-02-27 17:40:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_JAC_01",
+          "bairro": "Jacarecanga",
+          "inicio_alagamento": "2024-02-23 23:50:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_JAC_01",
+          "bairro": "Jacarecanga",
+          "inicio_alagamento": "2024-02-24 15:30:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_JAC_01",
+          "bairro": "Jacarecanga",
+          "inicio_alagamento": "2024-02-25 09:40:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_JAC_01",
+          "bairro": "Jacarecanga",
+          "inicio_alagamento": "2024-02-26 04:50:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_JAC_01",
+          "bairro": "Jacarecanga",
+          "inicio_alagamento": "2024-02-27 00:10:00",
+          "lead_time_minutos": 40.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_JAC_01",
+          "bairro": "Jacarecanga",
+          "inicio_alagamento": "2024-02-27 17:40:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_LAG_01",
+          "bairro": "Aerolândia",
+          "inicio_alagamento": "2024-02-23 23:40:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_LAG_01",
+          "bairro": "Aerolândia",
+          "inicio_alagamento": "2024-02-24 15:30:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_LAG_01",
+          "bairro": "Aerolândia",
+          "inicio_alagamento": "2024-02-25 09:40:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_LAG_01",
+          "bairro": "Aerolândia",
+          "inicio_alagamento": "2024-02-26 04:50:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_LAG_01",
+          "bairro": "Aerolândia",
+          "inicio_alagamento": "2024-02-27 00:10:00",
+          "lead_time_minutos": 50.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_LAG_01",
+          "bairro": "Aerolândia",
+          "inicio_alagamento": "2024-02-27 17:40:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_MES_01",
+          "bairro": "Messejana",
+          "inicio_alagamento": "2024-02-26 05:40:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_PAD_01",
+          "bairro": "Padre Andrade",
+          "inicio_alagamento": "2024-02-24 00:00:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_PAD_01",
+          "bairro": "Padre Andrade",
+          "inicio_alagamento": "2024-02-24 15:30:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_PAD_01",
+          "bairro": "Padre Andrade",
+          "inicio_alagamento": "2024-02-25 09:50:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_PAD_01",
+          "bairro": "Padre Andrade",
+          "inicio_alagamento": "2024-02-26 05:00:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        },
+        {
+          "id_ponto": "PC_PAD_01",
+          "bairro": "Padre Andrade",
+          "inicio_alagamento": "2024-02-27 17:50:00",
+          "lead_time_minutos": 60.0,
+          "antecipado_com_sucesso": true
+        }
+      ]
+    }
+  },
+  "decisao_e_retroalimentacao": {
+    "distribuicao_niveis": {
+      "NORMAL": 17757,
+      "ALARME": 2489,
+      "VIGILANCIA": 2303,
+      "ALERTA": 1312,
+      "ATENCAO": 331
+    },
+    "total_alertas_auditados": 3801,
+    "resumo_retroalimentacao": {
+      "CONFIRMADO_POSITIVO_EM_CAMPO": 2489,
+      "CONFIRMADO_ANTECIPACAO_PREVENTIVA": 828,
+      "FALSO_POSITIVO_ENCAMINHADO_VISTORIA": 484
+    }
+  }
+}
