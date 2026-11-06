@@ -1228,6 +1228,7 @@
   // Chave Pública Oficial da API CARTO (Padrão DCCALOR / DCPET — elimina marca d'água API KEY REQUIRED)
   const CARTO_API_KEY = 'cb1_2t7z_1_b4192d625bdc678b8f9125ad';
   const NASA_API_KEY = 'WmJbrCnNL6zCBNnLFCgbLJFtjrTpghH7NNWq8mWb';
+  const API_BASE = (window.location.protocol === 'file:') ? 'http://localhost:3005' : '';
 
   let stateData = null;
   let selectedPointId = 'PC_JAC_01';
@@ -1348,7 +1349,7 @@
     });
 
     // Carregar Limite Municipal Oficial de Fortaleza (IBGE)
-    fetch('/municipio_fortaleza.geojson')
+    fetch(`${API_BASE}/municipio_fortaleza.geojson`)
       .then(r => r.ok ? r.json() : null)
       .then(geo => {
         if (geo) {
@@ -1373,7 +1374,7 @@
         if (bairrosLayer) {
           map.addLayer(bairrosLayer);
         } else {
-          fetch('/bairros_fortaleza.geojson')
+          fetch(`${API_BASE}/bairros_fortaleza.geojson`)
             .then(r => r.json())
             .then(geo => {
               bairrosLayer = L.geoJSON(geo, {
@@ -1396,13 +1397,13 @@
   async function carregarDadosTempoReal() {
     countdownSeconds = 300;
     const scen = document.getElementById('scenario-select').value;
-    let url = '/api/status';
-    if (scen === 'sim_vigilancia') url += '?chuva_1h=12&mare=2.1';
-    if (scen === 'sim_alerta') url += '?chuva_1h=24&mare=2.7';
-    if (scen === 'sim_alarme') url += '?chuva_1h=42&mare=3.05';
+    let url = `${API_BASE}/api/status?t=${Date.now()}`;
+    if (scen === 'sim_vigilancia') url += '&chuva_1h=12&mare=2.1';
+    if (scen === 'sim_alerta') url += '&chuva_1h=24&mare=2.7';
+    if (scen === 'sim_alarme') url += '&chuva_1h=42&mare=3.05';
 
     try {
-      const resp = await fetch(url);
+      const resp = await fetch(url, { cache: 'no-store' });
       stateData = await resp.json();
       renderizarTudo();
     } catch (err) {

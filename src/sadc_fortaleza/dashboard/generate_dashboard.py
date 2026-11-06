@@ -644,4 +644,8 @@ selecionarPonto(pointIds[0]);
 </html>
 """
     caminho_html.parent.mkdir(parents=True, exist_ok=True)
-    caminho_html.write_text(html, encoding="utf-8")
+    public_index = Path(__file__).resolve().parents[3] / "public" / "index.html"
+    if public_index.exists():
+        caminho_html.write_text(public_index.read_text(encoding="utf-8"), encoding="utf-8")
+    else:
+        caminho_html.write_text(html, encoding="utf-8")
