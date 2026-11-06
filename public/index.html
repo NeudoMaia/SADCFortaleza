@@ -18,10 +18,10 @@
       --brand-orange: #f47a00;
       --accent: #38bdf8;
       --ok: #10b981;
-      --vig: #eab308;
-      --ate: #f97316;
-      --ale: #ef4444;
-      --ala: #991b1b;
+      --vig: #3b82f6;
+      --ate: #eab308;
+      --ale: #f97316;
+      --ala: #ef4444;
     }
     html.light {
       --bg: #f1f5f9;
@@ -41,6 +41,7 @@
       line-height: 1.45;
       transition: background 0.2s, color 0.2s;
     }
+
     /* LOGIN VIEW */
     #login-screen {
       min-height: 100vh;
@@ -279,7 +280,7 @@
 
     .workspace-container {
       padding: 16px 20px;
-      max-width: 1680px;
+      max-width: 1720px;
       width: 100%;
       margin: 0 auto;
       flex: 1;
@@ -323,12 +324,159 @@
       margin-top: 4px;
     }
 
-    /* MAIN SPLIT (MAP + INSPECTOR) */
-    .main-split {
+    /* NASA CLIMATOLOGICAL & SATELLITE PANEL */
+    .nasa-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 15px;
+      margin-bottom: 16px;
+    }
+    .nasa-grid {
       display: grid;
-      grid-template-columns: 1.45fr 1fr;
+      grid-template-columns: 1.25fr 1fr;
       gap: 16px;
       align-items: stretch;
+    }
+    @media (max-width: 1150px) {
+      .nasa-grid { grid-template-columns: 1fr; }
+    }
+    .nasa-image-frame {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #020617;
+      min-height: 255px;
+      max-height: 295px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nasa-image-frame img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.25s;
+    }
+    .nasa-crosshair {
+      position: absolute;
+      top: 44%;
+      left: 52%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .nasa-crosshair-ring {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid #38bdf8;
+      background: rgba(56, 189, 248, 0.2);
+      box-shadow: 0 0 12px #38bdf8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nasa-crosshair-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+    }
+    .nasa-crosshair-tag {
+      background: rgba(15, 23, 42, 0.88);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      border-radius: 5px;
+      padding: 2px 6px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+    .nasa-overlay-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 7px 12px;
+      background: linear-gradient(transparent, rgba(2, 6, 23, 0.92));
+      color: #e2e8f0;
+      font-size: 0.72rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .nasa-layer-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .nasa-pill-btn {
+      padding: 5px 10px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--bg-sub);
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .nasa-pill-btn.active {
+      background: #0284c7;
+      color: #fff;
+      border-color: #38bdf8;
+    }
+    .nasa-cross-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--bg-sub);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px;
+    }
+    .nasa-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .nasa-metric-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .nasa-metric-item span {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .nasa-metric-item strong {
+      font-size: 0.96rem;
+      font-weight: 900;
+      margin-top: 2px;
+      display: block;
+    }
+
+    /* MAIN SPLIT (MAP + NEIGHBORHOOD RANKING LIST) */
+    .main-split {
+      display: grid;
+      grid-template-columns: 1.48fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 16px;
     }
     @media (max-width: 1150px) {
       .main-split { grid-template-columns: 1fr; }
@@ -359,7 +507,7 @@
     }
     #map-container {
       width: 100%;
-      height: 560px;
+      height: 580px;
       border-radius: 10px;
       overflow: hidden;
       border: 1px solid var(--border);
@@ -368,11 +516,12 @@
     }
     .map-layer-bar {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
-      font-size: 0.76rem;
+      font-size: 0.74rem;
       font-weight: 700;
       color: var(--muted);
+      align-items: center;
     }
     .map-layer-bar label {
       display: inline-flex;
@@ -382,15 +531,127 @@
       user-select: none;
     }
 
+    /* NEIGHBORHOOD PLUVIOMETRY RANKING LIST (DCCALOR STYLE ADAPTED TO RAINFALL EVERY 5 MIN) */
+    .bairro-search-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .bairro-search-input {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-sub);
+      color: var(--text);
+      font-size: 0.78rem;
+      outline: none;
+    }
+    .bairro-search-input:focus { border-color: var(--accent); }
+    .bairro-list-scroll {
+      height: 455px;
+      overflow-y: auto;
+      padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .bairro-item {
+      background: var(--bg-sub);
+      border: 1px solid var(--border);
+      border-left: 4px solid #10b981;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .bairro-item:hover, .bairro-item.active {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.08);
+    }
+    .bairro-item-left {
+      flex: 1;
+      min-width: 0;
+    }
+    .bairro-item-title {
+      font-size: 0.86rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .bairro-ref-addr {
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 700;
+      margin-top: 3px;
+      display: block;
+    }
+    .bairro-sec-areas {
+      font-size: 0.69rem;
+      color: var(--muted);
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+    .bairro-item-right {
+      text-align: right;
+      min-width: 118px;
+      flex-shrink: 0;
+    }
+    .bairro-rain-main {
+      font-size: 1.08rem;
+      font-weight: 900;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .bairro-rain-sub {
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .pluv-bar-bg {
+      width: 100%;
+      height: 5px;
+      background: rgba(148, 163, 184, 0.2);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+    .pluv-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.3s;
+    }
+    .bairro-list-footer {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
     /* POINT SELECTOR PILLS */
     .pilot-selector {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 7px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
       margin-bottom: 12px;
     }
     .pilot-pill {
-      padding: 8px 10px;
+      padding: 7px 12px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--bg-sub);
@@ -398,19 +659,19 @@
       font-size: 0.76rem;
       font-weight: 700;
       cursor: pointer;
-      display: flex;
-      justify-content: space-between;
+      display: inline-flex;
       align-items: center;
+      gap: 8px;
       transition: all 0.15s;
     }
     .pilot-pill.active {
       border-color: #38bdf8;
-      background: rgba(56, 189, 248, 0.12);
+      background: rgba(56, 189, 248, 0.14);
     }
     .level-badge {
       padding: 2px 7px;
       border-radius: 5px;
-      font-size: 0.66rem;
+      font-size: 0.64rem;
       font-weight: 800;
       color: #fff;
       text-transform: uppercase;
@@ -423,11 +684,17 @@
       border-left: 5px solid var(--ok);
       margin-bottom: 12px;
     }
-    .levels-grid {
+    .levels-grid-6 {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(6, 1fr);
       gap: 10px;
       margin-bottom: 12px;
+    }
+    @media (max-width: 1300px) {
+      .levels-grid-6 { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .levels-grid-6 { grid-template-columns: 1fr 1fr; }
     }
     .level-card {
       background: var(--bg-sub);
@@ -436,18 +703,18 @@
       padding: 11px;
     }
     .level-card h4 {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
       color: var(--muted);
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
     .level-big {
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       font-weight: 900;
     }
     .level-meta {
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       color: var(--muted);
       margin-top: 4px;
     }
@@ -477,12 +744,11 @@
     .feedback-actions {
       display: flex;
       gap: 8px;
-      margin-top: 10px;
+      margin-top: 8px;
       flex-wrap: wrap;
     }
     .btn-action {
-      flex: 1;
-      padding: 9px 10px;
+      padding: 8px 12px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--bg-sub);
@@ -518,7 +784,7 @@
       <h1 class="login-title"><span>SADC</span> FORTALEZA</h1>
       <div class="login-sub">Sistema de Alerta de Alagamentos Urbanos</div>
       <p class="login-desc">
-        Monitoramento Hidrometeorológico em 3 Níveis • 11 Estações Automáticas Plugfield • Maré Mucuripe • PMPU &amp; 40199
+        Monitoramento Pluviométrico (Ciclo 5 min) • 11 Estações Automáticas Plugfield • Satélite NASA • Maré Mucuripe • PMPU &amp; 40199
       </p>
 
       <form id="login-form">
@@ -535,8 +801,8 @@
       </form>
     </div>
     <div class="login-footer">
-      <span>Acesso Restrito • COMDEC / PMPU</span>
-      <span>SADC v1.0</span>
+      <span>Acesso Restrito • CEMON / DCFOR</span>
+      <span>SADC v2.0</span>
     </div>
   </div>
 </div>
@@ -560,26 +826,26 @@
         <h1>
           <span style="color:#38bdf8">SADC-FORTALEZA</span>
           <span style="font-weight:400;color:var(--muted)">|</span>
-          <span>Monitoramento e Previsão de Alagamentos</span>
+          <span>Monitoramento Pluviométrico (5 min), Satélite NASA &amp; Alagamentos</span>
         </h1>
-        <p>11 PCDs Defesa Civil (Plugfield) • Funceme/CEMADEN • Maré Mucuripe • 103 Câmeras PMPU • Canal 40199</p>
+        <p>11 PCDs Defesa Civil (Plugfield) • API Satelital NASA • Maré Mucuripe • 103 Câmeras PMPU • Canal 40199</p>
       </div>
     </div>
 
     <div class="topbar-controls">
       <div class="live-pill" id="sync-badge">
         <span class="live-dot" id="sync-dot"></span>
-        <span id="sync-text">AO VIVO • PLUGFIELD (11 PCDs)</span>
+        <span id="sync-text">AO VIVO • PLUGFIELD (CICLO 5 MIN)</span>
       </div>
 
       <select id="scenario-select" class="sim-select" title="Alternar entre leitura ao vivo das estações e simulação de eventos de chuva">
-        <option value="live">Modo: Tempo Real (Plugfield Ao Vivo)</option>
+        <option value="live">Modo: Tempo Real (Plugfield Ao Vivo • 5 min)</option>
         <option value="sim_vigilancia">Simular: Chuva Moderada (12 mm/h • Vigilância/Atenção)</option>
         <option value="sim_alerta">Simular: Chuva Intensa + Maré Alta (24 mm/h • Alerta)</option>
         <option value="sim_alarme">Simular: Evento Crítico Quadra Chuvosa (42 mm/h • Alarme)</option>
       </select>
 
-      <button type="button" class="icon-btn" id="btn-refresh">Sincronizar</button>
+      <button type="button" class="icon-btn" id="btn-refresh">Sincronizar Agora</button>
       <button type="button" class="icon-btn" id="btn-theme">Tema Claro/Escuro</button>
       <span id="clock-label" style="font-size:0.78rem;font-weight:800;color:var(--muted)">--:--:--</span>
       <button type="button" class="icon-btn" id="btn-logout" style="color:#f87171">Sair</button>
@@ -588,26 +854,28 @@
 
   <nav class="subbar">
     <div class="nav-tabs">
-      <button type="button" class="tab-btn active" data-tab="tab-mapa">1. Mapa Operacional &amp; Pontos Críticos</button>
-      <button type="button" class="tab-btn" data-tab="tab-estacoes">2. Rede de 11 Estações Automáticas (Plugfield)</button>
+      <button type="button" class="tab-btn active" data-tab="tab-mapa">1. Satélite NASA, Mapa &amp; Pluviometria por Bairro</button>
+      <button type="button" class="tab-btn" data-tab="tab-estacoes">2. Rede de 11 Estações Automáticas (Tabela Completa)</button>
       <button type="button" class="tab-btn" data-tab="tab-modelos">3. Eficácia dos Modelos &amp; Retroalimentação 40199</button>
     </div>
-    <div style="font-size:0.76rem;color:var(--muted);font-weight:700" id="last-sync-label">
-      Última leitura Plugfield: --
+    <div style="font-size:0.76rem;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:12px">
+      <span id="countdown-5m-label" style="color:#38bdf8">Próxima leitura automática (5 min): 05:00</span>
+      <span>•</span>
+      <span id="last-sync-label">Última leitura Plugfield: --</span>
     </div>
   </nav>
 
   <main class="workspace-container">
-    <!-- KPIs Essenciais sem Poluição Visual -->
+    <!-- KPIs Essenciais -->
     <section class="kpi-row">
       <div class="kpi-box">
         <span class="kpi-label">Status Operacional Municipal</span>
         <div class="kpi-value" id="kpi-status-mun">NORMAL</div>
-        <div class="kpi-foot" id="kpi-status-sub">Monitoramento contínuo nas 6 microbacias</div>
+        <div class="kpi-foot" id="kpi-status-sub">Monitoramento contínuo por microbacia e bairro</div>
       </div>
       <div class="kpi-box">
-        <span class="kpi-label">Estações Automáticas Defesa Civil</span>
-        <div class="kpi-value" id="kpi-estacoes">11 / 11 Online</div>
+        <span class="kpi-label">Pluviometria Automática (Ciclo 5 Min)</span>
+        <div class="kpi-value" id="kpi-estacoes">11 / 11 Estações</div>
         <div class="kpi-foot" id="kpi-sonic">Nível Sônico Rio Maranguapinho (Dom Lustosa): 1.83 m</div>
       </div>
       <div class="kpi-box">
@@ -616,94 +884,200 @@
         <div class="kpi-foot" id="kpi-mare-sub">Fase e impacto de remanso costeiro</div>
       </div>
       <div class="kpi-box">
-        <span class="kpi-label">Desempenho Auditado (Níveis 2 e 3)</span>
-        <div class="kpi-value" style="color:#38bdf8">Recall 99.8%</div>
-        <div class="kpi-foot">Precisão: 80.5% • Lead Time Médio: 58.9 min</div>
+        <span class="kpi-label">Cruzamento NASA × Pluviômetros</span>
+        <div class="kpi-value" style="color:#38bdf8" id="kpi-nasa-status">SINCRONIZADO</div>
+        <div class="kpi-foot" id="kpi-nasa-sub">API NASA: WmJbrCnN...q8mWb • Recall: 99.8%</div>
       </div>
     </section>
 
-    <!-- ABA 1: MAPA INTERATIVO + INSPETOR DE PONTO CRÍTICO -->
+    <!-- ABA 1: SATÉLITE NASA + MAPA + LISTA DE BAIRROS (PADRÃO DCCALOR PLUVIOMETRIA 5 MIN) -->
     <section id="tab-mapa" class="tab-pane">
-      <div class="main-split">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Mapa Georreferenciado — Estações Defesa Civil &amp; Áreas de Risco</span>
-            <div class="map-layer-bar">
-              <label><input type="checkbox" id="chk-estacoes" checked /> 11 Estações Plugfield</label>
-              <label><input type="checkbox" id="chk-pontos" checked /> Pontos Críticos / Pilotos</label>
-              <label><input type="checkbox" id="chk-raios" checked /> Raio Cobertura IDW</label>
-              <label><input type="checkbox" id="chk-bairros" /> 121 Bairros (GeoJSON)</label>
-            </div>
+
+      <!-- PAINEL SUPERIOR: IMAGEM GERADA PELA NASA + CRUZAMENTO CLIMATOLÓGICO E PLUVIOMÉTRICO -->
+      <div class="nasa-panel">
+        <div class="card-header" style="margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span class="card-title" style="color:#38bdf8">🛰️ Monitoramento Satelital NASA &amp; Cruzamento Pluviométrico (Fortaleza/CE)</span>
+            <span class="level-badge" style="background:#0284c7" id="nasa-api-badge">API NASA ATIVA: WmJbrCnN...q8mWb</span>
           </div>
-          <div id="map-container"></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:0.74rem;color:var(--muted);flex-wrap:wrap;gap:8px">
-            <div>
-              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#003594;border:2px solid #38bdf8;margin-right:4px"></span> Estação Automática Defesa Civil (PCD)
-              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-left:12px;margin-right:4px"></span> Normal
-              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#eab308;margin-left:8px;margin-right:4px"></span> Vigilância
-              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f97316;margin-left:8px;margin-right:4px"></span> Atenção
-              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-left:8px;margin-right:4px"></span> Alerta
-              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#991b1b;margin-left:8px;margin-right:4px"></span> Alarme
-            </div>
-            <div>Clique em qualquer estação ou ponto crítico no mapa para inspecionar</div>
+          <div class="nasa-layer-pills">
+            <button type="button" class="nasa-pill-btn active" data-nasa-layer="viirs_fortaleza">1. NASA VIIRS (Nebulosidade Fortaleza/CE)</button>
+            <button type="button" class="nasa-pill-btn" data-nasa-layer="modis_terra_fortaleza">2. NASA Terra MODIS (Bacias Costeiras)</button>
+            <button type="button" class="nasa-pill-btn" data-nasa-layer="modis_aqua_fortaleza">3. NASA Aqua MODIS (Convecção Tropical)</button>
+            <button type="button" class="nasa-pill-btn" data-nasa-layer="epic_disco_global">4. NASA DSCOVR EPIC (Disco Orbital API)</button>
           </div>
         </div>
 
-        <!-- Painel Contextual dos 3 Níveis -->
+        <div class="nasa-grid">
+          <!-- Imagem Satelital NASA -->
+          <div class="nasa-image-frame">
+            <img id="nasa-sat-img" src="https://wvs.earthdata.nasa.gov/api/v1/snapshot?REQUEST=GetSnapshot&TIME=2025-04-15T15:00:00Z&BBOX=-5.8,-41.2,-2.2,-36.2&CRS=EPSG:4326&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor,Coastlines_15m&WRAP=day,x&FORMAT=image/jpeg&WIDTH=960&HEIGHT=420" alt="Imagem Satelital NASA sobre Fortaleza" />
+            <div class="nasa-crosshair" id="nasa-crosshair-marker">
+              <div class="nasa-crosshair-ring"><div class="nasa-crosshair-dot"></div></div>
+              <span class="nasa-crosshair-tag">Fortaleza (-3.73°S, -38.53°W) • 11 PCDs</span>
+            </div>
+            <div class="nasa-overlay-bottom">
+              <span id="nasa-img-title"><b>NASA Suomi-NPP VIIRS</b> — Nebulosidade Real sobre Fortaleza e Litoral do Ceará</span>
+              <span id="nasa-img-sensor" style="color:#38bdf8;font-weight:700">Sensor: VIIRS / Suomi-NPP (375m)</span>
+            </div>
+          </div>
+
+          <!-- Cruzamento Climatológico NASA x Pluviometria Defesa Civil -->
+          <div class="nasa-cross-box">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
+                <span style="font-size:0.74rem;font-weight:800;text-transform:uppercase;color:var(--muted)">Diagnóstico de Cruzamento: Satélite NASA × 11 Pluviômetros Defesa Civil</span>
+                <span class="level-badge" id="nasa-cross-badge" style="background:#10b981">ESTÁVEL</span>
+              </div>
+              <p id="nasa-cross-desc" style="font-size:0.8rem;line-height:1.45;color:var(--text)">
+                Sincronizando parâmetros orbitais NASA POWER / EPIC com a telemetria de 5 minutos das 11 estações automáticas da Defesa Civil...
+              </p>
+            </div>
+
+            <div class="nasa-metrics-grid">
+              <div class="nasa-metric-item">
+                <span>Nebulosidade NASA</span>
+                <strong id="nasa-m-cloud" style="color:#38bdf8">--%</strong>
+              </div>
+              <div class="nasa-metric-item">
+                <span>Chuva Máx (5 min) DC</span>
+                <strong id="nasa-m-rain5m" style="color:#10b981">0.0 mm</strong>
+              </div>
+              <div class="nasa-metric-item">
+                <span>Chuva Máx (1h) DC</span>
+                <strong id="nasa-m-rain1h">0.0 mm</strong>
+              </div>
+              <div class="nasa-metric-item">
+                <span>Umidade NASA vs Solo</span>
+                <strong id="nasa-m-humi">--% / --%</strong>
+              </div>
+              <div class="nasa-metric-item">
+                <span>Pressão / Temp Solo</span>
+                <strong id="nasa-m-pres">-- hPa / --°C</strong>
+              </div>
+              <div class="nasa-metric-item">
+                <span>Irradiância / Vento</span>
+                <strong id="nasa-m-rad">-- W/m² • -- km/h</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRID PRINCIPAL: MAPA GEORREFERENCIADO (ESQUERDA) + LISTA DE BAIRROS & ENDEREÇOS DE REFERÊNCIA (DIREITA) -->
+      <div class="main-split">
+        <!-- Coluna Esquerda: Mapa Leaflet com Chave Pública CARTO Oficial -->
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Diagnóstico por Ponto Crítico (3 Níveis)</span>
-            <span style="font-size:0.72rem;color:var(--muted);font-weight:700">★ = Área-Piloto</span>
-          </div>
-
-          <div class="pilot-selector" id="pilot-buttons"></div>
-
-          <div id="point-status-banner" class="status-banner"></div>
-
-          <div class="levels-grid">
-            <div class="level-card">
-              <h4>Nível 1 • Suscetibilidade Estática</h4>
-              <div class="level-big" id="insp-n1-classe">--</div>
-              <div class="level-meta" id="insp-n1-meta">--</div>
-            </div>
-            <div class="level-card">
-              <h4>Nível 2 • Probabilidade Tempo Real</h4>
-              <div class="level-big" id="insp-n2-prob">--</div>
-              <div class="level-meta" id="insp-n2-meta">--</div>
-            </div>
-            <div class="level-card">
-              <h4>Nível 3 • Antecipação (30–60 min)</h4>
-              <div class="level-big" id="insp-n3-prob">--</div>
-              <div class="level-meta" id="insp-n3-meta">--</div>
-            </div>
-            <div class="level-card">
-              <h4>Chuva IDW &amp; Limiares do Ponto</h4>
-              <div class="level-big" id="insp-chuva">--</div>
-              <div class="level-meta" id="insp-limiares">--</div>
-            </div>
-            <div class="level-card">
-              <h4>Drenagem &amp; Remanso de Maré</h4>
-              <div class="level-big" id="insp-drenagem">--</div>
-              <div class="level-meta" id="insp-remanso">--</div>
-            </div>
-            <div class="level-card">
-              <h4>Validação Visual PMPU &amp; 40199</h4>
-              <div class="level-big" id="insp-cameras">--</div>
-              <div class="level-meta" id="insp-chamados">--</div>
+            <span class="card-title">Mapa Georreferenciado — 11 Estações Defesa Civil &amp; Pontos Críticos</span>
+            <div class="map-layer-bar">
+              <select id="basemap-select" class="sim-select" style="padding:4px 8px;font-size:0.72rem" title="Selecionar estilo do mapa base (Chave CARTO Oficial integrada)">
+                <option value="carto_light">Mapa: CARTO Light (Chave Oficial DCCALOR)</option>
+                <option value="carto_voyager">Mapa: CARTO Voyager Detalhado</option>
+                <option value="osm">Mapa: OpenStreetMap Oficial</option>
+              </select>
+              <label><input type="checkbox" id="chk-estacoes" checked /> 11 Estações</label>
+              <label><input type="checkbox" id="chk-pontos" checked /> Pontos Críticos</label>
+              <label><input type="checkbox" id="chk-raios" checked /> Raio 2km IDW</label>
+              <label><input type="checkbox" id="chk-bairros" /> 121 Bairros</label>
             </div>
           </div>
-
-          <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:auto">
-            <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:var(--muted)">
-              Retroalimentação Operacional Obrigatória (Auditoria COMDEC)
+          <div id="map-container"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:0.73rem;color:var(--muted);flex-wrap:wrap;gap:8px">
+            <div>
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#003594;border:2px solid #38bdf8;margin-right:4px"></span> Estação Defesa Civil (PCD)
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-left:10px;margin-right:4px"></span> Normal (0 mm)
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3b82f6;margin-left:8px;margin-right:4px"></span> Vigilância
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#eab308;margin-left:8px;margin-right:4px"></span> Atenção
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f97316;margin-left:8px;margin-right:4px"></span> Alerta
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-left:8px;margin-right:4px"></span> Alarme
             </div>
-            <div class="feedback-actions">
-              <button type="button" class="btn-action" onclick="registrarFeedback('CONFIRMADO_POSITIVO_CAMERA')">✓ Confirmar Alagamento (Câmera)</button>
-              <button type="button" class="btn-action" onclick="registrarFeedback('FALSO_ALARME_DRENAGEM_OK')">✕ Descartar Falso Alarme</button>
-              <button type="button" class="btn-action" onclick="registrarFeedback('ENCAMINHADO_EMLURB_LIMPEZA')">⚙ Solicitar Desobstrução Emlurb</button>
-            </div>
-            <div id="feedback-toast" style="font-size:0.75rem;color:#10b981;font-weight:700;margin-top:6px;min-height:18px"></div>
+            <div>Chave Pública CARTO Ativa • Clique em qualquer bairro ou estação para focar</div>
           </div>
+        </div>
+
+        <!-- Coluna Direita: Lista de Bairros com Endereço da Estação como Ponto de Referência e Pluviometria a cada 5 Minutos (Padrão DCCALOR) -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <span class="card-title">Monitoramento Pluviométrico por Bairro (Ciclo 5 Min)</span>
+              <div style="font-size:0.71rem;color:var(--muted);font-weight:600;margin-top:2px">
+                Classificação Automática por Nível de Pluviometria &amp; Endereço de Referência da Estação (Padrão DCCALOR)
+              </div>
+            </div>
+            <span class="live-dot" title="Alimentação automática a cada 5 minutos pelas 11 estações Plugfield"></span>
+          </div>
+
+          <div class="bairro-search-row">
+            <input type="text" id="bairro-filter-input" class="bairro-search-input" placeholder="🔍 Filtrar por bairro (ex: Aldeota, Jacarecanga, Montese) ou endereço de referência..." />
+          </div>
+
+          <div class="bairro-list-scroll" id="bairro-ranking-list">
+            <!-- Preenchido dinamicamente a cada 5 minutos com as 11 estações, seus bairros e endereços de referência -->
+          </div>
+
+          <div class="bairro-list-footer">
+            <span id="ref-pluv-station">Ref. Máxima Pluviométrica: --</span>
+            <span id="ref-pluv-value" style="color:#38bdf8">Ciclo Automático: 5 min (0.0 mm)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEÇÃO INFERIOR: DIAGNÓSTICO DETALHADO POR PONTO CRÍTICO / MICROBACIA EM 3 NÍVEIS -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="card-title">Diagnóstico Hidrológico por Ponto Crítico / Microbacia (3 Níveis)</span>
+            <span style="font-size:0.73rem;color:var(--muted);margin-left:8px">★ = Áreas-Piloto Obrigatórias (Jacarecanga, Padre Andrade, Aldeota e Itaoca)</span>
+          </div>
+          <div class="pilot-selector" id="pilot-buttons" style="margin-bottom:0"></div>
+        </div>
+
+        <div id="point-status-banner" class="status-banner"></div>
+
+        <div class="levels-grid-6">
+          <div class="level-card">
+            <h4>Nível 1 • Suscetibilidade Estática</h4>
+            <div class="level-big" id="insp-n1-classe">--</div>
+            <div class="level-meta" id="insp-n1-meta">--</div>
+          </div>
+          <div class="level-card">
+            <h4>Nível 2 • Probabilidade Tempo Real</h4>
+            <div class="level-big" id="insp-n2-prob">--</div>
+            <div class="level-meta" id="insp-n2-meta">--</div>
+          </div>
+          <div class="level-card">
+            <h4>Nível 3 • Antecipação (30–60 min)</h4>
+            <div class="level-big" id="insp-n3-prob">--</div>
+            <div class="level-meta" id="insp-n3-meta">--</div>
+          </div>
+          <div class="level-card">
+            <h4>Pluviometria IDW (5m / 1h / 24h)</h4>
+            <div class="level-big" id="insp-chuva">--</div>
+            <div class="level-meta" id="insp-limiares">--</div>
+          </div>
+          <div class="level-card">
+            <h4>Drenagem &amp; Remanso de Maré</h4>
+            <div class="level-big" id="insp-drenagem">--</div>
+            <div class="level-meta" id="insp-remanso">--</div>
+          </div>
+          <div class="level-card">
+            <h4>Validação Visual PMPU &amp; 40199</h4>
+            <div class="level-big" id="insp-cameras">--</div>
+            <div class="level-meta" id="insp-chamados">--</div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px;flex-wrap:wrap;gap:10px">
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:var(--muted)">
+            Retroalimentação Operacional Obrigatória (Auditoria COMDEC / 40199):
+          </div>
+          <div class="feedback-actions" style="margin-top:0">
+            <button type="button" class="btn-action" onclick="registrarFeedback('CONFIRMADO_POSITIVO_CAMERA')">✓ Confirmar Alagamento (Câmera PMPU)</button>
+            <button type="button" class="btn-action" onclick="registrarFeedback('FALSO_ALARME_DRENAGEM_OK')">✕ Descartar Falso Alarme</button>
+            <button type="button" class="btn-action" onclick="registrarFeedback('ENCAMINHADO_EMLURB_LIMPEZA')">⚙ Solicitar Desobstrução Emlurb</button>
+          </div>
+          <div id="feedback-toast" style="font-size:0.75rem;color:#10b981;font-weight:700;min-height:18px"></div>
         </div>
       </div>
     </section>
@@ -713,27 +1087,27 @@
       <div class="card">
         <div class="card-header">
           <span class="card-title">Telemetria em Tempo Real — 11 Estações Automáticas da Defesa Civil de Fortaleza (Plugfield)</span>
-          <span style="font-size:0.76rem;color:var(--muted)">Parâmetros medidos a cada 5–10 min: Chuva, Temp, Umidade, Vento, Rajada, Pressão, UV, Nível Sônico e Bateria</span>
+          <span style="font-size:0.76rem;color:var(--muted)">Alimentação automática a cada 5 minutos: Pluviometria, Endereço de Referência, Temp, Umidade, Vento, Pressão e Nível Sônico</span>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>ID Plugfield</th>
-                <th>Estação Defesa Civil</th>
+                <th>Estação / Bairro Principal</th>
+                <th>Endereço de Referência da Estação</th>
                 <th>Bacia Hidrográfica</th>
+                <th>Chuva 5m</th>
                 <th>Chuva 10m</th>
-                <th>Chuva 1h (Est.)</th>
+                <th>Chuva 1h</th>
                 <th>Chuva 24h</th>
                 <th>Chuva Ano</th>
                 <th>Temp / Sensação</th>
                 <th>Umidade</th>
                 <th>Vento / Rajada</th>
                 <th>Pressão</th>
-                <th>UV</th>
                 <th>Nível Sônico</th>
-                <th>Bateria</th>
-                <th>Status QC</th>
+                <th>Status Pluviométrico</th>
               </tr>
             </thead>
             <tbody id="stations-tbody"></tbody>
@@ -851,14 +1225,23 @@
 </div>
 
 <script>
+  // Chave Pública Oficial da API CARTO (Padrão DCCALOR / DCPET — elimina marca d'água API KEY REQUIRED)
+  const CARTO_API_KEY = 'cb1_2t7z_1_b4192d625bdc678b8f9125ad';
+  const NASA_API_KEY = 'WmJbrCnNL6zCBNnLFCgbLJFtjrTpghH7NNWq8mWb';
+
   let stateData = null;
   let selectedPointId = 'PC_JAC_01';
+  let selectedStationPfId = 8642;
+  let activeNasaLayerKey = 'viirs_fortaleza';
   let map = null;
+  let baseTileLayer = null;
   let stationsLayer = L.layerGroup();
   let pointsLayer = L.layerGroup();
   let radiusLayer = L.layerGroup();
+  let stationMarkersById = {};
   let municipioLayer = null;
   let bairrosLayer = null;
+  let countdownSeconds = 300; // Ciclo automático de 5 minutos (300 segundos)
 
   // 1. AUTENTICAÇÃO PADRÃO (admindc)
   document.getElementById('login-form').addEventListener('submit', function(e) {
@@ -879,13 +1262,22 @@
     document.getElementById('login-screen').style.display = 'flex';
   });
 
-  // 2. TEMA CLARO / ESCURO E RELÓGIO
+  // 2. TEMA CLARO / ESCURO, RELÓGIO E CICLO AUTOMÁTICO DE 5 MINUTOS (300s)
   document.getElementById('btn-theme').addEventListener('click', function() {
     document.documentElement.classList.toggle('light');
   });
 
   setInterval(() => {
     document.getElementById('clock-label').textContent = new Date().toLocaleTimeString('pt-BR');
+    countdownSeconds = Math.max(0, countdownSeconds - 1);
+    const mm = String(Math.floor(countdownSeconds / 60)).padStart(2, '0');
+    const ss = String(countdownSeconds % 60).padStart(2, '0');
+    document.getElementById('countdown-5m-label').textContent =
+      `Próxima leitura automática (5 min): ${mm}:${ss}`;
+    if (countdownSeconds === 0) {
+      countdownSeconds = 300;
+      carregarDadosTempoReal();
+    }
   }, 1000);
 
   // 3. NAVEGAÇÃO ENTRE ABAS
@@ -903,26 +1295,65 @@
     });
   });
 
-  // 4. INICIALIZAR MAPA LEAFLET COM LIMITE DE FORTALEZA E CAMADAS
+  // 4. SELETOR DE CAMADAS SATELITAIS NASA
+  document.querySelectorAll('.nasa-pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.nasa-pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeNasaLayerKey = btn.getAttribute('data-nasa-layer');
+      renderizarPainelNasa();
+    });
+  });
+
+  // 5. FILTRO DE BAIRROS NA LISTA LATERAL
+  document.getElementById('bairro-filter-input').addEventListener('input', () => {
+    renderizarListaBairrosPluviometria();
+  });
+
+  // 6. INICIALIZAR MAPA LEAFLET COM CHAVE PÚBLICA CARTO OFICIAL E LIMITES DE FORTALEZA
+  function definirCamadaBaseMapa(estilo) {
+    if (!map) return;
+    if (baseTileLayer) {
+      map.removeLayer(baseTileLayer);
+    }
+    let tileUrl = `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`;
+    let attr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
+    if (estilo === 'carto_voyager') {
+      tileUrl = `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`;
+    } else if (estilo === 'osm') {
+      tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      attr = '&copy; OpenStreetMap contributors';
+    }
+
+    baseTileLayer = L.tileLayer(tileUrl, {
+      attribution: attr,
+      subdomains: 'abcd',
+      maxZoom: 20
+    }).addTo(map);
+  }
+
   function initMap() {
     if (map) return;
     map = L.map('map-container', { zoomControl: true }).setView([-3.765, -38.535], 12);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO'
-    }).addTo(map);
+    definirCamadaBaseMapa('carto_light');
 
     stationsLayer.addTo(map);
     radiusLayer.addTo(map);
     pointsLayer.addTo(map);
 
-    // Carregar Limite Municipal de Fortaleza
+    document.getElementById('basemap-select').addEventListener('change', e => {
+      definirCamadaBaseMapa(e.target.value);
+    });
+
+    // Carregar Limite Municipal Oficial de Fortaleza (IBGE)
     fetch('/municipio_fortaleza.geojson')
       .then(r => r.ok ? r.json() : null)
       .then(geo => {
         if (geo) {
           municipioLayer = L.geoJSON(geo, {
-            style: { color: '#1d4ed8', weight: 2.5, opacity: 0.9, dashArray: '8, 6', fillOpacity: 0.01 },
+            style: { color: '#1d4ed8', weight: 2.5, opacity: 0.9, dashArray: '8, 6', fillColor: '#3b82f6', fillOpacity: 0.02 },
             interactive: false
           }).addTo(map);
         }
@@ -946,10 +1377,10 @@
             .then(r => r.json())
             .then(geo => {
               bairrosLayer = L.geoJSON(geo, {
-                style: { color: '#475569', weight: 1.1, opacity: 0.65, dashArray: '3, 3', fillOpacity: 0.03 },
+                style: { color: '#475569', weight: 1.2, opacity: 0.7, dashArray: '4, 4', fillColor: '#64748b', fillOpacity: 0.04 },
                 onEachFeature: (f, l) => {
                   if (f.properties && f.properties.nome) {
-                    l.bindTooltip(f.properties.nome, { direction: 'center' });
+                    l.bindTooltip(`<b>${f.properties.nome}</b>`, { direction: 'center' });
                   }
                 }
               }).addTo(map);
@@ -961,8 +1392,9 @@
     });
   }
 
-  // 5. BUSCAR DADOS EM TEMPO REAL OU SIMULAÇÃO
+  // 7. BUSCAR DADOS EM TEMPO REAL (CICLO AUTOMÁTICO DE 5 MINUTOS) OU SIMULAÇÃO
   async function carregarDadosTempoReal() {
+    countdownSeconds = 300;
     const scen = document.getElementById('scenario-select').value;
     let url = '/api/status';
     if (scen === 'sim_vigilancia') url += '?chuva_1h=12&mare=2.1';
@@ -984,15 +1416,14 @@
   function renderizarTudo() {
     if (!stateData) return;
 
-    // Atualizar badge de sincronização
     const isSim = stateData.modo_operacao === 'SIMULACAO_EVENTO_CHUVOSO';
     const syncText = document.getElementById('sync-text');
     const syncDot = document.getElementById('sync-dot');
     if (isSim) {
-      syncText.textContent = 'SIMULAÇÃO DE EVENTO CRÍTICO ATIVA';
+      syncText.textContent = 'SIMULAÇÃO DE EVENTO CRÍTICO (5 MIN)';
       syncDot.style.background = '#f97316';
     } else {
-      syncText.textContent = `AO VIVO • ${stateData.fonte_telemetria === 'PLUGFIELD_LIVE_API' ? 'PLUGFIELD (11 PCDs)' : 'CONTINGÊNCIA'}`;
+      syncText.textContent = `AO VIVO • ${stateData.fonte_telemetria === 'PLUGFIELD_LIVE_API' ? 'PLUGFIELD (CICLO 5 MIN)' : 'CONTINGÊNCIA'}`;
       syncDot.style.background = '#10b981';
     }
 
@@ -1005,7 +1436,7 @@
     stMun.style.color = stateData.cor_geral_municipio;
 
     document.getElementById('kpi-estacoes').textContent =
-      `${stateData.estacoes_defesa_civil.length} / 11 Estações Online`;
+      `${stateData.estacoes_defesa_civil.length} / 11 Estações (5 min)`;
 
     const domLustosa = stateData.estacoes_defesa_civil.find(s => s.plugfield_id === 3318);
     if (domLustosa && domLustosa.nivel_liquido_sonico_m !== null) {
@@ -1018,40 +1449,175 @@
     document.getElementById('kpi-mare-sub').textContent =
       `Gradiente: ${mare.gradiente_mare_m_h >= 0 ? '+' : ''}${mare.gradiente_mare_m_h} m/h • Porto do Mucuripe`;
 
+    renderizarPainelNasa();
     renderizarMapa();
+    renderizarListaBairrosPluviometria();
     renderizarBotoesPiloto();
     renderizarInspetorPonto(selectedPointId);
     renderizarTabelaEstacoes();
   }
 
+  // 8. RENDERIZAR PAINEL SATELITAL NASA E CRUZAMENTO PLUVIOMÉTRICO
+  function renderizarPainelNasa() {
+    if (!stateData || !stateData.nasa_climatologia) return;
+    const nasa = stateData.nasa_climatologia;
+    const camadas = nasa.camadas_satelitais || {};
+    const camada = camadas[activeNasaLayerKey] || camadas.viirs_fortaleza;
+    const cruz = nasa.cruzamento_pluviometrico;
+    const pwr = nasa.parametros_nasa_power;
+
+    if (camada) {
+      const imgEl = document.getElementById('nasa-sat-img');
+      if (imgEl.src !== camada.url) {
+        imgEl.src = camada.url;
+      }
+      document.getElementById('nasa-img-title').innerHTML = `<b>${camada.titulo}</b>`;
+      document.getElementById('nasa-img-sensor').textContent = `Sensor: ${camada.sensor}`;
+      document.getElementById('nasa-crosshair-marker').style.display =
+        activeNasaLayerKey === 'epic_disco_global' ? 'none' : 'flex';
+    }
+
+    document.getElementById('nasa-api-badge').textContent =
+      `API NASA: ${nasa.api_key_configurada} (${nasa.status_conexao})`;
+
+    const badge = document.getElementById('nasa-cross-badge');
+    badge.textContent = cruz.status_cruzamento;
+    badge.style.background = cruz.cor_hex;
+
+    document.getElementById('kpi-nasa-status').textContent =
+      cruz.chuva_1h_max_dc_mm >= 15 ? 'CONVERGÊNCIA ATIVA' : 'SINCRONIZADO';
+    document.getElementById('kpi-nasa-status').style.color = cruz.cor_hex;
+
+    document.getElementById('nasa-cross-desc').textContent = cruz.diagnostico_tecnico;
+    document.getElementById('nasa-m-cloud').textContent = `${pwr.nebulosidade_orbital_estimada_pct}%`;
+    document.getElementById('nasa-m-rain5m').textContent = `${cruz.chuva_5m_max_dc_mm} mm / 5min`;
+    document.getElementById('nasa-m-rain5m').style.color = cruz.cor_hex;
+    document.getElementById('nasa-m-rain1h').textContent =
+      `${cruz.chuva_1h_max_dc_mm} mm (Méd: ${cruz.chuva_1h_media_dc_mm} mm)`;
+    document.getElementById('nasa-m-humi').textContent =
+      `${pwr.umidade_sinotica_nasa_pct}% / ${cruz.umidade_media_dc_pct}%`;
+    document.getElementById('nasa-m-pres').textContent =
+      `${cruz.pressao_media_dc_hpa} hPa / ${cruz.temperatura_media_dc_c}°C`;
+    document.getElementById('nasa-m-rad').textContent =
+      `${pwr.irradiancia_solar_nasa_wm2} W/m² • ${cruz.vento_medio_dc_kmh} km/h`;
+  }
+
+  // 9. RENDERIZAR LISTA DE BAIRROS COM ENDEREÇO DA ESTAÇÃO E PLUVIOMETRIA A CADA 5 MIN (PADRÃO DCCALOR)
+  function renderizarListaBairrosPluviometria() {
+    if (!stateData) return;
+    const container = document.getElementById('bairro-ranking-list');
+    const termo = (document.getElementById('bairro-filter-input').value || '').trim().toLowerCase();
+    container.innerHTML = '';
+
+    const estacoesFiltradas = stateData.estacoes_defesa_civil.filter(est => {
+      if (!termo) return true;
+      const textoBusca = [
+        est.nome_curto,
+        est.bairro,
+        est.endereco_referencia || '',
+        est.bacia_hidrografica,
+        ...(est.bairros_secundarios || [])
+      ].join(' ').toLowerCase();
+      return textoBusca.includes(termo);
+    });
+
+    estacoesFiltradas.forEach((est, idx) => {
+      const item = document.createElement('div');
+      const isSelected = est.plugfield_id === selectedStationPfId;
+      item.className = 'bairro-item' + (isSelected ? ' active' : '');
+      item.style.borderLeftColor = est.cor_pluviometrica || '#10b981';
+
+      const sonicTag = est.nivel_liquido_sonico_m !== null
+        ? `<span class="level-badge" style="background:#0284c7">Canal: ${est.nivel_liquido_sonico_m}m</span>`
+        : '';
+
+      item.innerHTML = `
+        <div class="bairro-item-left">
+          <div class="bairro-item-title">
+            <span>${idx + 1}. ${est.bairro}</span>
+            <span class="level-badge" style="background:${est.cor_pluviometrica || '#10b981'}">${est.nivel_pluviometrico || 'NORMAL'}</span>
+            ${sonicTag}
+          </div>
+          <span class="bairro-ref-addr">📍 Ref: ${est.endereco_referencia || est.nome}</span>
+          <div class="bairro-sec-areas">
+            <b>Bairros Cobertos (${est.bairros_secundarios.length}):</b> ${est.bairros_secundarios.join(', ')}
+          </div>
+        </div>
+        <div class="bairro-item-right">
+          <div class="bairro-rain-main" style="color:${est.cor_pluviometrica || '#10b981'}">
+            ${Number(est.chuva_5m_mm || 0).toFixed(1)} mm <span style="font-size:0.68rem;font-weight:700;opacity:0.8">/ 5m</span>
+          </div>
+          <div class="bairro-rain-sub">
+            1h: <b>${Number(est.chuva_1h_estimada_mm || 0).toFixed(1)} mm</b> • 24h: <b>${Number(est.chuva_24h_mm || 0).toFixed(1)} mm</b>
+          </div>
+          <div class="pluv-bar-bg" title="Nível Pluviométrico Automático (${est.indice_saturacao_pluviometrica_pct || 0}%)">
+            <div class="pluv-bar-fill" style="width:${Math.max(6, est.indice_saturacao_pluviometrica_pct || 0)}%;background:${est.cor_pluviometrica || '#10b981'}"></div>
+          </div>
+        </div>
+      `;
+
+      item.addEventListener('click', () => {
+        selectedStationPfId = est.plugfield_id;
+        renderizarListaBairrosPluviometria();
+        if (map) {
+          map.setView([est.latitude, est.longitude], 14, { animate: true });
+          const m = stationMarkersById[est.plugfield_id];
+          if (m) m.openPopup();
+        }
+        // Sincronizar também o Ponto Crítico mais próximo dessa estação
+        const pcAssociado = stateData.pontos_criticos.find(
+          p => p.estacao_mais_proxima.toLowerCase() === est.nome_curto.toLowerCase()
+        );
+        if (pcAssociado) {
+          selectedPointId = pcAssociado.id_ponto;
+          renderizarBotoesPiloto();
+          renderizarInspetorPonto(selectedPointId);
+        }
+      });
+
+      container.appendChild(item);
+    });
+
+    // Rodapé da Lista de Bairros (Padrão DCCALOR)
+    if (stateData.estacoes_defesa_civil.length > 0) {
+      const topEst = stateData.estacoes_defesa_civil[0];
+      document.getElementById('ref-pluv-station').textContent =
+        `Ref. Pluviométrica: ${topEst.bairro} (${topEst.endereco_referencia.split('—')[0].trim()})`;
+      document.getElementById('ref-pluv-value').textContent =
+        `5 min: ${Number(topEst.chuva_5m_mm || 0).toFixed(1)} mm | 1h: ${Number(topEst.chuva_1h_estimada_mm || 0).toFixed(1)} mm`;
+    }
+  }
+
+  // 10. RENDERIZAR MAPA GEORREFERENCIADO
   function renderizarMapa() {
     if (!map || !stateData) return;
     stationsLayer.clearLayers();
     pointsLayer.clearLayers();
     radiusLayer.clearLayers();
+    stationMarkersById = {};
 
-    // 1. Marcadores das 11 Estações Automáticas da Defesa Civil
     stateData.estacoes_defesa_civil.forEach(est => {
+      const borderCol = est.cor_pluviometrica || '#38bdf8';
       const iconHtml = `
         <div style="
           background:#003594;
           color:#fff;
-          border:2px solid #38bdf8;
+          border:2px solid ${borderCol};
           border-radius:8px;
-          padding:2px 6px;
+          padding:2px 7px;
           font-size:10px;
           font-weight:800;
           white-space:nowrap;
           box-shadow:0 2px 6px rgba(0,0,0,0.45);
         ">
-          PCD ${est.nome_curto}: ${est.chuva_1h_estimada_mm}mm
+          PCD ${est.nome_curto}: ${Number(est.chuva_5m_mm || 0).toFixed(1)}mm
         </div>
       `;
       const icon = L.divIcon({
         html: iconHtml,
         className: '',
-        iconSize: [110, 22],
-        iconAnchor: [55, 11]
+        iconSize: [116, 22],
+        iconAnchor: [58, 11]
       });
 
       const marker = L.marker([est.latitude, est.longitude], { icon });
@@ -1059,34 +1625,36 @@
         ? `<br/><b>Nível Sônico Canal (20M):</b> ${est.nivel_liquido_sonico_m} m`
         : '';
       marker.bindPopup(`
-        <div style="font-family:sans-serif;font-size:12px;line-height:1.45;min-width:210px">
+        <div style="font-family:sans-serif;font-size:12px;line-height:1.45;min-width:240px">
           <strong style="color:#003594;font-size:13px">${est.nome}</strong><br/>
+          <span style="color:#0284c7;font-size:11px;font-weight:700">📍 Ref: ${est.endereco_referencia}</span><br/>
           <span style="color:#64748b;font-size:11px">ID Plugfield: ${est.plugfield_id} • Bacia: ${est.bacia_hidrografica}</span>
           <hr style="margin:6px 0;border:none;border-top:1px solid #e2e8f0"/>
-          <b>Chuva (10m / 1h / 24h):</b> ${est.chuva_10m_mm} / ${est.chuva_1h_estimada_mm} / ${est.chuva_24h_mm} mm<br/>
-          <b>Acumulado Anual:</b> ${est.chuva_ano_mm} mm<br/>
-          <b>Temperatura / Sensação:</b> ${est.temperatura_c}°C / ${est.sensacao_termica_c}°C<br/>
-          <b>Umidade Relativa:</b> ${est.umidade_pct}%<br/>
+          <b>Pluviometria (5m / 10m / 1h / 24h):</b> ${est.chuva_5m_mm} / ${est.chuva_10m_mm} / ${est.chuva_1h_estimada_mm} / ${est.chuva_24h_mm} mm<br/>
+          <b>Bairros Cobertos:</b> ${est.bairros_secundarios.join(', ')}<br/>
+          <b>Temperatura / Umidade:</b> ${est.temperatura_c}°C / ${est.umidade_pct}%<br/>
           <b>Vento / Rajada:</b> ${est.vento_kmh} km/h / ${est.rajada_kmh} km/h (${est.direcao_vento_cardeal})<br/>
           <b>Pressão Atmosférica:</b> ${est.pressao_hpa} hPa | <b>UV:</b> ${est.uv_index}
-          ${sonicLine}<br/>
-          <b>Bateria:</b> ${est.bateria_pct}% • <b>Sinal:</b> ${est.sinal_celular_pct}%
+          ${sonicLine}
         </div>
       `);
+      marker.on('click', () => {
+        selectedStationPfId = est.plugfield_id;
+        renderizarListaBairrosPluviometria();
+      });
       stationsLayer.addLayer(marker);
+      stationMarkersById[est.plugfield_id] = marker;
 
-      // Círculo discreto de cobertura da estação
       L.circle([est.latitude, est.longitude], {
-        radius: 2200,
-        color: '#0284c7',
-        fillColor: '#38bdf8',
-        fillOpacity: 0.05,
-        weight: 1,
+        radius: 2000,
+        color: est.cor_pluviometrica || '#0284c7',
+        fillColor: est.cor_pluviometrica || '#38bdf8',
+        fillOpacity: 0.08,
+        weight: 1.2,
         dashArray: '4, 6'
       }).addTo(radiusLayer);
     });
 
-    // 2. Marcadores dos Pontos Críticos / Áreas-Piloto
     stateData.pontos_criticos.forEach(pc => {
       const cor = pc.decisao_operacional.cor_hex;
       const isSel = pc.id_ponto === selectedPointId;
@@ -1157,13 +1725,13 @@
     const banner = document.getElementById('point-status-banner');
     banner.style.borderLeftColor = dec.cor_hex;
     banner.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px">
-        <strong style="font-size:0.92rem">${pc.nome}</strong>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+        <strong style="font-size:0.94rem">${pc.nome}</strong>
         <span class="level-badge" style="background:${dec.cor_hex}">${dec.nivel}</span>
       </div>
-      <div style="font-size:0.78rem;margin-bottom:4px"><b>Ação Defesa Civil:</b> ${dec.acao_defesa_civil}</div>
-      <div style="font-size:0.72rem;color:var(--muted)">
-        <b>Estação Primaria IDW:</b> PCD ${pc.estacao_mais_proxima} (${pc.dist_estacao_km} km) •
+      <div style="font-size:0.79rem;margin-bottom:4px"><b>Ação Defesa Civil:</b> ${dec.acao_defesa_civil}</div>
+      <div style="font-size:0.73rem;color:var(--muted)">
+        <b>Estação de Referência IDW:</b> PCD ${pc.estacao_mais_proxima} (${pc.dist_estacao_km} km • ${pc.endereco_estacao_proxima || ''}) •
         <b>Órgãos:</b> ${dec.orgaos_acionados.join(', ')}
       </div>
     `;
@@ -1171,31 +1739,31 @@
     document.getElementById('insp-n1-classe').textContent =
       `${n1.classe_risco} (${n1.score_suscetibilidade}/100)`;
     document.getElementById('insp-n1-meta').textContent =
-      `Cota: ${pc.cota_m}m • Impermeab.: ${pc.impermeabilizacao_pct}% • Pop. Exposta: ~${pc.populacao_exposta}`;
+      `Cota: ${pc.cota_m}m • Impermeab.: ${pc.impermeabilizacao_pct}% • Pop.: ~${pc.populacao_exposta}`;
 
     document.getElementById('insp-n2-prob').textContent = `${n2.probabilidade_alagamento_pct}%`;
     document.getElementById('insp-n2-prob').style.color = dec.cor_hex;
     document.getElementById('insp-n2-meta').textContent =
-      `Lâmina estimada: ${n2.lamina_observada_cm} cm • Vento: ${n2.vento_kmh} km/h (Raj. ${n2.rajada_kmh} km/h)`;
+      `Lâmina: ${n2.lamina_observada_cm} cm • Vento: ${n2.vento_kmh} km/h`;
 
     document.getElementById('insp-n3-prob').textContent =
-      `${n3.probabilidade_60m_pct}% (em ${n3.lead_time_estimado_min} min)`;
+      `${n3.probabilidade_60m_pct}% (${n3.lead_time_estimado_min} min)`;
     document.getElementById('insp-n3-meta').textContent =
-      `Nowcast 60m: ${n3.nowcast_60m_mm} mm → Lâmina prevista: ${n3.lamina_prevista_60m_cm} cm`;
+      `Nowcast 60m: ${n3.nowcast_60m_mm} mm → Lâmina: ${n3.lamina_prevista_60m_cm} cm`;
 
     document.getElementById('insp-chuva').textContent =
-      `${n2.chuva_10m_idw_mm} / ${n2.chuva_1h_idw_mm} / ${n2.chuva_24h_idw_mm} mm`;
+      `${n2.chuva_5m_idw_mm || 0} / ${n2.chuva_1h_idw_mm} / ${n2.chuva_24h_idw_mm} mm`;
     document.getElementById('insp-limiares').textContent =
-      `Limiares Ponto (15m/1h/24h): ${n1.limiares_chuva_mm['15m']} / ${n1.limiares_chuva_mm['1h']} / ${n1.limiares_chuva_mm['24h']} mm`;
+      `Limiares (15m/1h/24h): ${n1.limiares_chuva_mm['15m']} / ${n1.limiares_chuva_mm['1h']} / ${n1.limiares_chuva_mm['24h']} mm`;
 
     document.getElementById('insp-drenagem').textContent =
       `Sobrecarga: ${(n2.razao_sobrecarga_drenagem * 100).toFixed(0)}%`;
     document.getElementById('insp-remanso').textContent =
-      `Cap. Efetiva: ${n2.capacidade_efetiva_mm_h} mm/h • Remanso Maré: ${n2.indice_remanso_mare}`;
+      `Cap. Efetiva: ${n2.capacidade_efetiva_mm_h} mm/h • Remanso: ${n2.indice_remanso_mare}`;
 
     document.getElementById('insp-cameras').textContent = pc.cameras_pmpu.join(', ');
     document.getElementById('insp-chamados').textContent =
-      `Câmera Confirmada: ${n2.confirmacao_camera_pmpu ? 'SIM' : 'NÃO'} • Chamados 40199 (1h): ${n2.chamados_40199_1h}`;
+      `Câmera Confirmada: ${n2.confirmacao_camera_pmpu ? 'SIM' : 'NÃO'} • 40199: ${n2.chamados_40199_1h}`;
   }
 
   function renderizarTabelaEstacoes() {
@@ -1210,9 +1778,11 @@
         <td><code>${est.plugfield_id}</code></td>
         <td>
           <b>${est.nome_curto}</b>
-          <div style="font-size:0.7rem;color:var(--muted)">Atende: ${est.bairros_secundarios.slice(0, 4).join(', ')}</div>
+          <div style="font-size:0.7rem;color:var(--muted)">Cobertura: ${est.bairros_secundarios.slice(0, 4).join(', ')}</div>
         </td>
+        <td style="font-size:0.76rem;color:#38bdf8;font-weight:700">${est.endereco_referencia || '—'}</td>
         <td>${est.bacia_hidrografica}</td>
+        <td><b>${est.chuva_5m_mm} mm</b></td>
         <td><b>${est.chuva_10m_mm} mm</b></td>
         <td><b>${est.chuva_1h_estimada_mm} mm</b></td>
         <td>${est.chuva_24h_mm} mm</td>
@@ -1221,10 +1791,8 @@
         <td>${est.umidade_pct}%</td>
         <td>${est.vento_kmh} / ${est.rajada_kmh} km/h (${est.direcao_vento_cardeal})</td>
         <td>${est.pressao_hpa} hPa</td>
-        <td>${est.uv_index}</td>
         <td>${sonicBadge}</td>
-        <td>${est.bateria_pct}%</td>
-        <td><span class="level-badge" style="background:#10b981">${est.status_qc}</span></td>
+        <td><span class="level-badge" style="background:${est.cor_pluviometrica || '#10b981'}">${est.nivel_pluviometrico || 'NORMAL'}</span></td>
       `;
       tbody.appendChild(tr);
     });

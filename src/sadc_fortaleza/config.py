@@ -20,8 +20,13 @@ class EstacaoMeteorologica:
     latitude: float
     longitude: float
     bacia_hidrografica: str
+    endereco_referencia: str = ""
     possui_sensor_nivel_sonico: bool = False
-    intervalo_leitura_min: int = 10
+    intervalo_leitura_min: int = 5
+
+
+CARTO_API_KEY_PUBLICA: str = "cb1_2t7z_1_b4192d625bdc678b8f9125ad"
+NASA_API_KEY_PADRAO: str = "WmJbrCnNL6zCBNnLFCgbLJFtjrTpghH7NNWq8mWb"
 
 
 @dataclass(frozen=True)
@@ -72,6 +77,7 @@ ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
         latitude=-3.72313,
         longitude=-38.53782,
         bacia_hidrografica="Vertente Marítima",
+        endereco_referencia="Rua Agapito dos Santos, 195 — Centro (Sede CEMON / Defesa Civil)",
     ),
     EstacaoMeteorologica(
         id_estacao="PCD_3318",
@@ -84,6 +90,7 @@ ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
         latitude=-3.74880,
         longitude=-38.58800,
         bacia_hidrografica="Maranguapinho",
+        endereco_referencia="Rua Pedro Augusto, 213 — Dom Lustosa (Ponte Canal Dom Lustosa)",
         possui_sensor_nivel_sonico=True,
     ),
     EstacaoMeteorologica(
@@ -97,6 +104,7 @@ ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
         latitude=-3.72617,
         longitude=-38.48407,
         bacia_hidrografica="Vertente Marítima",
+        endereco_referencia="Rua Umari, s/n — Mucuripe (Escola Municipal Dragão do Mar)",
     ),
     EstacaoMeteorologica(
         id_estacao="PCD_8836",
@@ -109,6 +117,7 @@ ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
         latitude=-3.77272,
         longitude=-38.55843,
         bacia_hidrografica="Cocó / Tauape",
+        endereco_referencia="Rua Mundica Paula, 670 — Montese/Itaoca (EM Carolino Sucupira)",
     ),
     EstacaoMeteorologica(
         id_estacao="PCD_9281",
@@ -121,6 +130,7 @@ ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
         latitude=-3.74815,
         longitude=-38.53839,
         bacia_hidrografica="Vertente Marítima / Tauape",
+        endereco_referencia="Rua Jorge Dumar, 1501 — Benfica (Sede URBFOR)",
     ),
     EstacaoMeteorologica(
         id_estacao="PCD_9242",
@@ -133,6 +143,7 @@ ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
         latitude=-3.76010,
         longitude=-38.48366,
         bacia_hidrografica="Cocó",
+        endereco_referencia="Av. Washington Soares, 800 — Guararapes (Corredor Cocó / SEUMA)",
     ),
     EstacaoMeteorologica(
         id_estacao="PCD_8869",
@@ -145,6 +156,7 @@ ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
         latitude=-3.71426,
         longitude=-38.59688,
         bacia_hidrografica="Rio Ceará / Vertente Marítima",
+        endereco_referencia="Av. Dom Aloísio Lorscheider, 1040 — Vila Velha (EM Dona Hilza Diogo)",
     ),
     EstacaoMeteorologica(
         id_estacao="PCD_9282",
@@ -157,6 +169,7 @@ ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
         latitude=-3.78997,
         longitude=-38.61905,
         bacia_hidrografica="Maranguapinho",
+        endereco_referencia="Rua Xavier da Silveira, s/n — Granja Lisboa (Bacia Maranguapinho)",
     ),
     EstacaoMeteorologica(
         id_estacao="PCD_9134",
@@ -169,6 +182,7 @@ ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
         latitude=-3.81477,
         longitude=-38.58990,
         bacia_hidrografica="Maranguapinho",
+        endereco_referencia="Av. Penetração Oeste, s/n — Cj. Esperança (EEFM Adalgisa Bonfim)",
     ),
     EstacaoMeteorologica(
         id_estacao="PCD_9249",
@@ -181,6 +195,7 @@ ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
         latitude=-3.83890,
         longitude=-38.52268,
         bacia_hidrografica="Cocó",
+        endereco_referencia="Av. Contorno Sul, s/n — Jangurussu (UPA Dr. Fábio Landim)",
     ),
     EstacaoMeteorologica(
         id_estacao="PCD_9169",
@@ -193,6 +208,7 @@ ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
         latitude=-3.82547,
         longitude=-38.48527,
         bacia_hidrografica="Cocó",
+        endereco_referencia="Av. Mem de Sá, 384 — Messejana (ETP Profª Raimunda Félix)",
     ),
     EstacaoMeteorologica(
         id_estacao="FUNCEME_01",
@@ -205,6 +221,7 @@ ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
         latitude=-3.74600,
         longitude=-38.57400,
         bacia_hidrografica="Maranguapinho",
+        endereco_referencia="Av. Mister Hull, s/n — Campus do Pici",
     ),
     EstacaoMeteorologica(
         id_estacao="CEMADEN_01",
@@ -217,6 +234,7 @@ ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
         latitude=-3.76200,
         longitude=-38.54600,
         bacia_hidrografica="Cocó / Tauape",
+        endereco_referencia="Rua Governador João Carlos, s/n — Itaoca",
     ),
 ]
 
