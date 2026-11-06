@@ -1,6 +1,7 @@
 """
-Configurações georreferenciadas, malha de pontos críticos, estações meteorológicas,
-câmeras do PMPU e protocolos operacionais da Defesa Civil de Fortaleza.
+Configurações georreferenciadas, malha de pontos críticos, as 11 estações automáticas oficiais
+da Defesa Civil de Fortaleza (Plugfield API), postos complementares Funceme/CEMADEN,
+câmeras do PMPU e protocolos operacionais.
 """
 
 from dataclasses import dataclass, field
@@ -10,12 +11,16 @@ from typing import Dict, List
 @dataclass(frozen=True)
 class EstacaoMeteorologica:
     id_estacao: str
+    plugfield_id: int
     nome: str
+    nome_curto: str
     orgao: str  # "DEFESA_CIVIL", "FUNCEME", "CEMADEN"
     bairro: str
+    bairros_secundarios: List[str]
     latitude: float
     longitude: float
     bacia_hidrografica: str
+    possui_sensor_nivel_sonico: bool = False
     intervalo_leitura_min: int = 10
 
 
@@ -35,10 +40,11 @@ class PontoCritico:
     dist_corpo_hidrico_m: float
     capacidade_drenagem_mm_h: float
     obstrucao_base_frac: float
-    fator_decaimento_api: float  # k para chuva antecedente (maior em bacias com lagoas/canais)
-    influencia_mare: float       # 0.0 (interior) a 1.0 (costeiro/estuarino direto)
-    ocorrencias_2021_2024: int   # Histórico DCFor 2021-2024
+    fator_decaimento_api: float
+    influencia_mare: float
+    ocorrencias_2021_2024: int
     anos_recorrencia_consecutivos: int
+    estacao_referencia_plugfield: int
     cameras_pmpu: List[str] = field(default_factory=list)
     populacao_exposta_estimada: int = 0
 
@@ -53,131 +59,170 @@ class ProtocoloOperacional:
     notificar_40199: bool
 
 
-# Rede integrada de estações (11 Estações Automáticas Defesa Civil + Postos Funceme/CEMADEN)
+# As 11 Estações Automáticas Oficiais da Defesa Civil de Fortaleza (Plugfield) + 2 Postos Parceiros
 ESTACOES_FORTALEZA: List[EstacaoMeteorologica] = [
     EstacaoMeteorologica(
-        id_estacao="DC_01",
-        nome="PCD Defesa Civil - Jacarecanga / Moura Brasil",
-        orgao="DEFESA_CIVIL",
-        bairro="Jacarecanga",
-        latitude=-3.7218,
-        longitude=-38.5432,
-        bacia_hidrografica="Vertente Marítima",
-    ),
-    EstacaoMeteorologica(
-        id_estacao="DC_02",
-        nome="PCD Defesa Civil - Padre Andrade / Antônio Bezerra",
-        orgao="DEFESA_CIVIL",
-        bairro="Padre Andrade",
-        latitude=-3.7395,
-        longitude=-38.5840,
-        bacia_hidrografica="Maranguapinho",
-    ),
-    EstacaoMeteorologica(
-        id_estacao="DC_03",
-        nome="PCD Defesa Civil - Aldeota / Parque Bisão",
-        orgao="DEFESA_CIVIL",
-        bairro="Aldeota",
-        latitude=-3.7362,
-        longitude=-38.4975,
-        bacia_hidrografica="Vertente Marítima",
-    ),
-    EstacaoMeteorologica(
-        id_estacao="DC_04",
-        nome="PCD Defesa Civil - Itaoca / Parangaba",
-        orgao="DEFESA_CIVIL",
-        bairro="Itaoca",
-        latitude=-3.7685,
-        longitude=-38.5538,
-        bacia_hidrografica="Cocó / Tauape",
-    ),
-    EstacaoMeteorologica(
-        id_estacao="DC_05",
-        nome="PCD Defesa Civil - Mucuripe / Cais do Porto",
-        orgao="DEFESA_CIVIL",
-        bairro="Mucuripe",
-        latitude=-3.7190,
-        longitude=-38.4765,
-        bacia_hidrografica="Vertente Marítima",
-    ),
-    EstacaoMeteorologica(
-        id_estacao="DC_06",
-        nome="PCD Defesa Civil - Barra do Ceará",
-        orgao="DEFESA_CIVIL",
-        bairro="Barra do Ceará",
-        latitude=-3.7055,
-        longitude=-38.5820,
-        bacia_hidrografica="Rio Ceará",
-    ),
-    EstacaoMeteorologica(
-        id_estacao="DC_07",
-        nome="PCD Defesa Civil - Messejana",
-        orgao="DEFESA_CIVIL",
-        bairro="Messejana",
-        latitude=-3.8310,
-        longitude=-38.4930,
-        bacia_hidrografica="Cocó",
-    ),
-    EstacaoMeteorologica(
-        id_estacao="DC_08",
-        nome="PCD Defesa Civil - Mondubim",
-        orgao="DEFESA_CIVIL",
-        bairro="Mondubim",
-        latitude=-3.8060,
-        longitude=-38.5720,
-        bacia_hidrografica="Maranguapinho",
-    ),
-    EstacaoMeteorologica(
-        id_estacao="DC_09",
-        nome="PCD Defesa Civil - Aerolândia / Lagamar",
-        orgao="DEFESA_CIVIL",
-        bairro="Aerolândia",
-        latitude=-3.7690,
-        longitude=-38.5130,
-        bacia_hidrografica="Cocó / Tauape",
-    ),
-    EstacaoMeteorologica(
-        id_estacao="DC_10",
-        nome="PCD Defesa Civil - Jangurussu",
-        orgao="DEFESA_CIVIL",
-        bairro="Jangurussu",
-        latitude=-3.8365,
-        longitude=-38.5325,
-        bacia_hidrografica="Cocó",
-    ),
-    EstacaoMeteorologica(
-        id_estacao="DC_11",
-        nome="PCD Defesa Civil - Centro / Paço Municipal",
+        id_estacao="PCD_8642",
+        plugfield_id=8642,
+        nome="DEFESA CIVIL - CENTRO",
+        nome_curto="Centro",
         orgao="DEFESA_CIVIL",
         bairro="Centro",
-        latitude=-3.7258,
-        longitude=-38.5245,
+        bairros_secundarios=["Jacarecanga", "Moura Brasil", "Praia de Iracema", "Aldeota", "Meireles", "Farias Brito"],
+        latitude=-3.72313,
+        longitude=-38.53782,
         bacia_hidrografica="Vertente Marítima",
+    ),
+    EstacaoMeteorologica(
+        id_estacao="PCD_3318",
+        plugfield_id=3318,
+        nome="SERVIZI - DEFESA CIVIL - DOM LUSTOSA",
+        nome_curto="Dom Lustosa",
+        orgao="DEFESA_CIVIL",
+        bairro="Dom Lustosa",
+        bairros_secundarios=["Padre Andrade", "Pici", "Antônio Bezerra", "Henrique Jorge", "Autran Nunes", "João XXIII"],
+        latitude=-3.74880,
+        longitude=-38.58800,
+        bacia_hidrografica="Maranguapinho",
+        possui_sensor_nivel_sonico=True,
+    ),
+    EstacaoMeteorologica(
+        id_estacao="PCD_9137",
+        plugfield_id=9137,
+        nome="DEFESA CIVIL - MUCURIPE",
+        nome_curto="Mucuripe",
+        orgao="DEFESA_CIVIL",
+        bairro="Mucuripe",
+        bairros_secundarios=["Aldeota", "Varjota", "Meireles", "Cais do Porto", "Vicente Pinzon", "Papicu"],
+        latitude=-3.72617,
+        longitude=-38.48407,
+        bacia_hidrografica="Vertente Marítima",
+    ),
+    EstacaoMeteorologica(
+        id_estacao="PCD_8836",
+        plugfield_id=8836,
+        nome="DEFESA CIVIL - MONTESE",
+        nome_curto="Montese",
+        orgao="DEFESA_CIVIL",
+        bairro="Montese",
+        bairros_secundarios=["Itaoca", "Parangaba", "Vila União", "Bom Futuro", "Jardim América", "Aeroporto", "Serrinha"],
+        latitude=-3.77272,
+        longitude=-38.55843,
+        bacia_hidrografica="Cocó / Tauape",
+    ),
+    EstacaoMeteorologica(
+        id_estacao="PCD_9281",
+        plugfield_id=9281,
+        nome="DEFESA CIVIL - BENFICA",
+        nome_curto="Benfica",
+        orgao="DEFESA_CIVIL",
+        bairro="Benfica",
+        bairros_secundarios=["Farias Brito", "Rodolfo Teófilo", "José Bonifácio", "Gentilândia", "Damas"],
+        latitude=-3.74815,
+        longitude=-38.53839,
+        bacia_hidrografica="Vertente Marítima / Tauape",
+    ),
+    EstacaoMeteorologica(
+        id_estacao="PCD_9242",
+        plugfield_id=9242,
+        nome="DEFESA CIVIL - GUARARAPES",
+        nome_curto="Guararapes",
+        orgao="DEFESA_CIVIL",
+        bairro="Guararapes",
+        bairros_secundarios=["Aerolândia", "Cocó", "Salinas", "Luciano Cavalcante", "Eng. Luciano Cavalcante", "Edson Queiroz"],
+        latitude=-3.76010,
+        longitude=-38.48366,
+        bacia_hidrografica="Cocó",
+    ),
+    EstacaoMeteorologica(
+        id_estacao="PCD_8869",
+        plugfield_id=8869,
+        nome="DEFESA CIVIL - VILA VELHA",
+        nome_curto="Vila Velha",
+        orgao="DEFESA_CIVIL",
+        bairro="Vila Velha",
+        bairros_secundarios=["Barra do Ceará", "Jardim Guanabara", "Quintino Cunha", "Cristo Redentor", "Pirambu"],
+        latitude=-3.71426,
+        longitude=-38.59688,
+        bacia_hidrografica="Rio Ceará / Vertente Marítima",
+    ),
+    EstacaoMeteorologica(
+        id_estacao="PCD_9282",
+        plugfield_id=9282,
+        nome="DEFESA CIVIL - GRANJA LISBOA",
+        nome_curto="Granja Lisboa",
+        orgao="DEFESA_CIVIL",
+        bairro="Granja Lisboa",
+        bairros_secundarios=["Granja Portugal", "Bom Jardim", "Siqueira", "Conjunto Ceará"],
+        latitude=-3.78997,
+        longitude=-38.61905,
+        bacia_hidrografica="Maranguapinho",
+    ),
+    EstacaoMeteorologica(
+        id_estacao="PCD_9134",
+        plugfield_id=9134,
+        nome="DEFESA CIVIL - CJ ESPERANÇA",
+        nome_curto="Conjunto Esperança",
+        orgao="DEFESA_CIVIL",
+        bairro="Conjunto Esperança",
+        bairros_secundarios=["Mondubim", "Parque Prefeito José Walter", "Maraponga", "Planalto Ayrton Senna", "Aracapé"],
+        latitude=-3.81477,
+        longitude=-38.58990,
+        bacia_hidrografica="Maranguapinho",
+    ),
+    EstacaoMeteorologica(
+        id_estacao="PCD_9249",
+        plugfield_id=9249,
+        nome="DEFESA CIVIL - JANGURUSSU",
+        nome_curto="Jangurussu",
+        orgao="DEFESA_CIVIL",
+        bairro="Jangurussu",
+        bairros_secundarios=["Conjunto Palmeiras", "Barroso", "Passaré", "Ancuri", "Pedras"],
+        latitude=-3.83890,
+        longitude=-38.52268,
+        bacia_hidrografica="Cocó",
+    ),
+    EstacaoMeteorologica(
+        id_estacao="PCD_9169",
+        plugfield_id=9169,
+        nome="DEFESA CIVIL - MESSEJANA",
+        nome_curto="Messejana",
+        orgao="DEFESA_CIVIL",
+        bairro="Messejana",
+        bairros_secundarios=["Cambeba", "Paupina", "Lagoa Redonda", "Curió", "Guajeru", "José de Alencar", "Coaçu"],
+        latitude=-3.82547,
+        longitude=-38.48527,
+        bacia_hidrografica="Cocó",
     ),
     EstacaoMeteorologica(
         id_estacao="FUNCEME_01",
+        plugfield_id=10001,
         nome="Posto Pluviométrico Funceme - Pici",
+        nome_curto="Funceme Pici",
         orgao="FUNCEME",
         bairro="Pici",
-        latitude=-3.7460,
-        longitude=-38.5740,
+        bairros_secundarios=["Padre Andrade", "Bela Vista", "Parquelândia"],
+        latitude=-3.74600,
+        longitude=-38.57400,
         bacia_hidrografica="Maranguapinho",
     ),
     EstacaoMeteorologica(
         id_estacao="CEMADEN_01",
-        nome="PCD CEMADEN - Montese / Itaoca",
+        plugfield_id=10002,
+        nome="PCD CEMADEN - Itaoca / Parangaba",
+        nome_curto="CEMADEN Itaoca",
         orgao="CEMADEN",
-        bairro="Montese",
-        latitude=-3.7620,
-        longitude=-38.5460,
+        bairro="Itaoca",
+        bairros_secundarios=["Montese", "Parangaba"],
+        latitude=-3.76200,
+        longitude=-38.54600,
         bacia_hidrografica="Cocó / Tauape",
     ),
 ]
 
 
-# Malha de Pontos Críticos e Microbacias (4 Áreas-Piloto + Pontos de Controle para Transferência)
+# Malha de Pontos Críticos e Microbacias (4 Áreas-Piloto + Pontos de Controle)
 PONTOS_CRITICOS: List[PontoCritico] = [
-    # 1. Piloto Jacarecanga: Zona baixa costeira/estuarina, canal São Gerardo/Jacarecanga, forte efeito de maré
     PontoCritico(
         id_ponto="PC_JAC_01",
         nome="Jacarecanga - Canal do Jacarecanga / Av. Filomeno Gomes",
@@ -197,10 +242,10 @@ PONTOS_CRITICOS: List[PontoCritico] = [
         influencia_mare=0.92,
         ocorrencias_2021_2024=142,
         anos_recorrencia_consecutivos=4,
+        estacao_referencia_plugfield=8642,
         cameras_pmpu=["CAM_PMPU_012", "CAM_PMPU_013", "CAM_RISCO_004"],
         populacao_exposta_estimada=4850,
     ),
-    # 2. Piloto Padre Andrade: Bacia do Maranguapinho, recorrência crônica e influência de canal/rio urbano
     PontoCritico(
         id_ponto="PC_PAD_01",
         nome="Padre Andrade - Margem Rio Maranguapinho / Rua Demétrio Menezes",
@@ -220,10 +265,10 @@ PONTOS_CRITICOS: List[PontoCritico] = [
         influencia_mare=0.22,
         ocorrencias_2021_2024=128,
         anos_recorrencia_consecutivos=4,
+        estacao_referencia_plugfield=3318,
         cameras_pmpu=["CAM_RISCO_011", "CAM_PMPU_041"],
         populacao_exposta_estimada=5600,
     ),
-    # 3. Piloto Aldeota: Bacia altamente verticalizada e impermeabilizada, alagamento rápido por microdrenagem
     PontoCritico(
         id_ponto="PC_ALD_01",
         nome="Aldeota - Bacia Riacho Pajeú / Av. Heráclito Graça x Barão de Studart",
@@ -243,10 +288,10 @@ PONTOS_CRITICOS: List[PontoCritico] = [
         influencia_mare=0.35,
         ocorrencias_2021_2024=96,
         anos_recorrencia_consecutivos=4,
+        estacao_referencia_plugfield=9137,
         cameras_pmpu=["CAM_PMPU_022", "CAM_PMPU_023"],
         populacao_exposta_estimada=3200,
     ),
-    # 4. Piloto Itaoca: Depressão topográfica e influência de canal/lagoa urbana, alta sensibilidade a acumulados
     PontoCritico(
         id_ponto="PC_ITA_01",
         nome="Itaoca - Canal do Tauape / Entorno Lagoa da Parangaba",
@@ -266,10 +311,10 @@ PONTOS_CRITICOS: List[PontoCritico] = [
         influencia_mare=0.05,
         ocorrencias_2021_2024=115,
         anos_recorrencia_consecutivos=4,
+        estacao_referencia_plugfield=8836,
         cameras_pmpu=["CAM_RISCO_019", "CAM_PMPU_058"],
         populacao_exposta_estimada=4100,
     ),
-    # 5. Ponto Crítico Complementar (Alto Risco): Aerolândia / Lagamar (para enriquecer treinamento multi-bacia)
     PontoCritico(
         id_ponto="PC_LAG_01",
         nome="Aerolândia - Canal do Lagamar / Comunidade do Lagamar",
@@ -289,10 +334,10 @@ PONTOS_CRITICOS: List[PontoCritico] = [
         influencia_mare=0.48,
         ocorrencias_2021_2024=154,
         anos_recorrencia_consecutivos=4,
+        estacao_referencia_plugfield=9242,
         cameras_pmpu=["CAM_RISCO_001", "CAM_RISCO_002", "CAM_PMPU_081"],
         populacao_exposta_estimada=7400,
     ),
-    # 6. Ponto de Controle (Baixo/Médio Risco): Messejana Alta (para calibração de especificidade espacial)
     PontoCritico(
         id_ponto="PC_MES_01",
         nome="Messejana - Trecho Alto / Coaçu",
@@ -312,6 +357,7 @@ PONTOS_CRITICOS: List[PontoCritico] = [
         influencia_mare=0.0,
         ocorrencias_2021_2024=14,
         anos_recorrencia_consecutivos=1,
+        estacao_referencia_plugfield=9169,
         cameras_pmpu=["CAM_PMPU_095"],
         populacao_exposta_estimada=950,
     ),
@@ -323,13 +369,13 @@ PROTOCOLOS_OPERACIONAIS: Dict[str, ProtocoloOperacional] = {
         nivel="NORMAL",
         cor_hex="#10B981",
         condicao_resumo="Sem chuva relevante e indicadores hidrometeorológicos abaixo do limiar de vigilância.",
-        acao_defesa_civil="Monitoramento de rotina nas estações automáticas e manutenção preventiva de drenagem.",
+        acao_defesa_civil="Monitoramento de rotina nas 11 estações automáticas e manutenção preventiva de drenagem.",
         orgaos_acionados=["CIOPS_ROTINA"],
         notificar_40199=False,
     ),
     "VIGILANCIA": ProtocoloOperacional(
         nivel="VIGILANCIA",
-        cor_hex="#F59E0B",
+        cor_hex="#EAB308",
         condicao_resumo="Previsão de chuva significativa (Nowcast 1-3h) em área de suscetibilidade Alta/Muito Alta.",
         acao_defesa_civil="Monitoramento reforçado a cada 10 min, comunicação interna e checagem preventiva de maré.",
         orgaos_acionados=["DEFESA_CIVIL_COMDEC", "OBSERVATORIO_CLIMA"],
@@ -359,7 +405,7 @@ PROTOCOLOS_OPERACIONAIS: Dict[str, ProtocoloOperacional] = {
     ),
     "ALARME": ProtocoloOperacional(
         nivel="ALARME",
-        cor_hex="#7F1D1D",
+        cor_hex="#991B1B",
         condicao_resumo="Limiar crítico atingido com alta probabilidade + confirmação visual por câmera PMPU (lâmina >= 15cm) ou múltiplos relatos 40199.",
         acao_defesa_civil="Acionamento operacional máximo, interdição viária imediata, envio de equipes de resgate/apoio social e comunicação pública de emergência.",
         orgaos_acionados=[
@@ -375,7 +421,6 @@ PROTOCOLOS_OPERACIONAIS: Dict[str, ProtocoloOperacional] = {
     ),
 }
 
-# Metas operacionais definidas no planejamento
 METAS_PILOTO = {
     "recall_minimo": 0.80,
     "precisao_minima": 0.50,

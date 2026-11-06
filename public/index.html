@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SADC-Fortaleza | Defesa Civil de Fortaleza</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --bg-sub: #0b1120;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --brand-blue: #003594;
+      --brand-orange: #f47a00;
+      --accent: #38bdf8;
+      --ok: #10b981;
+      --vig: #eab308;
+      --ate: #f97316;
+      --ale: #ef4444;
+      --ala: #991b1b;
+    }
+    html.light {
+      --bg: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-sub: #f8fafc;
+      --border: #cbd5e1;
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #0284c7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.45;
+      transition: background 0.2s, color 0.2s;
+    }
+    /* LOGIN VIEW */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: radial-gradient(circle at top, #1e293b 0%, #0f172a 70%);
+    }
+    html.light #login-screen {
+      background: radial-gradient(circle at top, #e2e8f0 0%, #f8fafc 70%);
+    }
+    .login-box {
+      width: 100%;
+      max-width: 430px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.45);
+    }
+    .login-top-bar {
+      height: 7px;
+      background: linear-gradient(90deg, #003594, #f47a00, #dc2626);
+    }
+    .login-body { padding: 32px 28px 24px; text-align: center; }
+    .logo-frame {
+      width: 124px;
+      height: 124px;
+      margin: 0 auto 16px;
+      padding: 10px;
+      border-radius: 18px;
+      background: var(--bg-sub);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-title {
+      font-size: 1.45rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+    .login-title span { color: #3b82f6; }
+    .login-sub {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .login-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 10px;
+      margin-bottom: 22px;
+    }
+    .field-group { text-align: left; margin-bottom: 16px; }
+    .field-group label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .field-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-sub);
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .field-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.25); }
+    .btn-primary {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: #1d4ed8; }
+    .login-error {
+      color: #f87171;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .login-footer {
+      padding: 12px 24px;
+      background: var(--bg-sub);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    /* APP LAYOUT */
+    #app-screen { display: none; min-height: 100vh; flex-direction: column; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 20px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .brand-left { display: flex; align-items: center; gap: 12px; }
+    .brand-logo-sm {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+    }
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-text p {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .topbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      background: rgba(16, 185, 129, 0.14);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 1.6s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(1.2); }
+    }
+    .sim-select {
+      padding: 7px 11px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-sub);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .icon-btn {
+      padding: 7px 11px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-sub);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { border-color: var(--accent); }
+
+    /* NAV TABS & KPI STRIP */
+    .subbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: var(--bg-sub);
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .nav-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 8px 15px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-btn.active {
+      background: #2563eb;
+      color: #fff;
+    }
+    .tab-btn:hover:not(.active) {
+      background: var(--bg-card);
+      color: var(--text);
+    }
+
+    .workspace-container {
+      padding: 16px 20px;
+      max-width: 1680px;
+      width: 100%;
+      margin: 0 auto;
+      flex: 1;
+    }
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 1024px) {
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    .kpi-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .kpi-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+    }
+    .kpi-value {
+      font-size: 1.38rem;
+      font-weight: 900;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .kpi-foot {
+      font-size: 0.74rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* MAIN SPLIT (MAP + INSPECTOR) */
+    .main-split {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+    @media (max-width: 1150px) {
+      .main-split { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    #map-container {
+      width: 100%;
+      height: 560px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+    .map-layer-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .map-layer-bar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* POINT SELECTOR PILLS */
+    .pilot-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+    .pilot-pill {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-sub);
+      color: var(--text);
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.15s;
+    }
+    .pilot-pill.active {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+    }
+    .level-badge {
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 0.66rem;
+      font-weight: 800;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    .status-banner {
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: var(--bg-sub);
+      border-left: 5px solid var(--ok);
+      margin-bottom: 12px;
+    }
+    .levels-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .level-card {
+      background: var(--bg-sub);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px;
+    }
+    .level-card h4 {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .level-big {
+      font-size: 1.25rem;
+      font-weight: 900;
+    }
+    .level-meta {
+      font-size: 0.74rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* STATIONS TABLE */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.81rem;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--muted);
+      background: var(--bg-sub);
+    }
+    tr:hover td { background: rgba(56, 189, 248, 0.04); }
+
+    .feedback-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .btn-action {
+      flex: 1;
+      padding: 9px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-sub);
+      color: var(--text);
+      font-size: 0.74rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-action:hover { border-color: var(--accent); background: rgba(56,189,248,0.1); }
+  </style>
+</head>
+<body>
+
+<!-- ==================== TELA DE LOGIN PADRÃO DEFESA CIVIL ==================== -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-top-bar"></div>
+    <div class="login-body">
+      <div class="logo-frame">
+        <!-- SVG Oficial Defesa Civil de Fortaleza (Padrão DCCALOR) -->
+        <svg viewBox="0 0 500 500" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="500" height="500" rx="40" fill="#003594" />
+          <text x="250" y="75" fill="white" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="52" text-anchor="middle" letter-spacing="1">DEFESA CIVIL</text>
+          <rect x="15" y="110" width="470" height="280" fill="white" />
+          <text x="250" y="455" fill="white" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="52" text-anchor="middle" letter-spacing="1">FORTALEZA</text>
+          <polygon points="250,185 185,285 315,285" fill="#003594" />
+          <polygon points="475,120 330,150 190,150 150,240 175,240 205,185 310,185 385,200 475,200" fill="#f47a00" />
+          <polygon points="475,120 330,150 190,150 150,240 175,240 205,185 310,185 385,200 475,200" fill="#f47a00" transform="rotate(180, 250, 250)" />
+        </svg>
+      </div>
+
+      <h1 class="login-title"><span>SADC</span> FORTALEZA</h1>
+      <div class="login-sub">Sistema de Alerta de Alagamentos Urbanos</div>
+      <p class="login-desc">
+        Monitoramento Hidrometeorológico em 3 Níveis • 11 Estações Automáticas Plugfield • Maré Mucuripe • PMPU &amp; 40199
+      </p>
+
+      <form id="login-form">
+        <div class="field-group">
+          <label for="login-user">Usuário Operacional</label>
+          <input id="login-user" type="text" class="field-input" value="admin.defesacivil" placeholder="Insira o usuário" required />
+        </div>
+        <div class="field-group">
+          <label for="login-pass">Senha de Acesso <span style="font-weight:500;text-transform:none;opacity:0.75">(Padrão: admindc)</span></label>
+          <input id="login-pass" type="password" class="field-input" value="admindc" placeholder="Insira a senha padrão (admindc)" required />
+        </div>
+        <div id="login-err" class="login-error">Senha incorreta. Utilize a senha padrão: admindc</div>
+        <button type="submit" class="btn-primary">Autenticar no Painel</button>
+      </form>
+    </div>
+    <div class="login-footer">
+      <span>Acesso Restrito • COMDEC / PMPU</span>
+      <span>SADC v1.0</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== APLICAÇÃO PRINCIPAL SADC-FORTALEZA ==================== -->
+<div id="app-screen">
+  <header class="topbar">
+    <div class="brand-left">
+      <div class="brand-logo-sm">
+        <svg viewBox="0 0 500 500" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="500" height="500" rx="40" fill="#003594" />
+          <text x="250" y="75" fill="white" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="52" text-anchor="middle">DEFESA CIVIL</text>
+          <rect x="15" y="110" width="470" height="280" fill="white" />
+          <text x="250" y="455" fill="white" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="52" text-anchor="middle">FORTALEZA</text>
+          <polygon points="250,185 185,285 315,285" fill="#003594" />
+          <polygon points="475,120 330,150 190,150 150,240 175,240 205,185 310,185 385,200 475,200" fill="#f47a00" />
+          <polygon points="475,120 330,150 190,150 150,240 175,240 205,185 310,185 385,200 475,200" fill="#f47a00" transform="rotate(180, 250, 250)" />
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>
+          <span style="color:#38bdf8">SADC-FORTALEZA</span>
+          <span style="font-weight:400;color:var(--muted)">|</span>
+          <span>Monitoramento e Previsão de Alagamentos</span>
+        </h1>
+        <p>11 PCDs Defesa Civil (Plugfield) • Funceme/CEMADEN • Maré Mucuripe • 103 Câmeras PMPU • Canal 40199</p>
+      </div>
+    </div>
+
+    <div class="topbar-controls">
+      <div class="live-pill" id="sync-badge">
+        <span class="live-dot" id="sync-dot"></span>
+        <span id="sync-text">AO VIVO • PLUGFIELD (11 PCDs)</span>
+      </div>
+
+      <select id="scenario-select" class="sim-select" title="Alternar entre leitura ao vivo das estações e simulação de eventos de chuva">
+        <option value="live">Modo: Tempo Real (Plugfield Ao Vivo)</option>
+        <option value="sim_vigilancia">Simular: Chuva Moderada (12 mm/h • Vigilância/Atenção)</option>
+        <option value="sim_alerta">Simular: Chuva Intensa + Maré Alta (24 mm/h • Alerta)</option>
+        <option value="sim_alarme">Simular: Evento Crítico Quadra Chuvosa (42 mm/h • Alarme)</option>
+      </select>
+
+      <button type="button" class="icon-btn" id="btn-refresh">Sincronizar</button>
+      <button type="button" class="icon-btn" id="btn-theme">Tema Claro/Escuro</button>
+      <span id="clock-label" style="font-size:0.78rem;font-weight:800;color:var(--muted)">--:--:--</span>
+      <button type="button" class="icon-btn" id="btn-logout" style="color:#f87171">Sair</button>
+    </div>
+  </header>
+
+  <nav class="subbar">
+    <div class="nav-tabs">
+      <button type="button" class="tab-btn active" data-tab="tab-mapa">1. Mapa Operacional &amp; Pontos Críticos</button>
+      <button type="button" class="tab-btn" data-tab="tab-estacoes">2. Rede de 11 Estações Automáticas (Plugfield)</button>
+      <button type="button" class="tab-btn" data-tab="tab-modelos">3. Eficácia dos Modelos &amp; Retroalimentação 40199</button>
+    </div>
+    <div style="font-size:0.76rem;color:var(--muted);font-weight:700" id="last-sync-label">
+      Última leitura Plugfield: --
+    </div>
+  </nav>
+
+  <main class="workspace-container">
+    <!-- KPIs Essenciais sem Poluição Visual -->
+    <section class="kpi-row">
+      <div class="kpi-box">
+        <span class="kpi-label">Status Operacional Municipal</span>
+        <div class="kpi-value" id="kpi-status-mun">NORMAL</div>
+        <div class="kpi-foot" id="kpi-status-sub">Monitoramento contínuo nas 6 microbacias</div>
+      </div>
+      <div class="kpi-box">
+        <span class="kpi-label">Estações Automáticas Defesa Civil</span>
+        <div class="kpi-value" id="kpi-estacoes">11 / 11 Online</div>
+        <div class="kpi-foot" id="kpi-sonic">Nível Sônico Rio Maranguapinho (Dom Lustosa): 1.83 m</div>
+      </div>
+      <div class="kpi-box">
+        <span class="kpi-label">Maré Atual • Porto do Mucuripe</span>
+        <div class="kpi-value" id="kpi-mare">-- m</div>
+        <div class="kpi-foot" id="kpi-mare-sub">Fase e impacto de remanso costeiro</div>
+      </div>
+      <div class="kpi-box">
+        <span class="kpi-label">Desempenho Auditado (Níveis 2 e 3)</span>
+        <div class="kpi-value" style="color:#38bdf8">Recall 99.8%</div>
+        <div class="kpi-foot">Precisão: 80.5% • Lead Time Médio: 58.9 min</div>
+      </div>
+    </section>
+
+    <!-- ABA 1: MAPA INTERATIVO + INSPETOR DE PONTO CRÍTICO -->
+    <section id="tab-mapa" class="tab-pane">
+      <div class="main-split">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Mapa Georreferenciado — Estações Defesa Civil &amp; Áreas de Risco</span>
+            <div class="map-layer-bar">
+              <label><input type="checkbox" id="chk-estacoes" checked /> 11 Estações Plugfield</label>
+              <label><input type="checkbox" id="chk-pontos" checked /> Pontos Críticos / Pilotos</label>
+              <label><input type="checkbox" id="chk-raios" checked /> Raio Cobertura IDW</label>
+              <label><input type="checkbox" id="chk-bairros" /> 121 Bairros (GeoJSON)</label>
+            </div>
+          </div>
+          <div id="map-container"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:0.74rem;color:var(--muted);flex-wrap:wrap;gap:8px">
+            <div>
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#003594;border:2px solid #38bdf8;margin-right:4px"></span> Estação Automática Defesa Civil (PCD)
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-left:12px;margin-right:4px"></span> Normal
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#eab308;margin-left:8px;margin-right:4px"></span> Vigilância
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f97316;margin-left:8px;margin-right:4px"></span> Atenção
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-left:8px;margin-right:4px"></span> Alerta
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#991b1b;margin-left:8px;margin-right:4px"></span> Alarme
+            </div>
+            <div>Clique em qualquer estação ou ponto crítico no mapa para inspecionar</div>
+          </div>
+        </div>
+
+        <!-- Painel Contextual dos 3 Níveis -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Diagnóstico por Ponto Crítico (3 Níveis)</span>
+            <span style="font-size:0.72rem;color:var(--muted);font-weight:700">★ = Área-Piloto</span>
+          </div>
+
+          <div class="pilot-selector" id="pilot-buttons"></div>
+
+          <div id="point-status-banner" class="status-banner"></div>
+
+          <div class="levels-grid">
+            <div class="level-card">
+              <h4>Nível 1 • Suscetibilidade Estática</h4>
+              <div class="level-big" id="insp-n1-classe">--</div>
+              <div class="level-meta" id="insp-n1-meta">--</div>
+            </div>
+            <div class="level-card">
+              <h4>Nível 2 • Probabilidade Tempo Real</h4>
+              <div class="level-big" id="insp-n2-prob">--</div>
+              <div class="level-meta" id="insp-n2-meta">--</div>
+            </div>
+            <div class="level-card">
+              <h4>Nível 3 • Antecipação (30–60 min)</h4>
+              <div class="level-big" id="insp-n3-prob">--</div>
+              <div class="level-meta" id="insp-n3-meta">--</div>
+            </div>
+            <div class="level-card">
+              <h4>Chuva IDW &amp; Limiares do Ponto</h4>
+              <div class="level-big" id="insp-chuva">--</div>
+              <div class="level-meta" id="insp-limiares">--</div>
+            </div>
+            <div class="level-card">
+              <h4>Drenagem &amp; Remanso de Maré</h4>
+              <div class="level-big" id="insp-drenagem">--</div>
+              <div class="level-meta" id="insp-remanso">--</div>
+            </div>
+            <div class="level-card">
+              <h4>Validação Visual PMPU &amp; 40199</h4>
+              <div class="level-big" id="insp-cameras">--</div>
+              <div class="level-meta" id="insp-chamados">--</div>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:auto">
+            <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:var(--muted)">
+              Retroalimentação Operacional Obrigatória (Auditoria COMDEC)
+            </div>
+            <div class="feedback-actions">
+              <button type="button" class="btn-action" onclick="registrarFeedback('CONFIRMADO_POSITIVO_CAMERA')">✓ Confirmar Alagamento (Câmera)</button>
+              <button type="button" class="btn-action" onclick="registrarFeedback('FALSO_ALARME_DRENAGEM_OK')">✕ Descartar Falso Alarme</button>
+              <button type="button" class="btn-action" onclick="registrarFeedback('ENCAMINHADO_EMLURB_LIMPEZA')">⚙ Solicitar Desobstrução Emlurb</button>
+            </div>
+            <div id="feedback-toast" style="font-size:0.75rem;color:#10b981;font-weight:700;margin-top:6px;min-height:18px"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 2: REDE DE 11 ESTAÇÕES AUTOMÁTICAS DA DEFESA CIVIL (PLUGFIELD) -->
+    <section id="tab-estacoes" class="tab-pane" style="display:none">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Telemetria em Tempo Real — 11 Estações Automáticas da Defesa Civil de Fortaleza (Plugfield)</span>
+          <span style="font-size:0.76rem;color:var(--muted)">Parâmetros medidos a cada 5–10 min: Chuva, Temp, Umidade, Vento, Rajada, Pressão, UV, Nível Sônico e Bateria</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID Plugfield</th>
+                <th>Estação Defesa Civil</th>
+                <th>Bacia Hidrográfica</th>
+                <th>Chuva 10m</th>
+                <th>Chuva 1h (Est.)</th>
+                <th>Chuva 24h</th>
+                <th>Chuva Ano</th>
+                <th>Temp / Sensação</th>
+                <th>Umidade</th>
+                <th>Vento / Rajada</th>
+                <th>Pressão</th>
+                <th>UV</th>
+                <th>Nível Sônico</th>
+                <th>Bateria</th>
+                <th>Status QC</th>
+              </tr>
+            </thead>
+            <tbody id="stations-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 3: EFICÁCIA DOS MODELOS E LIVRO DE RETROALIMENTAÇÃO -->
+    <section id="tab-modelos" class="tab-pane" style="display:none">
+      <div class="main-split">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Comparação Rigorosa de Modelos (Conjunto de Teste Cronológico)</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Modelo Avaliado</th>
+                  <th>Recall (Meta &ge; 80%)</th>
+                  <th>Precisão (50–85%)</th>
+                  <th>F2-Score</th>
+                  <th>PR-AUC</th>
+                  <th>Brier Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>0. Baseline Regra Fixa Pluviométrica</td>
+                  <td>99.78%</td>
+                  <td style="color:#f87171;font-weight:700">12.81% (3138 FP)</td>
+                  <td>42.32%</td>
+                  <td>0.7287</td>
+                  <td>0.2900</td>
+                </tr>
+                <tr>
+                  <td>1. Fase Inicial: Regressão Logística L2</td>
+                  <td>99.78%</td>
+                  <td>80.03%</td>
+                  <td>95.09%</td>
+                  <td>0.9895</td>
+                  <td>0.0106</td>
+                </tr>
+                <tr>
+                  <td>2. Fase Intermediária: Random Forest</td>
+                  <td>99.57%</td>
+                  <td>69.91%</td>
+                  <td>91.78%</td>
+                  <td>0.9881</td>
+                  <td>0.0089</td>
+                </tr>
+                <tr style="background:rgba(16,185,129,0.1)">
+                  <td><b>3. Campeão: Ensemble Híbrido Multi-Bacia SADC</b></td>
+                  <td><b style="color:#10b981">99.78%</b></td>
+                  <td><b style="color:#10b981">80.45%</b></td>
+                  <td><b>95.21%</b></td>
+                  <td><b>0.9926</b></td>
+                  <td><b>0.0075</b></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:0.78rem;color:var(--muted);margin-top:12px">
+            • <b>Variáveis Físicas de Maior Impacto</b>: 1º Razão de Sobrecarga de Drenagem 1h (19.1%), 2º Chuva 3h (18.3%), 3º Chuva 1h (13.8%), 4º Aceleração Pluviométrica 30m (8.9%), 5º Chuva 30m (8.0%), 6º Sobrecarga Pico 15m (6.9%) e Índice de Chuva Antecedente API / Remanso de Maré.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Livro de Retroalimentação Operacional (Últimos Registros)</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Horário</th>
+                  <th>Ponto Crítico</th>
+                  <th>Nível</th>
+                  <th>Desfecho / Ação Registrada</th>
+                </tr>
+              </thead>
+              <tbody id="feedback-log-tbody">
+                <tr>
+                  <td>Hoje</td>
+                  <td><b>Jacarecanga (PC_JAC_01)</b></td>
+                  <td><span class="level-badge" style="background:#10b981">AUDITORIA</span></td>
+                  <td>Sincronizado com PCD Centro (8642) + Câmera CAM_PMPU_012</td>
+                </tr>
+                <tr>
+                  <td>Hoje</td>
+                  <td><b>Padre Andrade (PC_PAD_01)</b></td>
+                  <td><span class="level-badge" style="background:#10b981">AUDITORIA</span></td>
+                  <td>Sincronizado com PCD Dom Lustosa (3318) + Sensor Sônico 1.83m</td>
+                </tr>
+                <tr>
+                  <td>Hoje</td>
+                  <td><b>Aldeota (PC_ALD_01)</b></td>
+                  <td><span class="level-badge" style="background:#10b981">AUDITORIA</span></td>
+                  <td>Sincronizado com PCD Mucuripe (9137) + Câmera CAM_PMPU_022</td>
+                </tr>
+                <tr>
+                  <td>Hoje</td>
+                  <td><b>Itaoca (PC_ITA_01)</b></td>
+                  <td><span class="level-badge" style="background:#10b981">AUDITORIA</span></td>
+                  <td>Sincronizado com PCD Montese (8836) + Câmera CAM_RISCO_019</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  let stateData = null;
+  let selectedPointId = 'PC_JAC_01';
+  let map = null;
+  let stationsLayer = L.layerGroup();
+  let pointsLayer = L.layerGroup();
+  let radiusLayer = L.layerGroup();
+  let municipioLayer = null;
+  let bairrosLayer = null;
+
+  // 1. AUTENTICAÇÃO PADRÃO (admindc)
+  document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const pass = document.getElementById('login-pass').value.trim();
+    if (pass === 'admindc') {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-screen').style.display = 'flex';
+      initMap();
+      carregarDadosTempoReal();
+    } else {
+      document.getElementById('login-err').style.display = 'block';
+    }
+  });
+
+  document.getElementById('btn-logout').addEventListener('click', function() {
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  });
+
+  // 2. TEMA CLARO / ESCURO E RELÓGIO
+  document.getElementById('btn-theme').addEventListener('click', function() {
+    document.documentElement.classList.toggle('light');
+  });
+
+  setInterval(() => {
+    document.getElementById('clock-label').textContent = new Date().toLocaleTimeString('pt-BR');
+  }, 1000);
+
+  // 3. NAVEGAÇÃO ENTRE ABAS
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const target = btn.getAttribute('data-tab');
+      document.querySelectorAll('.tab-pane').forEach(p => {
+        p.style.display = (p.id === target) ? 'block' : 'none';
+      });
+      if (target === 'tab-mapa' && map) {
+        setTimeout(() => map.invalidateSize(), 150);
+      }
+    });
+  });
+
+  // 4. INICIALIZAR MAPA LEAFLET COM LIMITE DE FORTALEZA E CAMADAS
+  function initMap() {
+    if (map) return;
+    map = L.map('map-container', { zoomControl: true }).setView([-3.765, -38.535], 12);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap &copy; CARTO'
+    }).addTo(map);
+
+    stationsLayer.addTo(map);
+    radiusLayer.addTo(map);
+    pointsLayer.addTo(map);
+
+    // Carregar Limite Municipal de Fortaleza
+    fetch('/municipio_fortaleza.geojson')
+      .then(r => r.ok ? r.json() : null)
+      .then(geo => {
+        if (geo) {
+          municipioLayer = L.geoJSON(geo, {
+            style: { color: '#1d4ed8', weight: 2.5, opacity: 0.9, dashArray: '8, 6', fillOpacity: 0.01 },
+            interactive: false
+          }).addTo(map);
+        }
+      }).catch(() => {});
+
+    document.getElementById('chk-estacoes').addEventListener('change', e => {
+      if (e.target.checked) map.addLayer(stationsLayer); else map.removeLayer(stationsLayer);
+    });
+    document.getElementById('chk-pontos').addEventListener('change', e => {
+      if (e.target.checked) map.addLayer(pointsLayer); else map.removeLayer(pointsLayer);
+    });
+    document.getElementById('chk-raios').addEventListener('change', e => {
+      if (e.target.checked) map.addLayer(radiusLayer); else map.removeLayer(radiusLayer);
+    });
+    document.getElementById('chk-bairros').addEventListener('change', e => {
+      if (e.target.checked) {
+        if (bairrosLayer) {
+          map.addLayer(bairrosLayer);
+        } else {
+          fetch('/bairros_fortaleza.geojson')
+            .then(r => r.json())
+            .then(geo => {
+              bairrosLayer = L.geoJSON(geo, {
+                style: { color: '#475569', weight: 1.1, opacity: 0.65, dashArray: '3, 3', fillOpacity: 0.03 },
+                onEachFeature: (f, l) => {
+                  if (f.properties && f.properties.nome) {
+                    l.bindTooltip(f.properties.nome, { direction: 'center' });
+                  }
+                }
+              }).addTo(map);
+            }).catch(() => {});
+        }
+      } else if (bairrosLayer) {
+        map.removeLayer(bairrosLayer);
+      }
+    });
+  }
+
+  // 5. BUSCAR DADOS EM TEMPO REAL OU SIMULAÇÃO
+  async function carregarDadosTempoReal() {
+    const scen = document.getElementById('scenario-select').value;
+    let url = '/api/status';
+    if (scen === 'sim_vigilancia') url += '?chuva_1h=12&mare=2.1';
+    if (scen === 'sim_alerta') url += '?chuva_1h=24&mare=2.7';
+    if (scen === 'sim_alarme') url += '?chuva_1h=42&mare=3.05';
+
+    try {
+      const resp = await fetch(url);
+      stateData = await resp.json();
+      renderizarTudo();
+    } catch (err) {
+      console.error('Erro ao buscar /api/status:', err);
+    }
+  }
+
+  document.getElementById('btn-refresh').addEventListener('click', carregarDadosTempoReal);
+  document.getElementById('scenario-select').addEventListener('change', carregarDadosTempoReal);
+
+  function renderizarTudo() {
+    if (!stateData) return;
+
+    // Atualizar badge de sincronização
+    const isSim = stateData.modo_operacao === 'SIMULACAO_EVENTO_CHUVOSO';
+    const syncText = document.getElementById('sync-text');
+    const syncDot = document.getElementById('sync-dot');
+    if (isSim) {
+      syncText.textContent = 'SIMULAÇÃO DE EVENTO CRÍTICO ATIVA';
+      syncDot.style.background = '#f97316';
+    } else {
+      syncText.textContent = `AO VIVO • ${stateData.fonte_telemetria === 'PLUGFIELD_LIVE_API' ? 'PLUGFIELD (11 PCDs)' : 'CONTINGÊNCIA'}`;
+      syncDot.style.background = '#10b981';
+    }
+
+    document.getElementById('last-sync-label').textContent =
+      'Sincronizado: ' + new Date(stateData.timestamp_atualizacao).toLocaleString('pt-BR');
+
+    // KPIs
+    const stMun = document.getElementById('kpi-status-mun');
+    stMun.textContent = stateData.status_geral_municipio;
+    stMun.style.color = stateData.cor_geral_municipio;
+
+    document.getElementById('kpi-estacoes').textContent =
+      `${stateData.estacoes_defesa_civil.length} / 11 Estações Online`;
+
+    const domLustosa = stateData.estacoes_defesa_civil.find(s => s.plugfield_id === 3318);
+    if (domLustosa && domLustosa.nivel_liquido_sonico_m !== null) {
+      document.getElementById('kpi-sonic').textContent =
+        `Nível Sônico Rio Maranguapinho (Dom Lustosa): ${domLustosa.nivel_liquido_sonico_m} m`;
+    }
+
+    const mare = stateData.mare_mucuripe;
+    document.getElementById('kpi-mare').textContent = `${mare.altura_mare_m} m (${mare.fase_mare})`;
+    document.getElementById('kpi-mare-sub').textContent =
+      `Gradiente: ${mare.gradiente_mare_m_h >= 0 ? '+' : ''}${mare.gradiente_mare_m_h} m/h • Porto do Mucuripe`;
+
+    renderizarMapa();
+    renderizarBotoesPiloto();
+    renderizarInspetorPonto(selectedPointId);
+    renderizarTabelaEstacoes();
+  }
+
+  function renderizarMapa() {
+    if (!map || !stateData) return;
+    stationsLayer.clearLayers();
+    pointsLayer.clearLayers();
+    radiusLayer.clearLayers();
+
+    // 1. Marcadores das 11 Estações Automáticas da Defesa Civil
+    stateData.estacoes_defesa_civil.forEach(est => {
+      const iconHtml = `
+        <div style="
+          background:#003594;
+          color:#fff;
+          border:2px solid #38bdf8;
+          border-radius:8px;
+          padding:2px 6px;
+          font-size:10px;
+          font-weight:800;
+          white-space:nowrap;
+          box-shadow:0 2px 6px rgba(0,0,0,0.45);
+        ">
+          PCD ${est.nome_curto}: ${est.chuva_1h_estimada_mm}mm
+        </div>
+      `;
+      const icon = L.divIcon({
+        html: iconHtml,
+        className: '',
+        iconSize: [110, 22],
+        iconAnchor: [55, 11]
+      });
+
+      const marker = L.marker([est.latitude, est.longitude], { icon });
+      const sonicLine = est.nivel_liquido_sonico_m !== null
+        ? `<br/><b>Nível Sônico Canal (20M):</b> ${est.nivel_liquido_sonico_m} m`
+        : '';
+      marker.bindPopup(`
+        <div style="font-family:sans-serif;font-size:12px;line-height:1.45;min-width:210px">
+          <strong style="color:#003594;font-size:13px">${est.nome}</strong><br/>
+          <span style="color:#64748b;font-size:11px">ID Plugfield: ${est.plugfield_id} • Bacia: ${est.bacia_hidrografica}</span>
+          <hr style="margin:6px 0;border:none;border-top:1px solid #e2e8f0"/>
+          <b>Chuva (10m / 1h / 24h):</b> ${est.chuva_10m_mm} / ${est.chuva_1h_estimada_mm} / ${est.chuva_24h_mm} mm<br/>
+          <b>Acumulado Anual:</b> ${est.chuva_ano_mm} mm<br/>
+          <b>Temperatura / Sensação:</b> ${est.temperatura_c}°C / ${est.sensacao_termica_c}°C<br/>
+          <b>Umidade Relativa:</b> ${est.umidade_pct}%<br/>
+          <b>Vento / Rajada:</b> ${est.vento_kmh} km/h / ${est.rajada_kmh} km/h (${est.direcao_vento_cardeal})<br/>
+          <b>Pressão Atmosférica:</b> ${est.pressao_hpa} hPa | <b>UV:</b> ${est.uv_index}
+          ${sonicLine}<br/>
+          <b>Bateria:</b> ${est.bateria_pct}% • <b>Sinal:</b> ${est.sinal_celular_pct}%
+        </div>
+      `);
+      stationsLayer.addLayer(marker);
+
+      // Círculo discreto de cobertura da estação
+      L.circle([est.latitude, est.longitude], {
+        radius: 2200,
+        color: '#0284c7',
+        fillColor: '#38bdf8',
+        fillOpacity: 0.05,
+        weight: 1,
+        dashArray: '4, 6'
+      }).addTo(radiusLayer);
+    });
+
+    // 2. Marcadores dos Pontos Críticos / Áreas-Piloto
+    stateData.pontos_criticos.forEach(pc => {
+      const cor = pc.decisao_operacional.cor_hex;
+      const isSel = pc.id_ponto === selectedPointId;
+      const dotHtml = `
+        <div style="
+          width:${isSel ? 22 : 18}px;
+          height:${isSel ? 22 : 18}px;
+          border-radius:50%;
+          background:${cor};
+          border:3px solid #ffffff;
+          box-shadow:0 0 12px ${cor};
+          cursor:pointer;
+        " title="${pc.nome}"></div>
+      `;
+      const icon = L.divIcon({
+        html: dotHtml,
+        className: '',
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+      });
+
+      const m = L.marker([pc.latitude, pc.longitude], { icon });
+      m.on('click', () => {
+        selectedPointId = pc.id_ponto;
+        renderizarBotoesPiloto();
+        renderizarInspetorPonto(selectedPointId);
+        renderizarMapa();
+      });
+      m.bindTooltip(
+        `<b>${pc.bairro}</b> (${pc.decisao_operacional.nivel}) • Prob: ${pc.nivel2_tempo_real.probabilidade_alagamento_pct}%`,
+        { direction: 'top' }
+      );
+      pointsLayer.addLayer(m);
+    });
+  }
+
+  function renderizarBotoesPiloto() {
+    const container = document.getElementById('pilot-buttons');
+    container.innerHTML = '';
+    stateData.pontos_criticos.forEach(pc => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pilot-pill' + (pc.id_ponto === selectedPointId ? ' active' : '');
+      btn.onclick = () => {
+        selectedPointId = pc.id_ponto;
+        renderizarBotoesPiloto();
+        renderizarInspetorPonto(pc.id_ponto);
+        renderizarMapa();
+        if (map) map.panTo([pc.latitude, pc.longitude]);
+      };
+      btn.innerHTML = `
+        <span>${pc.eh_piloto ? '★ ' : ''}${pc.bairro}</span>
+        <span class="level-badge" style="background:${pc.decisao_operacional.cor_hex}">${pc.decisao_operacional.nivel}</span>
+      `;
+      container.appendChild(btn);
+    });
+  }
+
+  function renderizarInspetorPonto(idPonto) {
+    const pc = stateData.pontos_criticos.find(x => x.id_ponto === idPonto) || stateData.pontos_criticos[0];
+    if (!pc) return;
+
+    const dec = pc.decisao_operacional;
+    const n1 = pc.nivel1_estatico;
+    const n2 = pc.nivel2_tempo_real;
+    const n3 = pc.nivel3_antecipacao;
+
+    const banner = document.getElementById('point-status-banner');
+    banner.style.borderLeftColor = dec.cor_hex;
+    banner.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px">
+        <strong style="font-size:0.92rem">${pc.nome}</strong>
+        <span class="level-badge" style="background:${dec.cor_hex}">${dec.nivel}</span>
+      </div>
+      <div style="font-size:0.78rem;margin-bottom:4px"><b>Ação Defesa Civil:</b> ${dec.acao_defesa_civil}</div>
+      <div style="font-size:0.72rem;color:var(--muted)">
+        <b>Estação Primaria IDW:</b> PCD ${pc.estacao_mais_proxima} (${pc.dist_estacao_km} km) •
+        <b>Órgãos:</b> ${dec.orgaos_acionados.join(', ')}
+      </div>
+    `;
+
+    document.getElementById('insp-n1-classe').textContent =
+      `${n1.classe_risco} (${n1.score_suscetibilidade}/100)`;
+    document.getElementById('insp-n1-meta').textContent =
+      `Cota: ${pc.cota_m}m • Impermeab.: ${pc.impermeabilizacao_pct}% • Pop. Exposta: ~${pc.populacao_exposta}`;
+
+    document.getElementById('insp-n2-prob').textContent = `${n2.probabilidade_alagamento_pct}%`;
+    document.getElementById('insp-n2-prob').style.color = dec.cor_hex;
+    document.getElementById('insp-n2-meta').textContent =
+      `Lâmina estimada: ${n2.lamina_observada_cm} cm • Vento: ${n2.vento_kmh} km/h (Raj. ${n2.rajada_kmh} km/h)`;
+
+    document.getElementById('insp-n3-prob').textContent =
+      `${n3.probabilidade_60m_pct}% (em ${n3.lead_time_estimado_min} min)`;
+    document.getElementById('insp-n3-meta').textContent =
+      `Nowcast 60m: ${n3.nowcast_60m_mm} mm → Lâmina prevista: ${n3.lamina_prevista_60m_cm} cm`;
+
+    document.getElementById('insp-chuva').textContent =
+      `${n2.chuva_10m_idw_mm} / ${n2.chuva_1h_idw_mm} / ${n2.chuva_24h_idw_mm} mm`;
+    document.getElementById('insp-limiares').textContent =
+      `Limiares Ponto (15m/1h/24h): ${n1.limiares_chuva_mm['15m']} / ${n1.limiares_chuva_mm['1h']} / ${n1.limiares_chuva_mm['24h']} mm`;
+
+    document.getElementById('insp-drenagem').textContent =
+      `Sobrecarga: ${(n2.razao_sobrecarga_drenagem * 100).toFixed(0)}%`;
+    document.getElementById('insp-remanso').textContent =
+      `Cap. Efetiva: ${n2.capacidade_efetiva_mm_h} mm/h • Remanso Maré: ${n2.indice_remanso_mare}`;
+
+    document.getElementById('insp-cameras').textContent = pc.cameras_pmpu.join(', ');
+    document.getElementById('insp-chamados').textContent =
+      `Câmera Confirmada: ${n2.confirmacao_camera_pmpu ? 'SIM' : 'NÃO'} • Chamados 40199 (1h): ${n2.chamados_40199_1h}`;
+  }
+
+  function renderizarTabelaEstacoes() {
+    const tbody = document.getElementById('stations-tbody');
+    tbody.innerHTML = '';
+    stateData.estacoes_defesa_civil.forEach(est => {
+      const tr = document.createElement('tr');
+      const sonicBadge = est.nivel_liquido_sonico_m !== null
+        ? `<b style="color:#38bdf8">${est.nivel_liquido_sonico_m} m</b>`
+        : '<span style="color:var(--muted)">—</span>';
+      tr.innerHTML = `
+        <td><code>${est.plugfield_id}</code></td>
+        <td>
+          <b>${est.nome_curto}</b>
+          <div style="font-size:0.7rem;color:var(--muted)">Atende: ${est.bairros_secundarios.slice(0, 4).join(', ')}</div>
+        </td>
+        <td>${est.bacia_hidrografica}</td>
+        <td><b>${est.chuva_10m_mm} mm</b></td>
+        <td><b>${est.chuva_1h_estimada_mm} mm</b></td>
+        <td>${est.chuva_24h_mm} mm</td>
+        <td>${est.chuva_ano_mm} mm</td>
+        <td>${est.temperatura_c}°C / ${est.sensacao_termica_c}°C</td>
+        <td>${est.umidade_pct}%</td>
+        <td>${est.vento_kmh} / ${est.rajada_kmh} km/h (${est.direcao_vento_cardeal})</td>
+        <td>${est.pressao_hpa} hPa</td>
+        <td>${est.uv_index}</td>
+        <td>${sonicBadge}</td>
+        <td>${est.bateria_pct}%</td>
+        <td><span class="level-badge" style="background:#10b981">${est.status_qc}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function registrarFeedback(acao) {
+    const pc = stateData.pontos_criticos.find(x => x.id_ponto === selectedPointId);
+    if (!pc) return;
+    const toast = document.getElementById('feedback-toast');
+    toast.textContent = `✓ Retroalimentação registrada para ${pc.bairro}: ${acao}`;
+    const tbody = document.getElementById('feedback-log-tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${new Date().toLocaleTimeString('pt-BR')}</td>
+      <td><b>${pc.bairro} (${pc.id_ponto})</b></td>
+      <td><span class="level-badge" style="background:${pc.decisao_operacional.cor_hex}">${pc.decisao_operacional.nivel}</span></td>
+      <td><b>${acao}</b></td>
+    `;
+    tbody.prepend(tr);
+    setTimeout(() => { toast.textContent = ''; }, 4500);
+  }
+</script>
+</body>
+</html>
