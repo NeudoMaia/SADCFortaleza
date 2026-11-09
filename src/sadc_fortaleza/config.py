@@ -28,6 +28,19 @@ class EstacaoMeteorologica:
 CARTO_API_KEY_PUBLICA: str = "cb1_2t7z_1_b4192d625bdc678b8f9125ad"
 NASA_API_KEY_PADRAO: str = "WmJbrCnNL6zCBNnLFCgbLJFtjrTpghH7NNWq8mWb"
 
+# Configurações Oficiais do Radar Meteorológico da FUNCEME (Fortaleza / RMF - GMWR1000SST)
+FUNCEME_RADAR_PORTAL_URL: str = (
+    "https://radar.funceme.br/radar/GMWR1000SST/prsf/RADAR_FORTALEZARMF/20/true/2/0"
+)
+FUNCEME_RADAR_API_URL: str = "https://api1.funceme.br/rpc/v1/produto-gerado"
+FUNCEME_RADAR_ID: str = "GMWR1000SST"
+FUNCEME_RADAR_NOME: str = "Radar Meteorológico Banda X FUNCEME — Fortaleza / RMF (Eusébio)"
+FUNCEME_RADAR_CENTER: List[float] = [-3.89299, -38.45739]  # [lat, lon]
+FUNCEME_RADAR_BOUNDS: List[float] = [-39.5916, -5.0230, -37.3235, -2.7608]  # [west_lon, south_lat, east_lon, north_lat]
+FUNCEME_RADAR_LEGENDA_PRSF: str = "https://radar.funceme.br/assets/img/legenda_chuva_agora.png"
+FUNCEME_RADAR_LEGENDA_ACUM: str = "https://radar.funceme.br/assets/img/legenda_acumulados.png"
+FUNCEME_RADAR_KML_ALCANCE: str = "https://cdn.funceme.br/assets/kml/rangeGMWR1000SST.kml"
+
 
 @dataclass(frozen=True)
 class PontoCritico:

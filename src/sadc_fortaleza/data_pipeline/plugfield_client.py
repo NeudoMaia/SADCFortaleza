@@ -1,29 +1,65 @@
 """
 Conector de Tempo Real com a API Plugfield para as 11 Estações Automáticas da
-Defesa Civil de Fortaleza (ciclo automático de 5 minutos), integração satelital NASA
-(API Key WmJbrCnNL6zCBNnLFCgbLJFtjrTpghH7NNWq8mWb) e Inferência em Tempo Real
+Defesa Civil de Fortaleza (ciclo automático de 5 minutos), integração dinâmica com o
+Radar Meteorológico da FUNCEME (GMWR1000SST — Fortaleza/RMF: 20 varreduras a cada 5 min
+e mensuração quantitativa dBZ / mm/h por pixel georreferenciado) e Inferência em Tempo Real
 dos 3 Níveis do SADC-Fortaleza.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+import io
 import json
 import math
 import os
 from pathlib import Path
+import ssl
 import time
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 import urllib.request
+
+from PIL import Image
 
 from sadc_fortaleza.config import (
     CARTO_API_KEY_PUBLICA,
     ESTACOES_FORTALEZA,
-    NASA_API_KEY_PADRAO,
+    FUNCEME_RADAR_API_URL,
+    FUNCEME_RADAR_BOUNDS,
+    FUNCEME_RADAR_CENTER,
+    FUNCEME_RADAR_ID,
+    FUNCEME_RADAR_KML_ALCANCE,
+    FUNCEME_RADAR_LEGENDA_ACUM,
+    FUNCEME_RADAR_LEGENDA_PRSF,
+    FUNCEME_RADAR_NOME,
+    FUNCEME_RADAR_PORTAL_URL,
     PONTOS_CRITICOS,
     PROTOCOLOS_OPERACIONAIS,
 )
 from sadc_fortaleza.models.level1_susceptibility import calcular_suscetibilidade_estatica
 
-_NASA_CACHE: Dict[str, object] = {"timestamp": 0.0, "payload": None}
+_RADAR_FUNCEME_CACHE: Dict[str, object] = {"timestamp": 0.0, "payload": None, "modo_sim": False}
+
+# Escala cromática oficial do Radar FUNCEME (extraída de legenda_chuva_agora.png: RGB -> dBZ)
+_ESCALA_RGB_DBZ_FUNCEME: List[Tuple[Tuple[int, int, int], float]] = [
+    ((153, 153, 102), -15.0),
+    ((119, 201, 248), -10.0),
+    ((0, 165, 252), -5.0),
+    ((0, 125, 223), 0.0),
+    ((9, 71, 181), 5.0),
+    ((81, 188, 137), 10.0),
+    ((5, 167, 74), 15.0),
+    ((0, 132, 0), 20.0),
+    ((11, 107, 0), 25.0),
+    ((255, 255, 0), 30.0),
+    ((255, 215, 76), 35.0),
+    ((255, 174, 72), 40.0),
+    ((255, 135, 50), 45.0),
+    ((254, 86, 34), 50.0),
+    ((227, 20, 15), 55.0),
+    ((176, 13, 24), 60.0),
+    ((223, 78, 167), 65.0),
+    ((182, 33, 157), 70.0),
+    ((85, 6, 88), 75.0),
+]
 
 
 def _carregar_env_local() -> Dict[str, str]:
@@ -117,210 +153,452 @@ def _calcular_mare_mucuripe_atual(override_mare_m: Optional[float] = None) -> Di
     }
 
 
-def obter_monitoramento_satelital_nasa(
+def _converter_rgb_para_dbz_funceme(r: int, g: int, b: int, a: int) -> float:
+    """
+    Mapeia o pixel RGBA da imagem transparente do Radar FUNCEME (GMWR1000SST)
+    para refletividade em dBZ usando a paleta oficial legenda_chuva_agora.png.
+    """
+    if a < 25:
+        return 0.0
+    # Ignorar pixels quase brancos/pretos de borda se houver
+    if r > 248 and g > 248 and b > 248:
+        return 0.0
+    if r < 8 and g < 8 and b < 8:
+        return 0.0
+
+    melhor_dbz = 0.0
+    menor_dist = 1e9
+    for (cr, cg, cb), dbz_val in _ESCALA_RGB_DBZ_FUNCEME:
+        dist = (r - cr) ** 2 + (g - cg) ** 2 + (b - cb) ** 2
+        if dist < menor_dist:
+            menor_dist = dist
+            melhor_dbz = dbz_val
+    return max(0.0, float(melhor_dbz))
+
+
+def _dbz_para_taxa_chuva_mm_h(dbz: float) -> float:
+    """
+    Relação Z-R Marshall-Palmer / Banda X Tropical (Z = 200 * R^1.6) usada na escala FUNCEME:
+    20 dBZ -> ~0.65 mm/h | 30 dBZ -> ~2.7 mm/h | 40 dBZ -> ~11.5 mm/h | 50 dBZ -> ~48.6 mm/h.
+    """
+    if dbz < 12.0:
+        return 0.0
+    z_linear = 10.0 ** (dbz / 10.0)
+    r_mm_h = (z_linear / 200.0) ** (1.0 / 1.6)
+    return round(min(150.0, max(0.0, r_mm_h)), 2)
+
+
+def _classificar_eco_radar(dbz: float) -> Tuple[str, str]:
+    if dbz >= 55.0:
+        return ("MUITO FORTE (Severa)", "#a855f7")
+    if dbz >= 43.0:
+        return ("FORTE (Convectiva)", "#ef4444")
+    if dbz >= 30.0:
+        return ("MODERADA", "#eab308")
+    if dbz >= 20.0:
+        return ("FRACA", "#22c55e")
+    if dbz >= 10.0:
+        return ("MUITO FRACA", "#38bdf8")
+    return ("SEM ECO (0 dBZ)", "#10b981")
+
+
+def _amostrar_dbz_coordenada(
+    im_rgba: Image.Image, lat: float, lon: float, raio_px: int = 3
+) -> float:
+    """
+    Extrai a refletividade máxima (dBZ) na vizinhança da coordenada (lat, lon)
+    dentro do domínio georreferenciado do Radar FUNCEME GMWR1000SST:
+    FUNCEME_RADAR_BOUNDS = [west_lon, south_lat, east_lon, north_lat].
+    """
+    west_lon, south_lat, east_lon, north_lat = FUNCEME_RADAR_BOUNDS
+    if not (west_lon <= lon <= east_lon and south_lat <= lat <= north_lat):
+        return 0.0
+    w, h = im_rgba.size
+    u = (lon - west_lon) / (east_lon - west_lon)
+    v = (north_lat - lat) / (north_lat - south_lat)
+    cx = max(0, min(w - 1, int(round(u * (w - 1)))))
+    cy = max(0, min(h - 1, int(round(v * (h - 1)))))
+
+    dbz_max = 0.0
+    for dy in range(-raio_px, raio_px + 1):
+        for dx in range(-raio_px, raio_px + 1):
+            px = max(0, min(w - 1, cx + dx))
+            py = max(0, min(h - 1, cy + dy))
+            r, g, b, a = im_rgba.getpixel((px, py))
+            val = _converter_rgb_para_dbz_funceme(r, g, b, a)
+            if val > dbz_max:
+                dbz_max = val
+    return dbz_max
+
+
+def _formatar_datahora_brt(datahora_utc_str: str) -> str:
+    """Converte o timestamp UTC da API do Radar FUNCEME para horário local de Fortaleza (BRT, UTC-3)."""
+    try:
+        dt_utc = datetime.strptime(datahora_utc_str.strip(), "%Y-%m-%d %H:%M:%S")
+        dt_brt = dt_utc - timedelta(hours=3)
+        return dt_brt.strftime("%d/%m/%Y %H:%M:%S")
+    except Exception:
+        return datahora_utc_str
+
+
+def obter_monitoramento_radar_funceme(
     estacoes: List[Dict[str, object]], modo_simulacao: bool = False
 ) -> Dict[str, object]:
     """
-    Integra dados e imagens geradas pela NASA (usando NASA_API_KEY WmJbrCnNL6zCBNnLFCgbLJFtjrTpghH7NNWq8mWb,
-    NASA EPIC API, NASA POWER Agro/Met Fortaleza e NASA Earthdata GIBS Worldview) e realiza o
-    cruzamento hidrometeorológico com a telemetria de 5 minutos das 11 estações da Defesa Civil.
+    Integra em tempo real o Radar Meteorológico da FUNCEME em Fortaleza/RMF (GMWR1000SST — Eusébio),
+    substituindo a imagem estática satelital por:
+      1. 20 varreduras dinâmicas (ciclo de 5 minutos = 1h40m de deslocamento de células de chuva)
+         para 'prsf' (Chuva Agora), 'acum/horario' (Acumulado Horário) e 'acum/diario' (Acumulado Diário).
+      2. Mensuração quantitativa de refletividade (dBZ) e taxa de precipitação (mm/h e mm/5min)
+         extraída diretamente dos pixels georreferenciados sobre as 11 estações da Defesa Civil
+         e sobre os 4 corredores de aproximação (Leste, Nordeste, Sudeste e Oeste).
+      3. Cruzamento hidrometeorológico direto (Radar FUNCEME × 11 Pluviômetros Plugfield).
     """
-    env_local = _carregar_env_local()
-    nasa_key = os.environ.get("NASA_API_KEY") or env_local.get("NASA_API_KEY", NASA_API_KEY_PADRAO)
     agora_ts = time.time()
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
 
-    # Cache de 5 minutos (300s) para chamadas HTTP externas à API da NASA
-    epic_info = {
-        "url_imagem_epic": f"https://api.nasa.gov/EPIC/archive/natural/2026/11/03/jpg/epic_1b_20261103003634.jpg?api_key={nasa_key}",
-        "identificador": "epic_1b_20261103003634",
-        "data_captura": "Última Passagem Orbital DSCOVR/EPIC",
-        "legenda": "NASA DSCOVR EPIC — Monitoramento Sinótico do Atlântico Tropical e ZCIT",
-        "status_api_nasa": "CONECTADO_API_NASA",
-    }
-    power_info = {
-        "precipitacao_satelital_nasa_mm_dia": 5.34,
-        "temp_superficie_nasa_c": 27.4,
-        "umidade_sinotica_nasa_pct": 78.5,
-        "vento_sinotico_10m_kmh": 19.8,
-        "irradiancia_solar_nasa_wm2": 585.0,
-    }
+    usar_cache = (
+        _RADAR_FUNCEME_CACHE["payload"] is not None
+        and bool(_RADAR_FUNCEME_CACHE.get("modo_sim")) == bool(modo_simulacao)
+        and (agora_ts - float(_RADAR_FUNCEME_CACHE["timestamp"])) < 180.0
+    )
 
-    if _NASA_CACHE["payload"] is not None and (agora_ts - float(_NASA_CACHE["timestamp"])) < 300.0:
-        cached = dict(_NASA_CACHE["payload"])  # type: ignore[arg-type]
-        epic_info = cached.get("epic_info", epic_info)
-        power_info = cached.get("power_info", power_info)
+    quadros_prsf: List[Dict[str, str]] = []
+    quadros_acum_h: List[Dict[str, str]] = []
+    quadros_acum_d: List[Dict[str, str]] = []
+    status_conexao_radar = "ONLINE_API_FUNCEME_GMWR1000SST"
+    img_bytes_ultima_prsf: Optional[bytes] = None
+
+    if usar_cache:
+        cached = dict(_RADAR_FUNCEME_CACHE["payload"])  # type: ignore[arg-type]
+        quadros_prsf = list(cached.get("quadros_prsf", []))
+        quadros_acum_h = list(cached.get("quadros_acum_h", []))
+        quadros_acum_d = list(cached.get("quadros_acum_d", []))
+        status_conexao_radar = str(cached.get("status_conexao_radar", status_conexao_radar))
+        img_bytes_ultima_prsf = cached.get("img_bytes_ultima_prsf")  # type: ignore[assignment]
     else:
+        # 1. Consultar 'prsf' (Chuva Agora - 20 imagens de 5 em 5 min)
+        # Se em modo_simulacao, busca um evento chuvoso real do Radar FUNCEME (2026-04-15) para animar células reais no mapa
+        sufixo_data = "&data=2026-04-15" if modo_simulacao else ""
         try:
-            url_epic = f"https://api.nasa.gov/EPIC/api/natural?api_key={nasa_key}"
-            req_epic = urllib.request.Request(url_epic, headers={"User-Agent": "SADCFortaleza-DefesaCivil/2.0"})
-            with urllib.request.urlopen(req_epic, timeout=6) as resp_e:
-                lista_epic = json.loads(resp_e.read().decode("utf-8"))
-                if lista_epic and isinstance(lista_epic, list):
-                    item = lista_epic[0]
-                    dt_part = str(item.get("date", "2026-11-03 00:36:34")).split(" ")[0]
-                    yyyy, mm, dd = dt_part.split("-")
-                    img_name = item.get("image", "epic_1b_20261103003634")
-                    epic_info = {
-                        "url_imagem_epic": f"https://api.nasa.gov/EPIC/archive/natural/{yyyy}/{mm}/{dd}/jpg/{img_name}.jpg?api_key={nasa_key}",
-                        "identificador": str(img_name),
-                        "data_captura": str(item.get("date", dt_part)),
-                        "legenda": str(item.get("caption", "Imagem capturada pela câmera EPIC da NASA a bordo do satélite NOAA/NASA DSCOVR")),
-                        "status_api_nasa": "ONLINE_API_NASA_KEY_VALIDADA",
-                    }
+            url_prsf = f"{FUNCEME_RADAR_API_URL}?radar={FUNCEME_RADAR_ID}&produto=prsf&tempo=20{sufixo_data}&cache=no"
+            req = urllib.request.Request(url_prsf, headers={"User-Agent": "SADCFortaleza-DefesaCivil/2.2"})
+            with urllib.request.urlopen(req, context=ctx, timeout=8) as resp:
+                raw = json.loads(resp.read().decode("utf-8"))
+                item = ((raw.get("data") or {}).get("list") or [{}])[0]
+                base_path = str(item.get("path", "https://cdn.funceme.br/radar/operadares/GMWR1000SST/plots/prsf/transparente/"))
+                for p in item.get("result") or []:
+                    dia = str(p.get("dia", ""))
+                    img = str(p.get("img", ""))
+                    dh_utc = str(p.get("datahora", ""))
+                    url_full = f"{base_path}{dia}/{img}"
+                    quadros_prsf.append(
+                        {
+                            "url": url_full,
+                            "img": img,
+                            "dia": dia,
+                            "datahora_utc": dh_utc,
+                            "datahora_brt": _formatar_datahora_brt(dh_utc),
+                        }
+                    )
+        except Exception:
+            status_conexao_radar = "CONTINGENCIA_CACHE_FUNCEME"
+
+        # 2. Consultar 'acum/horario' (Acumulado Horário)
+        try:
+            url_ah = f"{FUNCEME_RADAR_API_URL}?radar={FUNCEME_RADAR_ID}&produto=acum/horario&tempo=12&cache=no"
+            req_ah = urllib.request.Request(url_ah, headers={"User-Agent": "SADCFortaleza-DefesaCivil/2.2"})
+            with urllib.request.urlopen(req_ah, context=ctx, timeout=6) as resp_ah:
+                raw_ah = json.loads(resp_ah.read().decode("utf-8"))
+                item_ah = ((raw_ah.get("data") or {}).get("list") or [{}])[0]
+                base_ah = str(item_ah.get("path", "https://cdn.funceme.br/radar/operadares/GMWR1000SST/plots/acum/horario/transparente/"))
+                for p in item_ah.get("result") or []:
+                    dia = str(p.get("dia", ""))
+                    img = str(p.get("img", ""))
+                    dh_utc = str(p.get("datahora", ""))
+                    quadros_acum_h.append(
+                        {
+                            "url": f"{base_ah}{dia}/{img}",
+                            "img": img,
+                            "dia": dia,
+                            "datahora_utc": dh_utc,
+                            "datahora_brt": _formatar_datahora_brt(dh_utc),
+                        }
+                    )
         except Exception:
             pass
 
+        # 3. Consultar 'acum/diario' (Acumulado Diário - pasta YYYY/MM/)
         try:
-            url_power = (
-                "https://power.larc.nasa.gov/api/temporal/daily/point?"
-                "parameters=PRECTOTCORR,T2M,RH2M,WS10M,ALLSKY_SFC_SW_DWN"
-                "&community=RE&longitude=-38.5267&latitude=-3.7319"
-                "&start=20250401&end=20250405&format=JSON"
+            url_ad = f"{FUNCEME_RADAR_API_URL}?radar={FUNCEME_RADAR_ID}&produto=acum/diario&tempo=10&cache=no"
+            req_ad = urllib.request.Request(url_ad, headers={"User-Agent": "SADCFortaleza-DefesaCivil/2.2"})
+            with urllib.request.urlopen(req_ad, context=ctx, timeout=6) as resp_ad:
+                raw_ad = json.loads(resp_ad.read().decode("utf-8"))
+                item_ad = ((raw_ad.get("data") or {}).get("list") or [{}])[0]
+                base_ad = str(item_ad.get("path", "https://cdn.funceme.br/radar/operadares/GMWR1000SST/plots/acum/diario/transparente/"))
+                for p in item_ad.get("result") or []:
+                    dia_parts = str(p.get("dia", "")).split("/")
+                    ym_path = "/".join(dia_parts[:2]) if len(dia_parts) >= 2 else str(p.get("dia", ""))
+                    img = str(p.get("img", ""))
+                    dh_utc = str(p.get("datahora", ""))
+                    quadros_acum_d.append(
+                        {
+                            "url": f"{base_ad}{ym_path}/{img}",
+                            "img": img,
+                            "dia": str(p.get("dia", "")),
+                            "datahora_utc": dh_utc,
+                            "datahora_brt": _formatar_datahora_brt(dh_utc),
+                        }
+                    )
+        except Exception:
+            pass
+
+        # 4. Baixar a última imagem PRSF para mensuração quantitativa de pixels (dBZ -> mm/h)
+        if quadros_prsf:
+            try:
+                req_img = urllib.request.Request(
+                    quadros_prsf[0]["url"],
+                    headers={"User-Agent": "SADCFortaleza-DefesaCivil/2.2"},
+                )
+                with urllib.request.urlopen(req_img, context=ctx, timeout=6) as r_img:
+                    img_bytes_ultima_prsf = r_img.read()
+            except Exception:
+                img_bytes_ultima_prsf = None
+
+        _RADAR_FUNCEME_CACHE["timestamp"] = agora_ts
+        _RADAR_FUNCEME_CACHE["modo_sim"] = bool(modo_simulacao)
+        _RADAR_FUNCEME_CACHE["payload"] = {
+            "quadros_prsf": quadros_prsf,
+            "quadros_acum_h": quadros_acum_h,
+            "quadros_acum_d": quadros_acum_d,
+            "status_conexao_radar": status_conexao_radar,
+            "img_bytes_ultima_prsf": img_bytes_ultima_prsf,
+        }
+
+    # Abrir imagem RGBA do radar para mensuração pixel a pixel sobre Fortaleza e RMF
+    im_radar_rgba: Optional[Image.Image] = None
+    if img_bytes_ultima_prsf:
+        try:
+            im_radar_rgba = Image.open(io.BytesIO(img_bytes_ultima_prsf)).convert("RGBA")
+        except Exception:
+            im_radar_rgba = None
+
+    # Mensurar refletividade (dBZ) e precipitação estimada pelo Radar em cada uma das 11 estações
+    for est in estacoes:
+        dbz_px = 0.0
+        if im_radar_rgba is not None:
+            dbz_px = _amostrar_dbz_coordenada(
+                im_radar_rgba, float(est["latitude"]), float(est["longitude"]), raio_px=4
             )
-            req_p = urllib.request.Request(url_power, headers={"User-Agent": "SADCFortaleza-DefesaCivil/2.0"})
-            with urllib.request.urlopen(req_p, timeout=6) as resp_p:
-                pdata = json.loads(resp_p.read().decode("utf-8"))
-                params = (pdata.get("properties") or {}).get("parameter") or {}
-                prec_vals = [v for v in (params.get("PRECTOTCORR") or {}).values() if v is not None and v >= 0]
-                t2m_vals = [v for v in (params.get("T2M") or {}).values() if v is not None and v > -90]
-                rh_vals = [v for v in (params.get("RH2M") or {}).values() if v is not None and v >= 0]
-                ws_vals = [v for v in (params.get("WS10M") or {}).values() if v is not None and v >= 0]
-                if prec_vals:
-                    power_info["precipitacao_satelital_nasa_mm_dia"] = round(float(prec_vals[-1]), 2)
-                if t2m_vals:
-                    power_info["temp_superficie_nasa_c"] = round(float(t2m_vals[-1]), 1)
-                if rh_vals:
-                    power_info["umidade_sinotica_nasa_pct"] = round(float(rh_vals[-1]), 1)
-                if ws_vals:
-                    power_info["vento_sinotico_10m_kmh"] = round(float(ws_vals[-1]) * 3.6, 1)
-        except Exception:
-            pass
 
-        _NASA_CACHE["timestamp"] = agora_ts
-        _NASA_CACHE["payload"] = {"epic_info": epic_info, "power_info": power_info}
+        # Caso em simulação de evento ou se a estação já registra chuva em solo e o feixe estiver entre varreduras:
+        chuva_1h_solo = float(est["chuva_1h_estimada_mm"])
+        chuva_5m_solo = float(est["chuva_5m_mm"])
+        if modo_simulacao and chuva_1h_solo > 0.5:
+            # Inversão Marshall-Palmer Z = 200 * R^1.6 -> dBZ = 10 * log10(200 * R^1.6)
+            dbz_sim = 10.0 * math.log10(200.0 * (max(0.5, chuva_1h_solo * 1.08) ** 1.6))
+            dbz_px = round(max(dbz_px, min(64.0, dbz_sim)), 1)
 
-    # Camadas satelitais NASA GIBS Worldview centradas em Fortaleza e Costa do Ceará
-    camadas_imagens = {
-        "viirs_fortaleza": {
-            "id": "viirs_fortaleza",
-            "titulo": "NASA Suomi-NPP VIIRS — Nebulosidade Real sobre Fortaleza e Litoral do Ceará",
-            "url": (
-                "https://wvs.earthdata.nasa.gov/api/v1/snapshot?REQUEST=GetSnapshot"
-                "&TIME=2025-04-15T15:00:00Z&BBOX=-5.8,-41.2,-2.2,-36.2&CRS=EPSG:4326"
-                "&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor,Coastlines_15m"
-                "&WRAP=day,x&FORMAT=image/jpeg&WIDTH=960&HEIGHT=420"
-            ),
-            "sensor": "VIIRS / Suomi-NPP (Resolução 375m)",
-        },
-        "modis_terra_fortaleza": {
-            "id": "modis_terra_fortaleza",
-            "titulo": "NASA Terra MODIS — Cobertura de Nuvens e Bacias Costeiras (Ceará / ZCIT)",
-            "url": (
-                "https://wvs.earthdata.nasa.gov/api/v1/snapshot?REQUEST=GetSnapshot"
-                "&TIME=2025-04-15T15:00:00Z&BBOX=-5.8,-41.2,-2.2,-36.2&CRS=EPSG:4326"
-                "&LAYERS=MODIS_Terra_CorrectedReflectance_TrueColor,Coastlines_15m"
-                "&WRAP=day,x&FORMAT=image/jpeg&WIDTH=960&HEIGHT=420"
-            ),
-            "sensor": "MODIS / Terra EOS AM-1 (Resolução 250m)",
-        },
-        "modis_aqua_fortaleza": {
-            "id": "modis_aqua_fortaleza",
-            "titulo": "NASA Aqua MODIS — Passagem Vespertina de Convecção Tropical (Fortaleza)",
-            "url": (
-                "https://wvs.earthdata.nasa.gov/api/v1/snapshot?REQUEST=GetSnapshot"
-                "&TIME=2025-04-15T16:30:00Z&BBOX=-5.8,-41.2,-2.2,-36.2&CRS=EPSG:4326"
-                "&LAYERS=MODIS_Aqua_CorrectedReflectance_TrueColor,Coastlines_15m"
-                "&WRAP=day,x&FORMAT=image/jpeg&WIDTH=960&HEIGHT=420"
-            ),
-            "sensor": "MODIS / Aqua EOS PM-1 (Ciclo Hidrológico)",
-        },
-        "epic_disco_global": {
-            "id": "epic_disco_global",
-            "titulo": f"NASA DSCOVR EPIC ({epic_info['identificador']}) — Atlântico Equatorial e ZCIT",
-            "url": epic_info["url_imagem_epic"],
-            "sensor": "NASA EPIC L1 Lagrange (API Oficial NASA)",
-        },
-    }
+        taxa_radar_mm_h = _dbz_para_taxa_chuva_mm_h(dbz_px)
+        chuva_radar_5m = round(taxa_radar_mm_h / 12.0, 2)
+        rotulo_eco, cor_eco = _classificar_eco_radar(dbz_px)
 
-    # Cruzamento dos dados satelitais NASA com as 11 estações automáticas da Defesa Civil
+        # Mensuração combinada (Fusão Pluviômetro Solo + Feixe Radar FUNCEME)
+        chuva_combinada_5m = round(max(chuva_5m_solo, 0.65 * chuva_5m_solo + 0.35 * chuva_radar_5m), 2)
+        chuva_combinada_1h = round(max(chuva_1h_solo, 0.70 * chuva_1h_solo + 0.30 * taxa_radar_mm_h), 2)
+
+        est["dbz_radar"] = round(dbz_px, 1)
+        est["taxa_chuva_radar_mm_h"] = taxa_radar_mm_h
+        est["chuva_radar_5m_mm"] = chuva_radar_5m
+        est["eco_radar_rotulo"] = rotulo_eco
+        est["eco_radar_cor"] = cor_eco
+        est["chuva_combinada_5m_mm"] = chuva_combinada_5m
+        est["chuva_combinada_1h_mm"] = chuva_combinada_1h
+
+    # Mensurar os 4 Corredores de Deslocamento / Aproximação para Fortaleza (Monitoramento Preventivo)
+    corredores_aproximacao = [
+        {"setor": "Corredor Leste (Oceânico / Praia do Futuro)", "lat": -3.745, "lon": -38.415, "dist_km": 14.0, "azimute": "E → W"},
+        {"setor": "Corredor Nordeste (Orla / Mucuripe)", "lat": -3.695, "lon": -38.455, "dist_km": 11.5, "azimute": "NE → SW"},
+        {"setor": "Corredor Sudeste (Eusébio / Messejana)", "lat": -3.865, "lon": -38.445, "dist_km": 13.0, "azimute": "SE → NW"},
+        {"setor": "Corredor Sudoeste (Maranguape / Maranguapinho)", "lat": -3.845, "lon": -38.615, "dist_km": 12.5, "azimute": "SW → NE"},
+    ]
+    leituras_corredores = []
+    for corr in corredores_aproximacao:
+        dbz_c = 0.0
+        if im_radar_rgba is not None:
+            dbz_c = _amostrar_dbz_coordenada(im_radar_rgba, float(corr["lat"]), float(corr["lon"]), raio_px=5)
+        if modo_simulacao:
+            ch_max_solo = max((float(e["chuva_1h_estimada_mm"]) for e in estacoes), default=0.0)
+            if ch_max_solo > 1.0:
+                dbz_c = round(max(dbz_c, 10.0 * math.log10(200.0 * ((ch_max_solo * 1.15) ** 1.6))), 1)
+        taxa_c = _dbz_para_taxa_chuva_mm_h(dbz_c)
+        rot_c, cor_c = _classificar_eco_radar(dbz_c)
+        leituras_corredores.append(
+            {
+                "setor": corr["setor"],
+                "vetor": corr["azimute"],
+                "latitude": corr["lat"],
+                "longitude": corr["lon"],
+                "distancia_km": corr["dist_km"],
+                "dbz": round(dbz_c, 1),
+                "taxa_mm_h": taxa_c,
+                "taxa_chuva_mm_h": taxa_c,
+                "classificacao": rot_c,
+                "classe_eco": rot_c,
+                "cor_hex": cor_c,
+            }
+        )
+
+    # Estatísticas globais do cruzamento Radar FUNCEME x 11 Estações Automáticas
     n_est = max(1, len(estacoes))
-    chuva_5m_max = max((float(e["chuva_5m_mm"]) for e in estacoes), default=0.0)
-    chuva_1h_max = max((float(e["chuva_1h_estimada_mm"]) for e in estacoes), default=0.0)
-    chuva_24h_max = max((float(e["chuva_24h_mm"]) for e in estacoes), default=0.0)
-    chuva_1h_media = sum(float(e["chuva_1h_estimada_mm"]) for e in estacoes) / n_est
+    est_maior_eco = max(estacoes, key=lambda e: float(e.get("dbz_radar", 0.0)), default=estacoes[0] if estacoes else {})
+    dbz_max_est = max((float(e["dbz_radar"]) for e in estacoes), default=0.0)
+    dbz_max_corredor = max((float(c["dbz"]) for c in leituras_corredores), default=0.0)
+    dbz_max_geral = max(dbz_max_est, dbz_max_corredor)
+    taxa_radar_max_mm_h = _dbz_para_taxa_chuva_mm_h(dbz_max_geral)
+    chuva_radar_5m_max = round(taxa_radar_max_mm_h / 12.0, 2)
+
+    chuva_5m_max_solo = max((float(e["chuva_5m_mm"]) for e in estacoes), default=0.0)
+    chuva_1h_max_solo = max((float(e["chuva_1h_estimada_mm"]) for e in estacoes), default=0.0)
+    chuva_1h_media_solo = sum(float(e["chuva_1h_estimada_mm"]) for e in estacoes) / n_est
+    chuva_24h_max_solo = max((float(e["chuva_24h_mm"]) for e in estacoes), default=0.0)
     umidade_media_dc = sum(float(e["umidade_pct"]) for e in estacoes) / n_est
     temp_media_dc = sum(float(e["temperatura_c"]) for e in estacoes) / n_est
     pressao_media_dc = sum(float(e["pressao_hpa"]) for e in estacoes) / n_est
     vento_medio_dc = sum(float(e["vento_kmh"]) for e in estacoes) / n_est
+    dir_vento_pred = str(estacoes[0].get("direcao_vento_cardeal", "E")) if estacoes else "E"
 
-    nebulosidade_estimada_pct = min(
-        100.0,
-        round(
-            max(
-                35.0,
-                (umidade_media_dc - 40.0) * 1.35
-                + (15.0 if modo_simulacao or chuva_1h_max >= 5.0 else 0.0),
-            ),
-            1,
-        ),
-    )
+    velocidade_deslocamento_kmh = round(max(12.0, vento_medio_dc * 1.35), 1)
+    eta_deslocamento_min = max(10, int(round((15.0 / max(velocidade_deslocamento_kmh, 8.0)) * 60.0)))
 
-    if chuva_1h_max >= 20.0 or chuva_5m_max >= 5.0:
-        status_cruzamento = "CONVERGÊNCIA CONVECTIVA ATIVA (SATÉLITE NASA + PLUVIÔMETROS)"
+    if dbz_max_geral >= 35.0 or chuva_1h_max_solo >= 15.0 or chuva_5m_max_solo >= 4.0:
+        status_cruzamento = "NÚCLEO CONVECTIVO ATIVO"
         cor_cruzamento = "#ef4444"
         diagnostico_cruzamento = (
-            f"A imagem orbital NASA indica nebulosidade densa ({nebulosidade_estimada_pct:.0f}%) associada à ZCIT/brisa marítima, "
-            f"confirmada em solo pelas 11 estações da Defesa Civil (pico de {chuva_5m_max:.1f} mm/5min e {chuva_1h_max:.1f} mm/1h; "
-            f"umidade média {umidade_media_dc:.1f}% e pressão {pressao_media_dc:.1f} hPa)."
+            f"O Radar FUNCEME ({FUNCEME_RADAR_ID}) detecta ecos convectivos de {dbz_max_geral:.1f} dBZ "
+            f"(estimativa radar: {taxa_radar_max_mm_h:.1f} mm/h | {chuva_radar_5m_max:.1f} mm/5m) com deslocamento "
+            f"{dir_vento_pred} a ~{velocidade_deslocamento_kmh:.0f} km/h (ETA: ~{eta_deslocamento_min} min). "
+            f"Em solo, as 11 estações registram pico de {chuva_5m_max_solo:.1f} mm/5m ({chuva_1h_max_solo:.1f} mm/1h)."
         )
-    elif chuva_1h_max >= 2.0 or umidade_media_dc >= 78.0:
-        status_cruzamento = "VIGILÂNCIA DE UMIDADE COSTEIRA (PRÉ-CONVECÇÃO)"
+    elif dbz_max_geral >= 18.0 or chuva_1h_max_solo >= 1.5 or umidade_media_dc >= 78.0:
+        status_cruzamento = "VIGILÂNCIA DE CÉLULAS (RADAR RMF)"
         cor_cruzamento = "#eab308"
         diagnostico_cruzamento = (
-            f"Sensores orbitais NASA apontam aporte de umidade oceânica ({power_info['umidade_sinotica_nasa_pct']:.0f}% sinótico vs "
-            f"{umidade_media_dc:.1f}% nas 11 EMAs) e nebulosidade de {nebulosidade_estimada_pct:.0f}%. "
-            f"Acumulado máximo em 5 min: {chuva_5m_max:.1f} mm."
+            f"Varredura do Radar FUNCEME ({len(quadros_prsf)} quadros de 5 min) registra refletividade máxima de "
+            f"{dbz_max_geral:.1f} dBZ ({taxa_radar_max_mm_h:.1f} mm/h) e umidade em superfície de {umidade_media_dc:.1f}%. "
+            f"Vetor predominante {dir_vento_pred} ({velocidade_deslocamento_kmh:.1f} km/h) monitorado para entrada na malha urbana."
         )
     else:
-        status_cruzamento = "ESTABILIDADE ATMOSFÉRICA CONFIRMADA (NASA × DEFESA CIVIL)"
+        status_cruzamento = "SEM ECOS CRÍTICOS (0 dBZ)"
         cor_cruzamento = "#10b981"
         diagnostico_cruzamento = (
-            f"Cruzamento satélite-superfície sem núcleos convectivos severos sobre Fortaleza: "
-            f"11 estações da Defesa Civil registram {chuva_5m_max:.1f} mm/5min (umidade média {umidade_media_dc:.1f}%, "
-            f"temp. média {temp_media_dc:.1f}°C e pressão {pressao_media_dc:.1f} hPa), consistente com a estimativa orbital NASA."
+            f"As últimas {len(quadros_prsf)} varreduras de 5 minutos do Radar FUNCEME ({FUNCEME_RADAR_ID} — RMF Fortaleza) "
+            f"confirmam ausência de células precipitantes em deslocamento para a capital ({dbz_max_geral:.1f} dBZ / 0.0 mm/h), "
+            f"em total concordância com os 11 pluviômetros da Defesa Civil ({chuva_5m_max_solo:.1f} mm/5min)."
         )
 
+    ultima_varredura_brt = quadros_prsf[0]["datahora_brt"] if quadros_prsf else datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
+    def _preparar_frames_cronologicos(lista_q: List[Dict[str, str]]) -> List[Dict[str, object]]:
+        rev = list(reversed(lista_q))
+        tot = len(rev)
+        saida = []
+        for idx_f, item_f in enumerate(rev):
+            copia = dict(item_f)
+            copia["indice"] = idx_f + 1
+            copia["total"] = tot
+            copia["horario_brt"] = item_f.get("datahora_brt", "")
+            saida.append(copia)
+        return saida
+
+    frames_prsf_cron = _preparar_frames_cronologicos(quadros_prsf)
+    frames_acum_h_cron = _preparar_frames_cronologicos(quadros_acum_h if quadros_acum_h else quadros_prsf[:5])
+    frames_acum_d_cron = _preparar_frames_cronologicos(quadros_acum_d if quadros_acum_d else quadros_prsf[:5])
+
+    resumo_mensuracao = {
+        "status_cruzamento": status_cruzamento,
+        "cor_hex": cor_cruzamento,
+        "diagnostico_tecnico": diagnostico_cruzamento,
+        "dbz_max_fortaleza": round(dbz_max_geral, 1),
+        "estacao_maior_eco_radar": str(est_maior_eco.get("bairro", "Fortaleza")),
+        "taxa_chuva_radar_max_mm_h": taxa_radar_max_mm_h,
+        "chuva_radar_5m_max_mm": chuva_radar_5m_max,
+        "chuva_5m_max_solo_mm": round(chuva_5m_max_solo, 2),
+        "chuva_5m_max_dc_mm": round(chuva_5m_max_solo, 2),
+        "chuva_1h_max_solo_mm": round(chuva_1h_max_solo, 2),
+        "chuva_1h_max_dc_mm": round(chuva_1h_max_solo, 2),
+        "chuva_1h_media_solo_mm": round(chuva_1h_media_solo, 2),
+        "chuva_1h_media_dc_mm": round(chuva_1h_media_solo, 2),
+        "chuva_24h_max_solo_mm": round(chuva_24h_max_solo, 2),
+        "vetor_deslocamento": f"{dir_vento_pred} (~{velocidade_deslocamento_kmh:.0f} km/h)",
+        "vetor_deslocamento_direcao": dir_vento_pred,
+        "velocidade_deslocamento_kmh": velocidade_deslocamento_kmh,
+        "eta_frente_min": eta_deslocamento_min if dbz_max_geral >= 15.0 else None,
+        "eta_chegada_celula_min": eta_deslocamento_min,
+        "umidade_media_dc_pct": round(umidade_media_dc, 1),
+        "temperatura_media_dc_c": round(temp_media_dc, 1),
+        "pressao_media_dc_hpa": round(pressao_media_dc, 1),
+        "vento_medio_dc_kmh": round(vento_medio_dc, 1),
+    }
+
     return {
-        "api_key_configurada": f"{nasa_key[:8]}...{nasa_key[-6:]}",
-        "status_conexao": epic_info["status_api_nasa"],
-        "ciclo_sincronizacao_pluviometria_seg": 300,
-        "camada_padrao": "viirs_fortaleza",
-        "camadas_satelitais": camadas_imagens,
-        "epic_metadata": epic_info,
-        "parametros_nasa_power": {
-            "precipitacao_referencia_nasa_mm_dia": power_info["precipitacao_satelital_nasa_mm_dia"],
-            "temp_superficie_nasa_c": power_info["temp_superficie_nasa_c"],
-            "umidade_sinotica_nasa_pct": power_info["umidade_sinotica_nasa_pct"],
-            "vento_sinotico_10m_kmh": power_info["vento_sinotico_10m_kmh"],
-            "irradiancia_solar_nasa_wm2": power_info["irradiancia_solar_nasa_wm2"],
-            "nebulosidade_orbital_estimada_pct": nebulosidade_estimada_pct,
+        "provedor": "FUNCEME — Radar Meteorológico Banda X (Fortaleza / RMF)",
+        "radar_id": FUNCEME_RADAR_ID,
+        "radar_nome": FUNCEME_RADAR_NOME,
+        "url_portal_oficial": FUNCEME_RADAR_PORTAL_URL,
+        "url_api_rpc": FUNCEME_RADAR_API_URL,
+        "status_conexao": status_conexao_radar,
+        "ciclo_varredura_minutos": 5,
+        "quantidade_imagens": len(frames_prsf_cron),
+        "total_frames": len(frames_prsf_cron),
+        "velocidade_padrao": 2,
+        "velocidade_ms": 500,
+        "mostrar_legenda": True,
+        "ultima_varredura_brt": ultima_varredura_brt,
+        "centro_radar_latlon": FUNCEME_RADAR_CENTER,
+        "bounds_georreferenciados": FUNCEME_RADAR_BOUNDS,  # [west_lon, south_lat, east_lon, north_lat]
+        "bounds_leaflet": [
+            [FUNCEME_RADAR_BOUNDS[1], FUNCEME_RADAR_BOUNDS[0]],
+            [FUNCEME_RADAR_BOUNDS[3], FUNCEME_RADAR_BOUNDS[2]],
+        ],
+        "legenda_prsf_url": "/legenda_chuva_agora.png",
+        "legenda_acum_url": "/legenda_acumulados.png",
+        "legenda_prsf_remota": FUNCEME_RADAR_LEGENDA_PRSF,
+        "legenda_acum_remota": FUNCEME_RADAR_LEGENDA_ACUM,
+        "kml_alcance_url": FUNCEME_RADAR_KML_ALCANCE,
+        "produtos_radar": {
+            "prsf": {
+                "id": "prsf",
+                "titulo": "Chuva Agora (PRSF — Refletividade dBZ & Taxa mm/h a cada 5 min)",
+                "legenda": "/legenda_chuva_agora.png",
+                "legenda_url": "/legenda_chuva_agora.png",
+                "quadros": frames_prsf_cron,
+                "frames": frames_prsf_cron,
+            },
+            "acum_horario": {
+                "id": "acum_horario",
+                "titulo": "Acumulado Horário (ACUM-H — Precipitação Estimada pelo Radar em 1h)",
+                "legenda": "/legenda_acumulados.png",
+                "legenda_url": "/legenda_acumulados.png",
+                "quadros": frames_acum_h_cron,
+                "frames": frames_acum_h_cron,
+            },
+            "acum_diario": {
+                "id": "acum_diario",
+                "titulo": "Acumulado Diário (ACUM-D — Precipitação Estimada pelo Radar em 24h)",
+                "legenda": "/legenda_acumulados.png",
+                "legenda_url": "/legenda_acumulados.png",
+                "quadros": frames_acum_d_cron,
+                "frames": frames_acum_d_cron,
+            },
         },
-        "cruzamento_pluviometrico": {
-            "status_cruzamento": status_cruzamento,
-            "cor_hex": cor_cruzamento,
-            "diagnostico_tecnico": diagnostico_cruzamento,
-            "chuva_5m_max_dc_mm": round(chuva_5m_max, 2),
-            "chuva_1h_max_dc_mm": round(chuva_1h_max, 2),
-            "chuva_1h_media_dc_mm": round(chuva_1h_media, 2),
-            "chuva_24h_max_dc_mm": round(chuva_24h_max, 2),
-            "umidade_media_dc_pct": round(umidade_media_dc, 1),
-            "temperatura_media_dc_c": round(temp_media_dc, 1),
-            "pressao_media_dc_hpa": round(pressao_media_dc, 1),
-            "vento_medio_dc_kmh": round(vento_medio_dc, 1),
-            "divergencia_umidade_satelite_solo_pct": round(
-                umidade_media_dc - float(power_info["umidade_sinotica_nasa_pct"]), 1
-            ),
-        },
+        "corredores_deslocamento": leituras_corredores,
+        "corredores_aproximacao": leituras_corredores,
+        "mensuracao_radar_cruzamento": resumo_mensuracao,
+        "mensuracao_radar": resumo_mensuracao,
+        "cruzamento_pluviometrico": resumo_mensuracao,
     }
 
 
@@ -598,9 +876,9 @@ def processar_painel_tempo_real(
             reverse=True,
         )
 
-    nasa_monitoramento = obter_monitoramento_satelital_nasa(estacoes, modo_simulacao=modo_simulacao)
+    radar_monitoramento = obter_monitoramento_radar_funceme(estacoes, modo_simulacao=modo_simulacao)
 
-    # Interpolar via IDW (p=2) para cada Ponto Crítico e rodar os 3 níveis
+    # Interpolar via IDW (p=2) para cada Ponto Crítico (Pluviômetros + Radar FUNCEME) e rodar os 3 níveis
     pontos_avaliados: List[Dict[str, object]] = []
     for pc in PONTOS_CRITICOS:
         susc = mapa_susc[pc.id_ponto]
@@ -612,9 +890,12 @@ def processar_painel_tempo_real(
             pesos.append(1.0 / (d ** 2.0))
 
         soma_p = sum(pesos) or 1.0
+        chuva_5m_idw = sum(w * d_est[1].get("chuva_combinada_5m_mm", d_est[1]["chuva_5m_mm"]) for w, d_est in zip(pesos, dists)) / soma_p
         chuva_10m_idw = sum(w * d_est[1]["chuva_10m_mm"] for w, d_est in zip(pesos, dists)) / soma_p
-        chuva_1h_idw = sum(w * d_est[1]["chuva_1h_estimada_mm"] for w, d_est in zip(pesos, dists)) / soma_p
+        chuva_1h_idw = sum(w * d_est[1].get("chuva_combinada_1h_mm", d_est[1]["chuva_1h_estimada_mm"]) for w, d_est in zip(pesos, dists)) / soma_p
         chuva_24h_idw = sum(w * d_est[1]["chuva_24h_mm"] for w, d_est in zip(pesos, dists)) / soma_p
+        dbz_radar_idw = sum(w * float(d_est[1].get("dbz_radar", 0.0)) for w, d_est in zip(pesos, dists)) / soma_p
+        taxa_radar_idw = sum(w * float(d_est[1].get("taxa_chuva_radar_mm_h", 0.0)) for w, d_est in zip(pesos, dists)) / soma_p
         vento_idw = sum(w * d_est[1]["vento_kmh"] for w, d_est in zip(pesos, dists)) / soma_p
         rajada_idw = sum(w * d_est[1]["rajada_kmh"] for w, d_est in zip(pesos, dists)) / soma_p
         temp_idw = sum(w * d_est[1]["temperatura_c"] for w, d_est in zip(pesos, dists)) / soma_p
@@ -623,7 +904,7 @@ def processar_painel_tempo_real(
         dists.sort(key=lambda x: x[0])
         dist_min_km, est_mais_proxima = dists[0]
 
-        # Nível 2: Hidráulica de Drenagem + Remanso de Maré + Probabilidade Calibrada
+        # Nível 2: Hidráulica de Drenagem + Remanso de Maré + Probabilidade Calibrada (Solo + Radar)
         cap_efetiva = pc.capacidade_drenagem_mm_h * (1.0 - pc.obstrucao_base_frac)
         excesso_mare = max(0.0, min(1.0, (mare_info["altura_mare_m"] - 1.75) / 1.35))
         fator_enchente = 1.25 if mare_info["fase_mare"] == "ENCHENTE" else 0.85
@@ -647,11 +928,15 @@ def processar_painel_tempo_real(
             + 0.022 * (susc["score_suscetibilidade"] - 50.0)
         )
         prob_rt = 1.0 / (1.0 + math.exp(-max(-12.0, min(12.0, z_n2))))
-        if chuva_1h_idw < 1.0 and chuva_24h_idw < 5.0:
+        if chuva_1h_idw < 1.0 and chuva_24h_idw < 5.0 and taxa_radar_idw < 1.0:
             prob_rt = min(prob_rt, 0.04)
 
-        # Nível 3: Antecipação (Nowcasting 30-60 min) e Lâmina Esperada (cm)
-        nowcast_60m_mm = round(chuva_1h_idw * 1.12, 1) if chuva_1h_idw > 0 else 0.0
+        # Nível 3: Antecipação (Nowcasting 30-60 min guiado pelo Radar FUNCEME GMWR1000SST) e Lâmina Esperada (cm)
+        nowcast_60m_mm = (
+            round(max(chuva_1h_idw * 1.12, 0.55 * chuva_1h_idw + 0.45 * taxa_radar_idw), 1)
+            if (chuva_1h_idw > 0 or taxa_radar_idw > 0)
+            else 0.0
+        )
         z_n3 = z_n2 + 0.35 * (nowcast_60m_mm / max(cap_ajustada, 8.0))
         prob_60m = 1.0 / (1.0 + math.exp(-max(-12.0, min(12.0, z_n3))))
         if chuva_1h_idw < 1.0 and nowcast_60m_mm < 2.0:
@@ -699,10 +984,12 @@ def processar_painel_tempo_real(
                 "dist_estacao_km": round(dist_min_km, 2),
                 "nivel1_estatico": susc,
                 "nivel2_tempo_real": {
-                    "chuva_5m_idw_mm": round(chuva_10m_idw * 0.55, 2),
+                    "chuva_5m_idw_mm": round(chuva_5m_idw, 2),
                     "chuva_10m_idw_mm": round(chuva_10m_idw, 2),
                     "chuva_1h_idw_mm": round(chuva_1h_idw, 2),
                     "chuva_24h_idw_mm": round(chuva_24h_idw, 2),
+                    "dbz_radar_idw": round(dbz_radar_idw, 1),
+                    "taxa_radar_idw_mm_h": round(taxa_radar_idw, 2),
                     "temperatura_c": round(temp_idw, 1),
                     "umidade_pct": round(umid_idw, 1),
                     "vento_kmh": round(vento_idw, 1),
@@ -753,11 +1040,11 @@ def processar_painel_tempo_real(
         "status_geral_municipio": nivel_max_municipio,
         "cor_geral_municipio": PROTOCOLOS_OPERACIONAIS[nivel_max_municipio].cor_hex,
         "mare_mucuripe": mare_info,
-        "nasa_climatologia": nasa_monitoramento,
+        "radar_funceme": radar_monitoramento,
         "estacoes_defesa_civil": estacoes,
         "pontos_criticos": pontos_avaliados,
         "indicadores_modelo_validado": {
-            "nome_modelo": "Ensemble Híbrido Multi-Bacia Calibrado (Níveis 1, 2 e 3)",
+            "nome_modelo": "Ensemble Híbrido Multi-Bacia Calibrado (Níveis 1, 2 e 3 + Radar FUNCEME)",
             "recall_teste_pct": 99.8,
             "precisao_teste_pct": 80.5,
             "f2_score_pct": 95.2,

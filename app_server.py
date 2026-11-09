@@ -70,7 +70,7 @@ class SADCRequestHandler(BaseHTTPRequestHandler):
             self._send_json(
                 {
                     "status": "online",
-                    "version": "2.1.0-nasa-dccalor-5min",
+                    "version": "2.2.0-funceme-radar-rmf",
                     "system": "SADC-Fortaleza - Defesa Civil de Fortaleza",
                     "stations_count": 11,
                 }
@@ -87,8 +87,16 @@ class SADCRequestHandler(BaseHTTPRequestHandler):
                 mare_simulada_m=mare_m,
                 foco_bairro_simulacao=foco,
             )
-            payload["versao_painel"] = "2.1.0-nasa-dccalor-5min"
+            payload["versao_painel"] = "2.2.0-funceme-radar-rmf"
             self._send_json(payload)
+            return
+
+        if route.endswith("legenda_chuva_agora.png"):
+            self._send_file(PUBLIC_DIR / "legenda_chuva_agora.png", "image/png")
+            return
+
+        if route.endswith("legenda_acumulados.png"):
+            self._send_file(PUBLIC_DIR / "legenda_acumulados.png", "image/png")
             return
 
         if route.endswith("municipio_fortaleza.geojson"):
@@ -120,8 +128,8 @@ def iniciar_servidor(porta_principal: int = 3005, porta_espelho: int = 3006) -> 
         pass
 
     print("================================================================", flush=True)
-    print("  SADC-FORTALEZA v2.1 | Defesa Civil de Fortaleza", flush=True)
-    print(f"  Painel Dinâmico (Principal): http://localhost:{porta_principal}/?v=2.1", flush=True)
+    print("  SADC-FORTALEZA v2.2 | Defesa Civil de Fortaleza + Radar FUNCEME", flush=True)
+    print(f"  Painel Dinâmico (Principal): http://localhost:{porta_principal}/?v=2.2", flush=True)
     print(f"  Painel Dinâmico (Espelho)  : http://localhost:{porta_espelho}/", flush=True)
     print("  Login padrão: admin.defesacivil | Senha padrão: admindc", flush=True)
     print("================================================================", flush=True)

@@ -324,102 +324,130 @@
       margin-top: 4px;
     }
 
-    /* NASA CLIMATOLOGICAL & SATELLITE PANEL */
-    .nasa-panel {
+    /* FUNCEME RADAR RMF (GMWR1000SST) DYNAMIC PANEL */
+    .radar-panel {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 15px;
       margin-bottom: 16px;
     }
-    .nasa-grid {
+    .radar-grid {
       display: grid;
-      grid-template-columns: 1.25fr 1fr;
+      grid-template-columns: 1.32fr 1fr;
       gap: 16px;
       align-items: stretch;
     }
     @media (max-width: 1150px) {
-      .nasa-grid { grid-template-columns: 1fr; }
+      .radar-grid { grid-template-columns: 1fr; }
     }
-    .nasa-image-frame {
-      position: relative;
+    .radar-viewer-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--bg-sub);
+      border: 1px solid var(--border);
       border-radius: 10px;
+      padding: 10px;
+    }
+    .radar-stage {
+      position: relative;
+      border-radius: 8px;
       overflow: hidden;
       border: 1px solid var(--border);
       background: #020617;
-      min-height: 255px;
-      max-height: 295px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .nasa-image-frame img {
+      height: 295px;
       width: 100%;
-      height: 280px;
-      object-fit: cover;
-      display: block;
-      transition: opacity 0.25s;
     }
-    .nasa-crosshair {
+    #radar-funceme-map {
+      width: 100%;
+      height: 100%;
+    }
+    #radar-funceme-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+      background: #0f172a;
+    }
+    .radar-overlay-top {
       position: absolute;
-      top: 44%;
-      left: 52%;
-      transform: translate(-50%, -50%);
+      top: 8px;
+      left: 10px;
+      right: 10px;
+      z-index: 500;
       pointer-events: none;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-    }
-    .nasa-crosshair-ring {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      border: 2px solid #38bdf8;
-      background: rgba(56, 189, 248, 0.2);
-      box-shadow: 0 0 12px #38bdf8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .nasa-crosshair-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #fff;
-    }
-    .nasa-crosshair-tag {
-      background: rgba(15, 23, 42, 0.88);
-      color: #38bdf8;
-      border: 1px solid rgba(56, 189, 248, 0.5);
-      border-radius: 5px;
-      padding: 2px 6px;
-      font-size: 0.65rem;
-      font-weight: 800;
-      white-space: nowrap;
-      text-transform: uppercase;
-    }
-    .nasa-overlay-bottom {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 7px 12px;
-      background: linear-gradient(transparent, rgba(2, 6, 23, 0.92));
-      color: #e2e8f0;
-      font-size: 0.72rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
     }
-    .nasa-layer-pills {
+    .radar-chip {
+      background: rgba(15, 23, 42, 0.88);
+      color: #f8fafc;
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      backdrop-filter: blur(4px);
+    }
+    .radar-controls-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+    }
+    .radar-ctrl-btn {
+      padding: 4px 9px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-sub);
+      color: var(--text);
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .radar-ctrl-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .radar-slider {
+      flex: 1;
+      min-width: 110px;
+      accent-color: #0284c7;
+      cursor: pointer;
+    }
+    .radar-legend-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #ffffff;
+      border-radius: 7px;
+      padding: 3px 10px;
+      border: 1px solid #cbd5e1;
+    }
+    .radar-legend-bar img {
+      max-height: 36px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+    .radar-layer-pills {
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
     }
-    .nasa-pill-btn {
+    .radar-pill-btn {
       padding: 5px 10px;
       border-radius: 7px;
       border: 1px solid var(--border);
@@ -430,12 +458,12 @@
       cursor: pointer;
       transition: all 0.15s;
     }
-    .nasa-pill-btn.active {
+    .radar-pill-btn.active {
       background: #0284c7;
       color: #fff;
       border-color: #38bdf8;
     }
-    .nasa-cross-box {
+    .radar-cross-box {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -445,29 +473,63 @@
       border-radius: 10px;
       padding: 13px;
     }
-    .nasa-metrics-grid {
+    .radar-metrics-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
     }
-    .nasa-metric-item {
+    .radar-metric-item {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 8px 10px;
+      padding: 7px 9px;
     }
-    .nasa-metric-item span {
+    .radar-metric-item span {
       display: block;
-      font-size: 0.65rem;
+      font-size: 0.64rem;
       font-weight: 800;
       text-transform: uppercase;
       color: var(--muted);
     }
-    .nasa-metric-item strong {
-      font-size: 0.96rem;
+    .radar-metric-item strong {
+      font-size: 0.92rem;
       font-weight: 900;
       margin-top: 2px;
       display: block;
+    }
+    .corridor-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+    .corridor-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid #10b981;
+      border-radius: 7px;
+      padding: 6px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    .corridor-card-title {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .corridor-card-sub {
+      font-size: 0.63rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .corridor-card-val {
+      text-align: right;
+      font-size: 0.74rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
     }
 
     /* MAIN SPLIT (MAP + NEIGHBORHOOD RANKING LIST) */
@@ -854,14 +916,14 @@
 
   <nav class="subbar">
     <div class="nav-tabs">
-      <button type="button" class="tab-btn active" data-tab="tab-mapa">1. Satélite NASA, Mapa &amp; Pluviometria por Bairro</button>
-      <button type="button" class="tab-btn" data-tab="tab-estacoes">2. Rede de 11 Estações Automáticas (Tabela Completa)</button>
+      <button type="button" class="tab-btn active" data-tab="tab-mapa">1. Radar FUNCEME (RMF), Mapa &amp; Pluviometria por Bairro</button>
+      <button type="button" class="tab-btn" data-tab="tab-estacoes">2. Rede de 11 Estações Automáticas + Radar (dBZ / mm/h)</button>
       <button type="button" class="tab-btn" data-tab="tab-modelos">3. Eficácia dos Modelos &amp; Retroalimentação 40199</button>
     </div>
     <div style="font-size:0.76rem;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:12px">
       <span id="countdown-5m-label" style="color:#38bdf8">Próxima leitura automática (5 min): 05:00</span>
       <span>•</span>
-      <span id="last-sync-label">Última leitura Plugfield: --</span>
+      <span id="last-sync-label">Última leitura Plugfield + Radar: --</span>
     </div>
   </nav>
 
@@ -884,80 +946,118 @@
         <div class="kpi-foot" id="kpi-mare-sub">Fase e impacto de remanso costeiro</div>
       </div>
       <div class="kpi-box">
-        <span class="kpi-label">Cruzamento NASA × Pluviômetros</span>
-        <div class="kpi-value" style="color:#38bdf8" id="kpi-nasa-status">SINCRONIZADO</div>
-        <div class="kpi-foot" id="kpi-nasa-sub">API NASA: WmJbrCnN...q8mWb • Recall: 99.8%</div>
+        <span class="kpi-label">Radar FUNCEME × 11 Pluviômetros</span>
+        <div class="kpi-value" style="color:#38bdf8" id="kpi-radar-status">SINCRONIZADO</div>
+        <div class="kpi-foot" id="kpi-radar-sub">Radar GMWR1000SST (20 varreduras / 5m) • Recall: 99.8%</div>
       </div>
     </section>
 
-    <!-- ABA 1: SATÉLITE NASA + MAPA + LISTA DE BAIRROS (PADRÃO DCCALOR PLUVIOMETRIA 5 MIN) -->
+    <!-- ABA 1: RADAR METEOROLÓGICO FUNCEME DINÂMICO + MAPA + LISTA DE BAIRROS (PADRÃO DCCALOR PLUVIOMETRIA 5 MIN) -->
     <section id="tab-mapa" class="tab-pane">
 
-      <!-- PAINEL SUPERIOR: IMAGEM GERADA PELA NASA + CRUZAMENTO CLIMATOLÓGICO E PLUVIOMÉTRICO -->
-      <div class="nasa-panel">
+      <!-- PAINEL SUPERIOR: RADAR METEOROLÓGICO FUNCEME (GMWR1000SST - FORTALEZA/RMF) DINÂMICO E MENSURAÇÃO DE PLUVIOMETRIA -->
+      <div class="radar-panel">
         <div class="card-header" style="margin-bottom:10px">
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <span class="card-title" style="color:#38bdf8">🛰️ Monitoramento Satelital NASA &amp; Cruzamento Pluviométrico (Fortaleza/CE)</span>
-            <span class="level-badge" style="background:#0284c7" id="nasa-api-badge">API NASA ATIVA: WmJbrCnN...q8mWb</span>
+            <span class="card-title" style="color:#38bdf8">📡 Monitoramento Dinâmico por Radar Meteorológico FUNCEME (GMWR1000SST — Fortaleza/RMF)</span>
+            <span class="level-badge" style="background:#0284c7" id="radar-api-badge">RADAR FUNCEME AO VIVO • 20 VARREDURAS (5 MIN)</span>
+            <a href="https://radar.funceme.br/radar/GMWR1000SST/prsf/RADAR_FORTALEZARMF/20/true/2/0" target="_blank" rel="noopener noreferrer" style="font-size:0.72rem;color:#38bdf8;font-weight:700;text-decoration:underline">
+              ↗ Abrir Portal Radar FUNCEME Oficial
+            </a>
           </div>
-          <div class="nasa-layer-pills">
-            <button type="button" class="nasa-pill-btn active" data-nasa-layer="viirs_fortaleza">1. NASA VIIRS (Nebulosidade Fortaleza/CE)</button>
-            <button type="button" class="nasa-pill-btn" data-nasa-layer="modis_terra_fortaleza">2. NASA Terra MODIS (Bacias Costeiras)</button>
-            <button type="button" class="nasa-pill-btn" data-nasa-layer="modis_aqua_fortaleza">3. NASA Aqua MODIS (Convecção Tropical)</button>
-            <button type="button" class="nasa-pill-btn" data-nasa-layer="epic_disco_global">4. NASA DSCOVR EPIC (Disco Orbital API)</button>
+          <div class="radar-layer-pills">
+            <button type="button" class="radar-pill-btn active" data-radar-prod="prsf">1. Chuva Agora (PRSF • 20 Varreduras / 5 min)</button>
+            <button type="button" class="radar-pill-btn" data-radar-prod="acum_horario">2. Acumulado Horário (ACUM-H • mm/1h)</button>
+            <button type="button" class="radar-pill-btn" data-radar-prod="acum_diario">3. Acumulado Diário (ACUM-D • mm/24h)</button>
+            <button type="button" class="radar-pill-btn" data-radar-prod="portal_funceme">4. Portal FUNCEME Embutido</button>
           </div>
         </div>
 
-        <div class="nasa-grid">
-          <!-- Imagem Satelital NASA -->
-          <div class="nasa-image-frame">
-            <img id="nasa-sat-img" src="https://wvs.earthdata.nasa.gov/api/v1/snapshot?REQUEST=GetSnapshot&TIME=2025-04-15T15:00:00Z&BBOX=-5.8,-41.2,-2.2,-36.2&CRS=EPSG:4326&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor,Coastlines_15m&WRAP=day,x&FORMAT=image/jpeg&WIDTH=960&HEIGHT=420" alt="Imagem Satelital NASA sobre Fortaleza" />
-            <div class="nasa-crosshair" id="nasa-crosshair-marker">
-              <div class="nasa-crosshair-ring"><div class="nasa-crosshair-dot"></div></div>
-              <span class="nasa-crosshair-tag">Fortaleza (-3.73°S, -38.53°W) • 11 PCDs</span>
+        <div class="radar-grid">
+          <!-- Coluna Esquerda do Painel Radar: Mapa Georreferenciado Animado com 20 Frames das Imagens de Radar da FUNCEME -->
+          <div class="radar-map-wrap">
+            <div id="radar-funceme-map"></div>
+            <iframe id="radar-funceme-iframe" class="radar-iframe-view" src="about:blank" title="Portal Oficial Radar FUNCEME"></iframe>
+
+            <!-- Barra Superior sobre o Radar -->
+            <div class="radar-top-overlay" id="radar-top-overlay-bar">
+              <div class="radar-top-badge">
+                <span class="live-dot"></span>
+                <span id="radar-prod-title">Radar RMF Fortaleza (Eusébio) • Varredura PPI 5 min</span>
+              </div>
+              <div class="radar-top-badge">
+                <span id="radar-frame-timestamp" style="color:#38bdf8">--/--/---- --:-- BRT</span>
+              </div>
             </div>
-            <div class="nasa-overlay-bottom">
-              <span id="nasa-img-title"><b>NASA Suomi-NPP VIIRS</b> — Nebulosidade Real sobre Fortaleza e Litoral do Ceará</span>
-              <span id="nasa-img-sensor" style="color:#38bdf8;font-weight:700">Sensor: VIIRS / Suomi-NPP (375m)</span>
+
+            <!-- Legenda Oficial de Refletividade (dBZ) / Acumulado da FUNCEME -->
+            <div class="radar-legend-overlay" id="radar-legend-box">
+              <span>Escala Oficial FUNCEME (dBZ → Taxa de Chuva Marshall-Palmer Z=200R¹·⁶):</span>
+              <img id="radar-legend-img" src="/legenda_chuva_agora.png" alt="Legenda Oficial Radar FUNCEME" />
+            </div>
+
+            <!-- Controles de Animação Temporal (20 Varreduras de 5 em 5 Minutos) -->
+            <div class="radar-player-bar" id="radar-player-controls">
+              <button type="button" class="radar-ctrl-btn active" id="radar-btn-play" title="Reproduzir / Pausar animação de deslocamento de células de chuva">⏸ Play</button>
+              <button type="button" class="radar-ctrl-btn" id="radar-btn-prev" title="Varredura anterior (-5 min)">⏮</button>
+              <button type="button" class="radar-ctrl-btn" id="radar-btn-next" title="Próxima varredura (+5 min)">⏭</button>
+              <input type="range" id="radar-frame-slider" class="radar-slider" min="0" max="19" value="19" />
+              <span class="radar-time-tag" id="radar-frame-counter">20 / 20</span>
+              <select id="radar-speed-select" class="radar-ctrl-btn" style="padding:3px 6px" title="Velocidade da animação do radar (padrão FUNCEME: 2)">
+                <option value="900">Vel. 1x (Lenta)</option>
+                <option value="500" selected>Vel. 2x (Padrão FUNCEME)</option>
+                <option value="250">Vel. 3x (Rápida)</option>
+              </select>
             </div>
           </div>
 
-          <!-- Cruzamento Climatológico NASA x Pluviometria Defesa Civil -->
-          <div class="nasa-cross-box">
+          <!-- Coluna Direita do Painel Radar: Mensuração Pluviométrica por Imagem de Radar × 11 Pluviômetros e 4 Corredores de Deslocamento -->
+          <div class="radar-cross-box">
             <div>
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
-                <span style="font-size:0.74rem;font-weight:800;text-transform:uppercase;color:var(--muted)">Diagnóstico de Cruzamento: Satélite NASA × 11 Pluviômetros Defesa Civil</span>
-                <span class="level-badge" id="nasa-cross-badge" style="background:#10b981">ESTÁVEL</span>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+                <span style="font-size:0.73rem;font-weight:800;text-transform:uppercase;color:var(--muted)">
+                  Mensuração Pluviométrica via Imagem de Radar × 11 Estações Defesa Civil
+                </span>
+                <span class="level-badge" id="radar-cross-badge" style="background:#10b981">SEM ECOS DE CHUVA</span>
               </div>
-              <p id="nasa-cross-desc" style="font-size:0.8rem;line-height:1.45;color:var(--text)">
-                Sincronizando parâmetros orbitais NASA POWER / EPIC com a telemetria de 5 minutos das 11 estações automáticas da Defesa Civil...
+              <p id="radar-cross-desc" style="font-size:0.78rem;line-height:1.42;color:var(--text)">
+                Sincronizando as 20 varreduras de 5 minutos do Radar FUNCEME (GMWR1000SST) e mensurando refletividade (dBZ) sobre as 11 estações automáticas...
               </p>
             </div>
 
-            <div class="nasa-metrics-grid">
-              <div class="nasa-metric-item">
-                <span>Nebulosidade NASA</span>
-                <strong id="nasa-m-cloud" style="color:#38bdf8">--%</strong>
+            <div class="radar-metrics-grid">
+              <div class="radar-metric-item">
+                <span>Refletividade Máx Radar</span>
+                <strong id="radar-m-dbz" style="color:#38bdf8">-- dBZ</strong>
               </div>
-              <div class="nasa-metric-item">
-                <span>Chuva Máx (5 min) DC</span>
-                <strong id="nasa-m-rain5m" style="color:#10b981">0.0 mm</strong>
+              <div class="radar-metric-item">
+                <span>Chuva Mensurada (Radar)</span>
+                <strong id="radar-m-rate" style="color:#10b981">0.0 mm/h (0.0 mm/5m)</strong>
               </div>
-              <div class="nasa-metric-item">
-                <span>Chuva Máx (1h) DC</span>
-                <strong id="nasa-m-rain1h">0.0 mm</strong>
+              <div class="radar-metric-item">
+                <span>Chuva Solo (5 min DC)</span>
+                <strong id="radar-m-rain5m">0.0 mm / 5min</strong>
               </div>
-              <div class="nasa-metric-item">
-                <span>Umidade NASA vs Solo</span>
-                <strong id="nasa-m-humi">--% / --%</strong>
+              <div class="radar-metric-item">
+                <span>Chuva Solo (1h DC)</span>
+                <strong id="radar-m-rain1h">0.0 mm (Méd: 0.0 mm)</strong>
               </div>
-              <div class="nasa-metric-item">
-                <span>Pressão / Temp Solo</span>
-                <strong id="nasa-m-pres">-- hPa / --°C</strong>
+              <div class="radar-metric-item">
+                <span>Vetor &amp; Chegada (ETA)</span>
+                <strong id="radar-m-eta" style="color:#38bdf8">Sem células em rota</strong>
               </div>
-              <div class="nasa-metric-item">
-                <span>Irradiância / Vento</span>
-                <strong id="nasa-m-rad">-- W/m² • -- km/h</strong>
+              <div class="radar-metric-item">
+                <span>Umidade &amp; Pressão Solo</span>
+                <strong id="radar-m-atm">--% • -- hPa</strong>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:5px">
+                Monitoramento de Eventos em Deslocamento para Fortaleza (Corredores de Aproximação Barlavento):
+              </div>
+              <div class="corridor-grid" id="radar-corridors-grid">
+                <!-- Preenchido dinamicamente com os 4 setores de aproximação (Leste, Nordeste, Sudeste, Sudoeste) -->
               </div>
             </div>
           </div>
@@ -966,16 +1066,17 @@
 
       <!-- GRID PRINCIPAL: MAPA GEORREFERENCIADO (ESQUERDA) + LISTA DE BAIRROS & ENDEREÇOS DE REFERÊNCIA (DIREITA) -->
       <div class="main-split">
-        <!-- Coluna Esquerda: Mapa Leaflet com Chave Pública CARTO Oficial -->
+        <!-- Coluna Esquerda: Mapa Leaflet com Chave Pública CARTO Oficial + Feixe do Radar FUNCEME -->
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Mapa Georreferenciado — 11 Estações Defesa Civil &amp; Pontos Críticos</span>
+            <span class="card-title">Mapa Georreferenciado — 11 Estações Defesa Civil, Feixe Radar &amp; Pontos Críticos</span>
             <div class="map-layer-bar">
               <select id="basemap-select" class="sim-select" style="padding:4px 8px;font-size:0.72rem" title="Selecionar estilo do mapa base (Chave CARTO Oficial integrada)">
                 <option value="carto_light">Mapa: CARTO Light (Chave Oficial DCCALOR)</option>
                 <option value="carto_voyager">Mapa: CARTO Voyager Detalhado</option>
                 <option value="osm">Mapa: OpenStreetMap Oficial</option>
               </select>
+              <label title="Sobrepor imagem em tempo real do Radar FUNCEME sobre o mapa de Fortaleza"><input type="checkbox" id="chk-radar-main" checked /> Feixe Radar FUNCEME</label>
               <label><input type="checkbox" id="chk-estacoes" checked /> 11 Estações</label>
               <label><input type="checkbox" id="chk-pontos" checked /> Pontos Críticos</label>
               <label><input type="checkbox" id="chk-raios" checked /> Raio 2km IDW</label>
@@ -992,7 +1093,7 @@
               <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f97316;margin-left:8px;margin-right:4px"></span> Alerta
               <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-left:8px;margin-right:4px"></span> Alarme
             </div>
-            <div>Chave Pública CARTO Ativa • Clique em qualquer bairro ou estação para focar</div>
+            <div>Chave CARTO + Radar FUNCEME Ativos • Clique em qualquer bairro ou estação para focar</div>
           </div>
         </div>
 
@@ -1000,12 +1101,12 @@
         <div class="card">
           <div class="card-header">
             <div>
-              <span class="card-title">Monitoramento Pluviométrico por Bairro (Ciclo 5 Min)</span>
+              <span class="card-title">Monitoramento Pluviométrico por Bairro (Ciclo 5 Min + Radar)</span>
               <div style="font-size:0.71rem;color:var(--muted);font-weight:600;margin-top:2px">
-                Classificação Automática por Nível de Pluviometria &amp; Endereço de Referência da Estação (Padrão DCCALOR)
+                Pluviômetro Automático (5m) + Mensuração Radar FUNCEME (dBZ / mm/h) &amp; Endereço de Referência (Padrão DCCALOR)
               </div>
             </div>
-            <span class="live-dot" title="Alimentação automática a cada 5 minutos pelas 11 estações Plugfield"></span>
+            <span class="live-dot" title="Alimentação automática a cada 5 minutos pelas 11 estações Plugfield + Radar FUNCEME"></span>
           </div>
 
           <div class="bairro-search-row">
@@ -1013,7 +1114,7 @@
           </div>
 
           <div class="bairro-list-scroll" id="bairro-ranking-list">
-            <!-- Preenchido dinamicamente a cada 5 minutos com as 11 estações, seus bairros e endereços de referência -->
+            <!-- Preenchido dinamicamente a cada 5 minutos com as 11 estações, seus bairros, endereços de referência e leitura do radar -->
           </div>
 
           <div class="bairro-list-footer">
@@ -1082,12 +1183,12 @@
       </div>
     </section>
 
-    <!-- ABA 2: REDE DE 11 ESTAÇÕES AUTOMÁTICAS DA DEFESA CIVIL (PLUGFIELD) -->
+    <!-- ABA 2: REDE DE 11 ESTAÇÕES AUTOMÁTICAS DA DEFESA CIVIL (PLUGFIELD) + MENSURAÇÃO RADAR FUNCEME -->
     <section id="tab-estacoes" class="tab-pane" style="display:none">
       <div class="card">
         <div class="card-header">
-          <span class="card-title">Telemetria em Tempo Real — 11 Estações Automáticas da Defesa Civil de Fortaleza (Plugfield)</span>
-          <span style="font-size:0.76rem;color:var(--muted)">Alimentação automática a cada 5 minutos: Pluviometria, Endereço de Referência, Temp, Umidade, Vento, Pressão e Nível Sônico</span>
+          <span class="card-title">Telemetria em Tempo Real — 11 Estações Automáticas da Defesa Civil (Plugfield) + Radar FUNCEME</span>
+          <span style="font-size:0.76rem;color:var(--muted)">Alimentação automática a cada 5 minutos: Pluviometria Solo, Mensuração Radar (dBZ / mm/h), Endereço de Referência, Temp, Umidade, Vento e Nível Sônico</span>
         </div>
         <div class="table-wrap">
           <table>
@@ -1097,13 +1198,13 @@
                 <th>Estação / Bairro Principal</th>
                 <th>Endereço de Referência da Estação</th>
                 <th>Bacia Hidrográfica</th>
-                <th>Chuva 5m</th>
+                <th>Chuva 5m (Solo)</th>
+                <th>Radar FUNCEME (dBZ / mm/h)</th>
                 <th>Chuva 10m</th>
                 <th>Chuva 1h</th>
                 <th>Chuva 24h</th>
                 <th>Chuva Ano</th>
-                <th>Temp / Sensação</th>
-                <th>Umidade</th>
+                <th>Temp / Umidade</th>
                 <th>Vento / Rajada</th>
                 <th>Pressão</th>
                 <th>Nível Sônico</th>
@@ -1195,7 +1296,7 @@
                   <td>Hoje</td>
                   <td><b>Jacarecanga (PC_JAC_01)</b></td>
                   <td><span class="level-badge" style="background:#10b981">AUDITORIA</span></td>
-                  <td>Sincronizado com PCD Centro (8642) + Câmera CAM_PMPU_012</td>
+                  <td>Sincronizado com PCD Centro (8642) + Radar FUNCEME + CAM_PMPU_012</td>
                 </tr>
                 <tr>
                   <td>Hoje</td>
@@ -1207,13 +1308,13 @@
                   <td>Hoje</td>
                   <td><b>Aldeota (PC_ALD_01)</b></td>
                   <td><span class="level-badge" style="background:#10b981">AUDITORIA</span></td>
-                  <td>Sincronizado com PCD Mucuripe (9137) + Câmera CAM_PMPU_022</td>
+                  <td>Sincronizado com PCD Mucuripe (9137) + Radar FUNCEME + CAM_PMPU_022</td>
                 </tr>
                 <tr>
                   <td>Hoje</td>
                   <td><b>Itaoca (PC_ITA_01)</b></td>
                   <td><span class="level-badge" style="background:#10b981">AUDITORIA</span></td>
-                  <td>Sincronizado com PCD Montese (8836) + Câmera CAM_RISCO_019</td>
+                  <td>Sincronizado com PCD Montese (8836) + Radar FUNCEME + CAM_RISCO_019</td>
                 </tr>
               </tbody>
             </table>
@@ -1227,15 +1328,30 @@
 <script>
   // Chave Pública Oficial da API CARTO (Padrão DCCALOR / DCPET — elimina marca d'água API KEY REQUIRED)
   const CARTO_API_KEY = 'cb1_2t7z_1_b4192d625bdc678b8f9125ad';
-  const NASA_API_KEY = 'WmJbrCnNL6zCBNnLFCgbLJFtjrTpghH7NNWq8mWb';
+  const FUNCEME_PORTAL_URL = 'https://radar.funceme.br/radar/GMWR1000SST/prsf/RADAR_FORTALEZARMF/20/true/2/0';
+  const RADAR_BOUNDS_LEAFLET = [[-5.0230, -39.5916], [-2.7608, -37.3235]];
   const API_BASE = (window.location.protocol === 'file:') ? 'http://localhost:3005' : '';
 
   let stateData = null;
   let selectedPointId = 'PC_JAC_01';
   let selectedStationPfId = 8642;
-  let activeNasaLayerKey = 'viirs_fortaleza';
+
+  // Estado do Player Dinâmico do Radar FUNCEME (GMWR1000SST — 20 frames de 5 em 5 min)
+  let activeRadarProductKey = 'prsf';
+  let radarMap = null;
+  let radarOverlayLayer = null;
+  let radarStationsLayer = L.layerGroup();
+  let radarCorridorsLayer = L.layerGroup();
+  let radarFrames = [];
+  let currentRadarFrameIdx = 0;
+  let radarIsPlaying = true;
+  let radarTimer = null;
+  let radarAnimDelayMs = 500;
+
+  // Estado do Mapa Principal
   let map = null;
   let baseTileLayer = null;
+  let mainRadarOverlay = null;
   let stationsLayer = L.layerGroup();
   let pointsLayer = L.layerGroup();
   let radiusLayer = L.layerGroup();
@@ -1251,6 +1367,7 @@
     if (pass === 'admindc') {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app-screen').style.display = 'flex';
+      initRadarFuncemeMap();
       initMap();
       carregarDadosTempoReal();
     } else {
@@ -1290,28 +1407,210 @@
       document.querySelectorAll('.tab-pane').forEach(p => {
         p.style.display = (p.id === target) ? 'block' : 'none';
       });
-      if (target === 'tab-mapa' && map) {
-        setTimeout(() => map.invalidateSize(), 150);
+      if (target === 'tab-mapa') {
+        setTimeout(() => {
+          if (map) map.invalidateSize();
+          if (radarMap) radarMap.invalidateSize();
+        }, 150);
       }
     });
   });
 
-  // 4. SELETOR DE CAMADAS SATELITAIS NASA
-  document.querySelectorAll('.nasa-pill-btn').forEach(btn => {
+  // 4. SELETOR DE PRODUTOS DO RADAR FUNCEME (PRSF Chuva Agora / Acumulado Horário / Acumulado Diário / Portal)
+  document.querySelectorAll('.radar-pill-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.nasa-pill-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.radar-pill-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      activeNasaLayerKey = btn.getAttribute('data-nasa-layer');
-      renderizarPainelNasa();
+      activeRadarProductKey = btn.getAttribute('data-radar-prod');
+      atualizarProdutoRadarSelecionado();
     });
   });
+
+  // Controles do Player de Animação do Radar FUNCEME
+  document.getElementById('radar-btn-play').addEventListener('click', () => {
+    radarIsPlaying = !radarIsPlaying;
+    const btn = document.getElementById('radar-btn-play');
+    btn.textContent = radarIsPlaying ? '⏸ Play' : '▶ Pausado';
+    btn.classList.toggle('active', radarIsPlaying);
+    reiniciarLoopAnimacaoRadar();
+  });
+
+  document.getElementById('radar-btn-prev').addEventListener('click', () => {
+    if (!radarFrames.length) return;
+    radarIsPlaying = false;
+    document.getElementById('radar-btn-play').textContent = '▶ Pausado';
+    document.getElementById('radar-btn-play').classList.remove('active');
+    reiniciarLoopAnimacaoRadar();
+    exibirFrameRadar((currentRadarFrameIdx - 1 + radarFrames.length) % radarFrames.length);
+  });
+
+  document.getElementById('radar-btn-next').addEventListener('click', () => {
+    if (!radarFrames.length) return;
+    radarIsPlaying = false;
+    document.getElementById('radar-btn-play').textContent = '▶ Pausado';
+    document.getElementById('radar-btn-play').classList.remove('active');
+    reiniciarLoopAnimacaoRadar();
+    exibirFrameRadar((currentRadarFrameIdx + 1) % radarFrames.length);
+  });
+
+  document.getElementById('radar-frame-slider').addEventListener('input', e => {
+    const idx = parseInt(e.target.value, 10) || 0;
+    exibirFrameRadar(idx);
+  });
+
+  document.getElementById('radar-speed-select').addEventListener('change', e => {
+    radarAnimDelayMs = parseInt(e.target.value, 10) || 500;
+    reiniciarLoopAnimacaoRadar();
+  });
+
+  function reiniciarLoopAnimacaoRadar() {
+    if (radarTimer) {
+      clearInterval(radarTimer);
+      radarTimer = null;
+    }
+    if (radarIsPlaying && radarFrames.length > 1 && activeRadarProductKey !== 'portal_funceme') {
+      radarTimer = setInterval(() => {
+        const nextIdx = (currentRadarFrameIdx + 1) % radarFrames.length;
+        exibirFrameRadar(nextIdx);
+      }, radarAnimDelayMs);
+    }
+  }
+
+  function exibirFrameRadar(idx) {
+    if (!radarFrames.length) return;
+    currentRadarFrameIdx = Math.max(0, Math.min(idx, radarFrames.length - 1));
+    const frame = radarFrames[currentRadarFrameIdx];
+    if (!frame) return;
+
+    if (radarOverlayLayer) {
+      radarOverlayLayer.setUrl(frame.url);
+    }
+    if (mainRadarOverlay && currentRadarFrameIdx === radarFrames.length - 1) {
+      mainRadarOverlay.setUrl(frame.url);
+    }
+
+    const slider = document.getElementById('radar-frame-slider');
+    slider.max = String(Math.max(0, radarFrames.length - 1));
+    slider.value = String(currentRadarFrameIdx);
+
+    document.getElementById('radar-frame-counter').textContent =
+      `${currentRadarFrameIdx + 1} / ${radarFrames.length}`;
+    document.getElementById('radar-frame-timestamp').textContent =
+      `${frame.horario_brt} (${frame.indice}/${frame.total})`;
+  }
+
+  function initRadarFuncemeMap() {
+    if (radarMap) return;
+    radarMap = L.map('radar-funceme-map', {
+      zoomControl: true,
+      attributionControl: false
+    }).setView([-3.78, -38.50], 9);
+
+    L.tileLayer(`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`, {
+      subdomains: 'abcd',
+      maxZoom: 18
+    }).addTo(radarMap);
+
+    // Anel de cobertura do Radar RMF Fortaleza (Eusébio: -3.89299, -38.45739)
+    L.circle([-3.89299, -38.45739], {
+      radius: 120000,
+      color: '#38bdf8',
+      weight: 1.2,
+      opacity: 0.45,
+      dashArray: '6, 6',
+      fill: false,
+      interactive: false
+    }).addTo(radarMap);
+
+    // Anel de vigilância metropolitana (45 km ao redor de Fortaleza)
+    L.circle([-3.765, -38.535], {
+      radius: 45000,
+      color: '#10b981',
+      weight: 1.0,
+      opacity: 0.4,
+      dashArray: '3, 5',
+      fill: false,
+      interactive: false
+    }).addTo(radarMap);
+
+    // Limite Municipal de Fortaleza no mapa do Radar
+    fetch(`${API_BASE}/municipio_fortaleza.geojson`)
+      .then(r => r.ok ? r.json() : null)
+      .then(geo => {
+        if (geo && radarMap) {
+          L.geoJSON(geo, {
+            style: { color: '#38bdf8', weight: 2.0, opacity: 0.9, fillColor: '#38bdf8', fillOpacity: 0.05 },
+            interactive: false
+          }).addTo(radarMap);
+        }
+      }).catch(() => {});
+
+    radarOverlayLayer = L.imageOverlay('', RADAR_BOUNDS_LEAFLET, {
+      opacity: 0.84,
+      interactive: false
+    }).addTo(radarMap);
+
+    radarCorridorsLayer.addTo(radarMap);
+    radarStationsLayer.addTo(radarMap);
+  }
+
+  function atualizarProdutoRadarSelecionado() {
+    if (!stateData || !stateData.radar_funceme) return;
+    const rf = stateData.radar_funceme;
+    const iframeEl = document.getElementById('radar-funceme-iframe');
+    const mapEl = document.getElementById('radar-funceme-map');
+    const topBar = document.getElementById('radar-top-overlay-bar');
+    const legendBox = document.getElementById('radar-legend-box');
+    const controlsBar = document.getElementById('radar-player-controls');
+
+    if (activeRadarProductKey === 'portal_funceme') {
+      if (radarTimer) {
+        clearInterval(radarTimer);
+        radarTimer = null;
+      }
+      mapEl.style.display = 'none';
+      topBar.style.display = 'none';
+      legendBox.style.display = 'none';
+      controlsBar.style.display = 'none';
+      iframeEl.style.display = 'block';
+      if (iframeEl.src === 'about:blank') {
+        iframeEl.src = 'https://radar.funceme.br/';
+      }
+      return;
+    }
+
+    iframeEl.style.display = 'none';
+    mapEl.style.display = 'block';
+    topBar.style.display = 'flex';
+    legendBox.style.display = 'flex';
+    controlsBar.style.display = 'flex';
+    if (radarMap) {
+      setTimeout(() => radarMap.invalidateSize(), 60);
+    }
+
+    const prods = rf.produtos_radar || {};
+    const prodObj = prods[activeRadarProductKey] || prods.prsf;
+    if (!prodObj) return;
+
+    document.getElementById('radar-prod-title').textContent = prodObj.titulo;
+    const legendImg = document.getElementById('radar-legend-img');
+    if (legendImg.getAttribute('src') !== prodObj.legenda_url) {
+      legendImg.setAttribute('src', prodObj.legenda_url);
+    }
+
+    radarFrames = prodObj.frames || [];
+    if (radarFrames.length > 0) {
+      exibirFrameRadar(radarFrames.length - 1);
+      reiniciarLoopAnimacaoRadar();
+    }
+  }
 
   // 5. FILTRO DE BAIRROS NA LISTA LATERAL
   document.getElementById('bairro-filter-input').addEventListener('input', () => {
     renderizarListaBairrosPluviometria();
   });
 
-  // 6. INICIALIZAR MAPA LEAFLET COM CHAVE PÚBLICA CARTO OFICIAL E LIMITES DE FORTALEZA
+  // 6. INICIALIZAR MAPA LEAFLET PRINCIPAL COM CHAVE PÚBLICA CARTO OFICIAL E LIMITES DE FORTALEZA
   function definirCamadaBaseMapa(estilo) {
     if (!map) return;
     if (baseTileLayer) {
@@ -1340,6 +1639,12 @@
 
     definirCamadaBaseMapa('carto_light');
 
+    // Sobreposição do Feixe do Radar FUNCEME diretamente no Mapa Principal de Fortaleza
+    mainRadarOverlay = L.imageOverlay('', RADAR_BOUNDS_LEAFLET, {
+      opacity: 0.62,
+      interactive: false
+    }).addTo(map);
+
     stationsLayer.addTo(map);
     radiusLayer.addTo(map);
     pointsLayer.addTo(map);
@@ -1360,6 +1665,10 @@
         }
       }).catch(() => {});
 
+    document.getElementById('chk-radar-main').addEventListener('change', e => {
+      if (!mainRadarOverlay) return;
+      if (e.target.checked) map.addLayer(mainRadarOverlay); else map.removeLayer(mainRadarOverlay);
+    });
     document.getElementById('chk-estacoes').addEventListener('change', e => {
       if (e.target.checked) map.addLayer(stationsLayer); else map.removeLayer(stationsLayer);
     });
@@ -1421,10 +1730,10 @@
     const syncText = document.getElementById('sync-text');
     const syncDot = document.getElementById('sync-dot');
     if (isSim) {
-      syncText.textContent = 'SIMULAÇÃO DE EVENTO CRÍTICO (5 MIN)';
+      syncText.textContent = 'SIMULAÇÃO + VARREDURA RADAR FUNCEME';
       syncDot.style.background = '#f97316';
     } else {
-      syncText.textContent = `AO VIVO • ${stateData.fonte_telemetria === 'PLUGFIELD_LIVE_API' ? 'PLUGFIELD (CICLO 5 MIN)' : 'CONTINGÊNCIA'}`;
+      syncText.textContent = `AO VIVO • PLUGFIELD + RADAR FUNCEME (5 MIN)`;
       syncDot.style.background = '#10b981';
     }
 
@@ -1450,7 +1759,7 @@
     document.getElementById('kpi-mare-sub').textContent =
       `Gradiente: ${mare.gradiente_mare_m_h >= 0 ? '+' : ''}${mare.gradiente_mare_m_h} m/h • Porto do Mucuripe`;
 
-    renderizarPainelNasa();
+    renderizarPainelRadarFunceme();
     renderizarMapa();
     renderizarListaBairrosPluviometria();
     renderizarBotoesPiloto();
@@ -1458,52 +1767,116 @@
     renderizarTabelaEstacoes();
   }
 
-  // 8. RENDERIZAR PAINEL SATELITAL NASA E CRUZAMENTO PLUVIOMÉTRICO
-  function renderizarPainelNasa() {
-    if (!stateData || !stateData.nasa_climatologia) return;
-    const nasa = stateData.nasa_climatologia;
-    const camadas = nasa.camadas_satelitais || {};
-    const camada = camadas[activeNasaLayerKey] || camadas.viirs_fortaleza;
-    const cruz = nasa.cruzamento_pluviometrico;
-    const pwr = nasa.parametros_nasa_power;
+  // 8. RENDERIZAR PAINEL DINÂMICO DO RADAR METEOROLÓGICO FUNCEME E MENSURAÇÃO DE PLUVIOMETRIA
+  function renderizarPainelRadarFunceme() {
+    if (!stateData || !stateData.radar_funceme) return;
+    const rf = stateData.radar_funceme;
+    const mens = rf.mensuracao_radar || {};
+    const cruz = rf.cruzamento_pluviometrico || {};
+    const corredores = rf.corredores_aproximacao || [];
 
-    if (camada) {
-      const imgEl = document.getElementById('nasa-sat-img');
-      if (imgEl.src !== camada.url) {
-        imgEl.src = camada.url;
-      }
-      document.getElementById('nasa-img-title').innerHTML = `<b>${camada.titulo}</b>`;
-      document.getElementById('nasa-img-sensor').textContent = `Sensor: ${camada.sensor}`;
-      document.getElementById('nasa-crosshair-marker').style.display =
-        activeNasaLayerKey === 'epic_disco_global' ? 'none' : 'flex';
+    // Atualizar o overlay do Mapa Principal com a última varredura PRSF
+    const prsfFrames = (rf.produtos_radar && rf.produtos_radar.prsf && rf.produtos_radar.prsf.frames) || [];
+    if (prsfFrames.length > 0 && mainRadarOverlay) {
+      const latestFrame = prsfFrames[prsfFrames.length - 1];
+      mainRadarOverlay.setUrl(latestFrame.url);
     }
 
-    document.getElementById('nasa-api-badge').textContent =
-      `API NASA: ${nasa.api_key_configurada} (${nasa.status_conexao})`;
+    // Atualizar player do Radar
+    atualizarProdutoRadarSelecionado();
 
-    const badge = document.getElementById('nasa-cross-badge');
-    badge.textContent = cruz.status_cruzamento;
-    badge.style.background = cruz.cor_hex;
+    // Marcadores das 11 estações e dos 4 corredores no mapa do Radar
+    if (radarMap) {
+      radarStationsLayer.clearLayers();
+      radarCorridorsLayer.clearLayers();
 
-    document.getElementById('kpi-nasa-status').textContent =
-      cruz.chuva_1h_max_dc_mm >= 15 ? 'CONVERGÊNCIA ATIVA' : 'SINCRONIZADO';
-    document.getElementById('kpi-nasa-status').style.color = cruz.cor_hex;
+      stateData.estacoes_defesa_civil.forEach(est => {
+        const dot = L.circleMarker([est.latitude, est.longitude], {
+          radius: 4.5,
+          color: '#ffffff',
+          weight: 1.5,
+          fillColor: est.cor_pluviometrica || '#10b981',
+          fillOpacity: 0.95
+        });
+        dot.bindTooltip(
+          `<b>PCD ${est.nome_curto}</b><br/>Solo 5m: ${est.chuva_5m_mm} mm | Radar: ${est.dbz_radar ?? '--'} dBZ (${est.taxa_chuva_radar_mm_h || 0} mm/h)`,
+          { direction: 'top' }
+        );
+        radarStationsLayer.addLayer(dot);
+      });
 
-    document.getElementById('nasa-cross-desc').textContent = cruz.diagnostico_tecnico;
-    document.getElementById('nasa-m-cloud').textContent = `${pwr.nebulosidade_orbital_estimada_pct}%`;
-    document.getElementById('nasa-m-rain5m').textContent = `${cruz.chuva_5m_max_dc_mm} mm / 5min`;
-    document.getElementById('nasa-m-rain5m').style.color = cruz.cor_hex;
-    document.getElementById('nasa-m-rain1h').textContent =
-      `${cruz.chuva_1h_max_dc_mm} mm (Méd: ${cruz.chuva_1h_media_dc_mm} mm)`;
-    document.getElementById('nasa-m-humi').textContent =
-      `${pwr.umidade_sinotica_nasa_pct}% / ${cruz.umidade_media_dc_pct}%`;
-    document.getElementById('nasa-m-pres').textContent =
-      `${cruz.pressao_media_dc_hpa} hPa / ${cruz.temperatura_media_dc_c}°C`;
-    document.getElementById('nasa-m-rad').textContent =
-      `${pwr.irradiancia_solar_nasa_wm2} W/m² • ${cruz.vento_medio_dc_kmh} km/h`;
+      corredores.forEach(c => {
+        const cMarker = L.circleMarker([c.latitude, c.longitude], {
+          radius: 6,
+          color: c.cor_hex || '#38bdf8',
+          weight: 2,
+          fillColor: c.cor_hex || '#38bdf8',
+          fillOpacity: 0.35
+        });
+        cMarker.bindTooltip(
+          `<b>${c.setor}</b> (${c.distancia_km} km)<br/>Refletividade: ${c.dbz ?? 'Sem eco'} dBZ • Taxa: ${c.taxa_chuva_mm_h} mm/h`,
+          { direction: 'top' }
+        );
+        radarCorridorsLayer.addLayer(cMarker);
+      });
+    }
+
+    // Badges e Métricas de Mensuração Radar × Pluviômetros
+    document.getElementById('radar-api-badge').textContent =
+      `RADAR ${rf.radar_id} (${rf.status_conexao}) • ${rf.total_frames || 20} VARREDURAS`;
+
+    const badge = document.getElementById('radar-cross-badge');
+    badge.textContent = cruz.status_cruzamento || 'SINCRONIZADO';
+    badge.style.background = cruz.cor_hex || '#10b981';
+
+    const kpiRadar = document.getElementById('kpi-radar-status');
+    kpiRadar.textContent = cruz.status_cruzamento || 'SINCRONIZADO';
+    kpiRadar.style.color = cruz.cor_hex || '#38bdf8';
+    document.getElementById('kpi-radar-sub').textContent =
+      `Radar ${rf.radar_id}: Máx ${mens.dbz_max_fortaleza ?? 0} dBZ (${mens.taxa_chuva_radar_max_mm_h || 0} mm/h) • Última: ${rf.ultima_varredura_brt || '--'}`;
+
+    document.getElementById('radar-cross-desc').textContent = cruz.diagnostico_tecnico || '';
+
+    const dbzMax = mens.dbz_max_fortaleza !== null && mens.dbz_max_fortaleza !== undefined
+      ? `${mens.dbz_max_fortaleza} dBZ`
+      : 'Sem eco (>0 dBZ)';
+    document.getElementById('radar-m-dbz').textContent = `${dbzMax} (${mens.estacao_maior_eco_radar || 'RMF'})`;
+    document.getElementById('radar-m-dbz').style.color = cruz.cor_hex || '#38bdf8';
+
+    document.getElementById('radar-m-rate').textContent =
+      `${mens.taxa_chuva_radar_max_mm_h || 0} mm/h (${mens.chuva_radar_5m_max_mm || 0} mm/5m)`;
+    document.getElementById('radar-m-rate').style.color = cruz.cor_hex || '#10b981';
+
+    document.getElementById('radar-m-rain5m').textContent =
+      `${cruz.chuva_5m_max_dc_mm || 0} mm / 5min`;
+    document.getElementById('radar-m-rain1h').textContent =
+      `${cruz.chuva_1h_max_dc_mm || 0} mm (Méd: ${cruz.chuva_1h_media_dc_mm || 0} mm)`;
+
+    const etaTxt = mens.eta_frente_min
+      ? `${mens.vetor_deslocamento || 'Leste → Oeste'} (ETA ~${mens.eta_frente_min} min)`
+      : `${mens.vetor_deslocamento || 'Leste → Oeste'} (Sem núcleos severos)`;
+    document.getElementById('radar-m-eta').textContent = etaTxt;
+
+    document.getElementById('radar-m-atm').textContent =
+      `${cruz.umidade_media_dc_pct || '--'}% • ${cruz.pressao_media_dc_hpa || '--'} hPa`;
+
+    // Renderizar os 4 Corredores de Aproximação (Deslocamento de Eventos para a Cidade)
+    const corrGrid = document.getElementById('radar-corridors-grid');
+    corrGrid.innerHTML = '';
+    corredores.forEach(c => {
+      const card = document.createElement('div');
+      card.className = 'corridor-card';
+      card.style.borderLeftColor = c.cor_hex || '#10b981';
+      const dbzStr = (c.dbz !== null && c.dbz !== undefined && c.dbz > 5) ? `${c.dbz} dBZ` : '0 dBZ';
+      card.innerHTML = `
+        <span>${c.setor} (${c.distancia_km} km)</span>
+        <strong style="color:${c.cor_hex || '#10b981'}">${dbzStr} • ${c.taxa_chuva_mm_h} mm/h (${c.classe_eco})</strong>
+      `;
+      corrGrid.appendChild(card);
+    });
   }
 
-  // 9. RENDERIZAR LISTA DE BAIRROS COM ENDEREÇO DA ESTAÇÃO E PLUVIOMETRIA A CADA 5 MIN (PADRÃO DCCALOR)
+  // 9. RENDERIZAR LISTA DE BAIRROS COM ENDEREÇO DA ESTAÇÃO, PLUVIOMETRIA 5 MIN E MENSURAÇÃO RADAR (PADRÃO DCCALOR)
   function renderizarListaBairrosPluviometria() {
     if (!stateData) return;
     const container = document.getElementById('bairro-ranking-list');
@@ -1532,6 +1905,10 @@
         ? `<span class="level-badge" style="background:#0284c7">Canal: ${est.nivel_liquido_sonico_m}m</span>`
         : '';
 
+      const radarDbz = (est.dbz_radar !== null && est.dbz_radar !== undefined && est.dbz_radar > 5)
+        ? `${est.dbz_radar} dBZ (${est.taxa_chuva_radar_mm_h || 0} mm/h)`
+        : `0 dBZ (0.0 mm/h)`;
+
       item.innerHTML = `
         <div class="bairro-item-left">
           <div class="bairro-item-title">
@@ -1549,7 +1926,7 @@
             ${Number(est.chuva_5m_mm || 0).toFixed(1)} mm <span style="font-size:0.68rem;font-weight:700;opacity:0.8">/ 5m</span>
           </div>
           <div class="bairro-rain-sub">
-            1h: <b>${Number(est.chuva_1h_estimada_mm || 0).toFixed(1)} mm</b> • 24h: <b>${Number(est.chuva_24h_mm || 0).toFixed(1)} mm</b>
+            1h: <b>${Number(est.chuva_1h_estimada_mm || 0).toFixed(1)} mm</b> • Radar: <b style="color:#38bdf8">${radarDbz}</b>
           </div>
           <div class="pluv-bar-bg" title="Nível Pluviométrico Automático (${est.indice_saturacao_pluviometrica_pct || 0}%)">
             <div class="pluv-bar-fill" style="width:${Math.max(6, est.indice_saturacao_pluviometrica_pct || 0)}%;background:${est.cor_pluviometrica || '#10b981'}"></div>
@@ -1585,11 +1962,11 @@
       document.getElementById('ref-pluv-station').textContent =
         `Ref. Pluviométrica: ${topEst.bairro} (${topEst.endereco_referencia.split('—')[0].trim()})`;
       document.getElementById('ref-pluv-value').textContent =
-        `5 min: ${Number(topEst.chuva_5m_mm || 0).toFixed(1)} mm | 1h: ${Number(topEst.chuva_1h_estimada_mm || 0).toFixed(1)} mm`;
+        `Solo 5m: ${Number(topEst.chuva_5m_mm || 0).toFixed(1)} mm | Radar: ${Number(topEst.taxa_chuva_radar_mm_h || 0).toFixed(1)} mm/h`;
     }
   }
 
-  // 10. RENDERIZAR MAPA GEORREFERENCIADO
+  // 10. RENDERIZAR MAPA GEORREFERENCIADO PRINCIPAL
   function renderizarMapa() {
     if (!map || !stateData) return;
     stationsLayer.clearLayers();
@@ -1625,13 +2002,15 @@
       const sonicLine = est.nivel_liquido_sonico_m !== null
         ? `<br/><b>Nível Sônico Canal (20M):</b> ${est.nivel_liquido_sonico_m} m`
         : '';
+      const radarLine = `<br/><b>Mensuração Radar FUNCEME:</b> ${est.dbz_radar ?? 0} dBZ → ${est.taxa_chuva_radar_mm_h || 0} mm/h (${est.classe_eco_radar || 'Sem Eco'})`;
       marker.bindPopup(`
-        <div style="font-family:sans-serif;font-size:12px;line-height:1.45;min-width:240px">
+        <div style="font-family:sans-serif;font-size:12px;line-height:1.45;min-width:250px">
           <strong style="color:#003594;font-size:13px">${est.nome}</strong><br/>
           <span style="color:#0284c7;font-size:11px;font-weight:700">📍 Ref: ${est.endereco_referencia}</span><br/>
           <span style="color:#64748b;font-size:11px">ID Plugfield: ${est.plugfield_id} • Bacia: ${est.bacia_hidrografica}</span>
           <hr style="margin:6px 0;border:none;border-top:1px solid #e2e8f0"/>
-          <b>Pluviometria (5m / 10m / 1h / 24h):</b> ${est.chuva_5m_mm} / ${est.chuva_10m_mm} / ${est.chuva_1h_estimada_mm} / ${est.chuva_24h_mm} mm<br/>
+          <b>Pluviometria Solo (5m / 10m / 1h / 24h):</b> ${est.chuva_5m_mm} / ${est.chuva_10m_mm} / ${est.chuva_1h_estimada_mm} / ${est.chuva_24h_mm} mm
+          ${radarLine}<br/>
           <b>Bairros Cobertos:</b> ${est.bairros_secundarios.join(', ')}<br/>
           <b>Temperatura / Umidade:</b> ${est.temperatura_c}°C / ${est.umidade_pct}%<br/>
           <b>Vento / Rajada:</b> ${est.vento_kmh} km/h / ${est.rajada_kmh} km/h (${est.direcao_vento_cardeal})<br/>
@@ -1750,7 +2129,7 @@
     document.getElementById('insp-n3-prob').textContent =
       `${n3.probabilidade_60m_pct}% (${n3.lead_time_estimado_min} min)`;
     document.getElementById('insp-n3-meta').textContent =
-      `Nowcast 60m: ${n3.nowcast_60m_mm} mm → Lâmina: ${n3.lamina_prevista_60m_cm} cm`;
+      `Nowcast 60m (Solo + Radar): ${n3.nowcast_60m_mm} mm → Lâmina: ${n3.lamina_prevista_60m_cm} cm`;
 
     document.getElementById('insp-chuva').textContent =
       `${n2.chuva_5m_idw_mm || 0} / ${n2.chuva_1h_idw_mm} / ${n2.chuva_24h_idw_mm} mm`;
@@ -1775,6 +2154,9 @@
       const sonicBadge = est.nivel_liquido_sonico_m !== null
         ? `<b style="color:#38bdf8">${est.nivel_liquido_sonico_m} m</b>`
         : '<span style="color:var(--muted)">—</span>';
+      const radarCol = (est.dbz_radar !== null && est.dbz_radar !== undefined && est.dbz_radar > 5)
+        ? `<b style="color:#38bdf8">${est.dbz_radar} dBZ</b> (${est.taxa_chuva_radar_mm_h || 0} mm/h)`
+        : `<span style="color:var(--muted)">0 dBZ (0.0 mm/h)</span>`;
       tr.innerHTML = `
         <td><code>${est.plugfield_id}</code></td>
         <td>
@@ -1784,12 +2166,12 @@
         <td style="font-size:0.76rem;color:#38bdf8;font-weight:700">${est.endereco_referencia || '—'}</td>
         <td>${est.bacia_hidrografica}</td>
         <td><b>${est.chuva_5m_mm} mm</b></td>
+        <td>${radarCol}</td>
         <td><b>${est.chuva_10m_mm} mm</b></td>
         <td><b>${est.chuva_1h_estimada_mm} mm</b></td>
         <td>${est.chuva_24h_mm} mm</td>
         <td>${est.chuva_ano_mm} mm</td>
-        <td>${est.temperatura_c}°C / ${est.sensacao_termica_c}°C</td>
-        <td>${est.umidade_pct}%</td>
+        <td>${est.temperatura_c}°C / ${est.umidade_pct}%</td>
         <td>${est.vento_kmh} / ${est.rajada_kmh} km/h (${est.direcao_vento_cardeal})</td>
         <td>${est.pressao_hpa} hPa</td>
         <td>${sonicBadge}</td>
