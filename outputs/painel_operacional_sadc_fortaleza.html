@@ -996,7 +996,7 @@
               <img id="radar-legend-img" src="/legenda_chuva_agora.png" alt="Legenda Oficial Radar FUNCEME" />
             </div>
 
-            <!-- Controles de Animação Temporal (20 Varreduras de 5 em 5 Minutos) -->
+            <!-- Controles de Animação Temporal (20 Varreduras de 5 em 5 Minutos) + Seletor Opcional de Imagem de Satélite -->
             <div class="radar-player-bar" id="radar-player-controls">
               <button type="button" class="radar-ctrl-btn active" id="radar-btn-play" title="Reproduzir / Pausar animação de deslocamento de células de chuva">⏸ Play</button>
               <button type="button" class="radar-ctrl-btn" id="radar-btn-prev" title="Varredura anterior (-5 min)">⏮</button>
@@ -1004,9 +1004,16 @@
               <input type="range" id="radar-frame-slider" class="radar-slider" min="0" max="19" value="19" />
               <span class="radar-time-tag" id="radar-frame-counter">20 / 20</span>
               <select id="radar-speed-select" class="radar-ctrl-btn" style="padding:3px 6px" title="Velocidade da animação do radar (padrão FUNCEME: 2)">
-                <option value="900">Vel. 1x (Lenta)</option>
-                <option value="500" selected>Vel. 2x (Padrão FUNCEME)</option>
-                <option value="250">Vel. 3x (Rápida)</option>
+                <option value="900">Vel. 1x</option>
+                <option value="500" selected>Vel. 2x</option>
+                <option value="250">Vel. 3x</option>
+              </select>
+              <select id="radar-basemap-select" class="radar-ctrl-btn" style="padding:3px 6px" title="Design opcional do mapa de fundo do Radar FUNCEME (incluindo Imagem de Satélite)">
+                <option value="carto_dark" selected>Fundo: Escuro Radar</option>
+                <option value="satelite_hibrido">🛰️ Fundo: Satélite + Rótulos</option>
+                <option value="satelite_puro">🛰️ Fundo: Imagem de Satélite</option>
+                <option value="carto_light">Fundo: CARTO Light</option>
+                <option value="carto_voyager">Fundo: CARTO Voyager</option>
               </select>
             </div>
           </div>
@@ -1066,14 +1073,17 @@
 
       <!-- GRID PRINCIPAL: MAPA GEORREFERENCIADO (ESQUERDA) + LISTA DE BAIRROS & ENDEREÇOS DE REFERÊNCIA (DIREITA) -->
       <div class="main-split">
-        <!-- Coluna Esquerda: Mapa Leaflet com Chave Pública CARTO Oficial + Feixe do Radar FUNCEME -->
+        <!-- Coluna Esquerda: Mapa Leaflet com Chave Pública CARTO Oficial + Opção Imagem de Satélite + Feixe do Radar FUNCEME -->
         <div class="card">
           <div class="card-header">
             <span class="card-title">Mapa Georreferenciado — 11 Estações Defesa Civil, Feixe Radar &amp; Pontos Críticos</span>
             <div class="map-layer-bar">
-              <select id="basemap-select" class="sim-select" style="padding:4px 8px;font-size:0.72rem" title="Selecionar estilo do mapa base (Chave CARTO Oficial integrada)">
+              <select id="basemap-select" class="sim-select" style="padding:4px 8px;font-size:0.72rem" title="Selecionar estilo do mapa base (CARTO Oficial ou Imagem de Satélite)">
                 <option value="carto_light">Mapa: CARTO Light (Chave Oficial DCCALOR)</option>
+                <option value="satelite_hibrido">🛰️ Mapa: Imagem de Satélite + Rótulos (Híbrido)</option>
+                <option value="satelite_puro">🛰️ Mapa: Imagem de Satélite Pura (Esri)</option>
                 <option value="carto_voyager">Mapa: CARTO Voyager Detalhado</option>
+                <option value="carto_dark">Mapa: CARTO Escuro (Noturno)</option>
                 <option value="osm">Mapa: OpenStreetMap Oficial</option>
               </select>
               <label title="Sobrepor imagem em tempo real do Radar FUNCEME sobre o mapa de Fortaleza"><input type="checkbox" id="chk-radar-main" checked /> Feixe Radar FUNCEME</label>
@@ -1093,7 +1103,7 @@
               <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f97316;margin-left:8px;margin-right:4px"></span> Alerta
               <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-left:8px;margin-right:4px"></span> Alarme
             </div>
-            <div>Chave CARTO + Radar FUNCEME Ativos • Clique em qualquer bairro ou estação para focar</div>
+            <div>Chave CARTO + Satélite + Radar FUNCEME Ativos • Clique em qualquer bairro ou estação para focar</div>
           </div>
         </div>
 
@@ -1121,64 +1131,6 @@
             <span id="ref-pluv-station">Ref. Máxima Pluviométrica: --</span>
             <span id="ref-pluv-value" style="color:#38bdf8">Ciclo Automático: 5 min (0.0 mm)</span>
           </div>
-        </div>
-      </div>
-
-      <!-- SEÇÃO INFERIOR: DIAGNÓSTICO DETALHADO POR PONTO CRÍTICO / MICROBACIA EM 3 NÍVEIS -->
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <span class="card-title">Diagnóstico Hidrológico por Ponto Crítico / Microbacia (3 Níveis)</span>
-            <span style="font-size:0.73rem;color:var(--muted);margin-left:8px">★ = Áreas-Piloto Obrigatórias (Jacarecanga, Padre Andrade, Aldeota e Itaoca)</span>
-          </div>
-          <div class="pilot-selector" id="pilot-buttons" style="margin-bottom:0"></div>
-        </div>
-
-        <div id="point-status-banner" class="status-banner"></div>
-
-        <div class="levels-grid-6">
-          <div class="level-card">
-            <h4>Nível 1 • Suscetibilidade Estática</h4>
-            <div class="level-big" id="insp-n1-classe">--</div>
-            <div class="level-meta" id="insp-n1-meta">--</div>
-          </div>
-          <div class="level-card">
-            <h4>Nível 2 • Probabilidade Tempo Real</h4>
-            <div class="level-big" id="insp-n2-prob">--</div>
-            <div class="level-meta" id="insp-n2-meta">--</div>
-          </div>
-          <div class="level-card">
-            <h4>Nível 3 • Antecipação (30–60 min)</h4>
-            <div class="level-big" id="insp-n3-prob">--</div>
-            <div class="level-meta" id="insp-n3-meta">--</div>
-          </div>
-          <div class="level-card">
-            <h4>Pluviometria IDW (5m / 1h / 24h)</h4>
-            <div class="level-big" id="insp-chuva">--</div>
-            <div class="level-meta" id="insp-limiares">--</div>
-          </div>
-          <div class="level-card">
-            <h4>Drenagem &amp; Remanso de Maré</h4>
-            <div class="level-big" id="insp-drenagem">--</div>
-            <div class="level-meta" id="insp-remanso">--</div>
-          </div>
-          <div class="level-card">
-            <h4>Validação Visual PMPU &amp; 40199</h4>
-            <div class="level-big" id="insp-cameras">--</div>
-            <div class="level-meta" id="insp-chamados">--</div>
-          </div>
-        </div>
-
-        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px;flex-wrap:wrap;gap:10px">
-          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:var(--muted)">
-            Retroalimentação Operacional Obrigatória (Auditoria COMDEC / 40199):
-          </div>
-          <div class="feedback-actions" style="margin-top:0">
-            <button type="button" class="btn-action" onclick="registrarFeedback('CONFIRMADO_POSITIVO_CAMERA')">✓ Confirmar Alagamento (Câmera PMPU)</button>
-            <button type="button" class="btn-action" onclick="registrarFeedback('FALSO_ALARME_DRENAGEM_OK')">✕ Descartar Falso Alarme</button>
-            <button type="button" class="btn-action" onclick="registrarFeedback('ENCAMINHADO_EMLURB_LIMPEZA')">⚙ Solicitar Desobstrução Emlurb</button>
-          </div>
-          <div id="feedback-toast" style="font-size:0.75rem;color:#10b981;font-weight:700;min-height:18px"></div>
         </div>
       </div>
     </section>
@@ -1339,6 +1291,7 @@
   // Estado do Player Dinâmico do Radar FUNCEME (GMWR1000SST — 20 frames de 5 em 5 min)
   let activeRadarProductKey = 'prsf';
   let radarMap = null;
+  let radarBaseTileLayer = null;
   let radarOverlayLayer = null;
   let radarStationsLayer = L.layerGroup();
   let radarCorridorsLayer = L.layerGroup();
@@ -1359,6 +1312,59 @@
   let municipioLayer = null;
   let bairrosLayer = null;
   let countdownSeconds = 300; // Ciclo automático de 5 minutos (300 segundos)
+
+  // Construtor compartilhado de camadas base (CARTO Oficial + Imagem de Satélite Esri Híbrida/Pura + OSM)
+  function criarCamadaBaseLeaflet(estilo) {
+    const esriSatUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+    const esriAttr = 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, CNES/Airbus DS';
+    const cartoAttr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
+    if (estilo === 'satelite_hibrido') {
+      const imgLayer = L.tileLayer(esriSatUrl, { attribution: esriAttr, maxZoom: 19 });
+      const labelsLayer = L.tileLayer(
+        `https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`,
+        { subdomains: 'abcd', maxZoom: 20, opacity: 0.92 }
+      );
+      return L.layerGroup([imgLayer, labelsLayer]);
+    }
+    if (estilo === 'satelite_puro') {
+      return L.tileLayer(esriSatUrl, { attribution: esriAttr, maxZoom: 19 });
+    }
+    if (estilo === 'carto_dark') {
+      return L.tileLayer(
+        `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`,
+        { attribution: cartoAttr, subdomains: 'abcd', maxZoom: 20 }
+      );
+    }
+    if (estilo === 'carto_voyager') {
+      return L.tileLayer(
+        `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`,
+        { attribution: cartoAttr, subdomains: 'abcd', maxZoom: 20 }
+      );
+    }
+    if (estilo === 'osm') {
+      return L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        { attribution: '&copy; OpenStreetMap contributors', maxZoom: 19 }
+      );
+    }
+    // Padrão: carto_light com chave pública oficial
+    return L.tileLayer(
+      `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`,
+      { attribution: cartoAttr, subdomains: 'abcd', maxZoom: 20 }
+    );
+  }
+
+  function definirCamadaBaseRadar(estilo) {
+    if (!radarMap) return;
+    if (radarBaseTileLayer) {
+      radarMap.removeLayer(radarBaseTileLayer);
+    }
+    radarBaseTileLayer = criarCamadaBaseLeaflet(estilo).addTo(radarMap);
+    if (radarOverlayLayer && radarOverlayLayer.bringToFront) {
+      radarOverlayLayer.bringToFront();
+    }
+  }
 
   // 1. AUTENTICAÇÃO PADRÃO (admindc)
   document.getElementById('login-form').addEventListener('submit', function(e) {
@@ -1506,10 +1512,11 @@
       attributionControl: false
     }).setView([-3.78, -38.50], 9);
 
-    L.tileLayer(`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`, {
-      subdomains: 'abcd',
-      maxZoom: 18
-    }).addTo(radarMap);
+    definirCamadaBaseRadar('carto_dark');
+
+    document.getElementById('radar-basemap-select').addEventListener('change', e => {
+      definirCamadaBaseRadar(e.target.value);
+    });
 
     // Anel de cobertura do Radar RMF Fortaleza (Eusébio: -3.89299, -38.45739)
     L.circle([-3.89299, -38.45739], {
@@ -1610,27 +1617,16 @@
     renderizarListaBairrosPluviometria();
   });
 
-  // 6. INICIALIZAR MAPA LEAFLET PRINCIPAL COM CHAVE PÚBLICA CARTO OFICIAL E LIMITES DE FORTALEZA
+  // 6. INICIALIZAR MAPA LEAFLET PRINCIPAL COM CHAVE PÚBLICA CARTO OFICIAL, OPÇÃO SATÉLITE E LIMITES DE FORTALEZA
   function definirCamadaBaseMapa(estilo) {
     if (!map) return;
     if (baseTileLayer) {
       map.removeLayer(baseTileLayer);
     }
-    let tileUrl = `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`;
-    let attr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
-
-    if (estilo === 'carto_voyager') {
-      tileUrl = `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`;
-    } else if (estilo === 'osm') {
-      tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-      attr = '&copy; OpenStreetMap contributors';
+    baseTileLayer = criarCamadaBaseLeaflet(estilo).addTo(map);
+    if (mainRadarOverlay && mainRadarOverlay.bringToFront) {
+      mainRadarOverlay.bringToFront();
     }
-
-    baseTileLayer = L.tileLayer(tileUrl, {
-      attribution: attr,
-      subdomains: 'abcd',
-      maxZoom: 20
-    }).addTo(map);
   }
 
   function initMap() {
@@ -1762,8 +1758,6 @@
     renderizarPainelRadarFunceme();
     renderizarMapa();
     renderizarListaBairrosPluviometria();
-    renderizarBotoesPiloto();
-    renderizarInspetorPonto(selectedPointId);
     renderizarTabelaEstacoes();
   }
 
@@ -1942,15 +1936,6 @@
           const m = stationMarkersById[est.plugfield_id];
           if (m) m.openPopup();
         }
-        // Sincronizar também o Ponto Crítico mais próximo dessa estação
-        const pcAssociado = stateData.pontos_criticos.find(
-          p => p.estacao_mais_proxima.toLowerCase() === est.nome_curto.toLowerCase()
-        );
-        if (pcAssociado) {
-          selectedPointId = pcAssociado.id_ponto;
-          renderizarBotoesPiloto();
-          renderizarInspetorPonto(selectedPointId);
-        }
       });
 
       container.appendChild(item);
@@ -2002,7 +1987,7 @@
       const sonicLine = est.nivel_liquido_sonico_m !== null
         ? `<br/><b>Nível Sônico Canal (20M):</b> ${est.nivel_liquido_sonico_m} m`
         : '';
-      const radarLine = `<br/><b>Mensuração Radar FUNCEME:</b> ${est.dbz_radar ?? 0} dBZ → ${est.taxa_chuva_radar_mm_h || 0} mm/h (${est.classe_eco_radar || 'Sem Eco'})`;
+      const radarLine = `<br/><b>Mensuração Radar FUNCEME:</b> ${est.dbz_radar ?? 0} dBZ → ${est.taxa_chuva_radar_mm_h || 0} mm/h (${est.eco_radar_rotulo || 'Sem Eco'})`;
       marker.bindPopup(`
         <div style="font-family:sans-serif;font-size:12px;line-height:1.45;min-width:250px">
           <strong style="color:#003594;font-size:13px">${est.nome}</strong><br/>
@@ -2059,8 +2044,6 @@
       const m = L.marker([pc.latitude, pc.longitude], { icon });
       m.on('click', () => {
         selectedPointId = pc.id_ponto;
-        renderizarBotoesPiloto();
-        renderizarInspetorPonto(selectedPointId);
         renderizarMapa();
       });
       m.bindTooltip(
@@ -2069,81 +2052,6 @@
       );
       pointsLayer.addLayer(m);
     });
-  }
-
-  function renderizarBotoesPiloto() {
-    const container = document.getElementById('pilot-buttons');
-    container.innerHTML = '';
-    stateData.pontos_criticos.forEach(pc => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'pilot-pill' + (pc.id_ponto === selectedPointId ? ' active' : '');
-      btn.onclick = () => {
-        selectedPointId = pc.id_ponto;
-        renderizarBotoesPiloto();
-        renderizarInspetorPonto(pc.id_ponto);
-        renderizarMapa();
-        if (map) map.panTo([pc.latitude, pc.longitude]);
-      };
-      btn.innerHTML = `
-        <span>${pc.eh_piloto ? '★ ' : ''}${pc.bairro}</span>
-        <span class="level-badge" style="background:${pc.decisao_operacional.cor_hex}">${pc.decisao_operacional.nivel}</span>
-      `;
-      container.appendChild(btn);
-    });
-  }
-
-  function renderizarInspetorPonto(idPonto) {
-    const pc = stateData.pontos_criticos.find(x => x.id_ponto === idPonto) || stateData.pontos_criticos[0];
-    if (!pc) return;
-
-    const dec = pc.decisao_operacional;
-    const n1 = pc.nivel1_estatico;
-    const n2 = pc.nivel2_tempo_real;
-    const n3 = pc.nivel3_antecipacao;
-
-    const banner = document.getElementById('point-status-banner');
-    banner.style.borderLeftColor = dec.cor_hex;
-    banner.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
-        <strong style="font-size:0.94rem">${pc.nome}</strong>
-        <span class="level-badge" style="background:${dec.cor_hex}">${dec.nivel}</span>
-      </div>
-      <div style="font-size:0.79rem;margin-bottom:4px"><b>Ação Defesa Civil:</b> ${dec.acao_defesa_civil}</div>
-      <div style="font-size:0.73rem;color:var(--muted)">
-        <b>Estação de Referência IDW:</b> PCD ${pc.estacao_mais_proxima} (${pc.dist_estacao_km} km • ${pc.endereco_estacao_proxima || ''}) •
-        <b>Órgãos:</b> ${dec.orgaos_acionados.join(', ')}
-      </div>
-    `;
-
-    document.getElementById('insp-n1-classe').textContent =
-      `${n1.classe_risco} (${n1.score_suscetibilidade}/100)`;
-    document.getElementById('insp-n1-meta').textContent =
-      `Cota: ${pc.cota_m}m • Impermeab.: ${pc.impermeabilizacao_pct}% • Pop.: ~${pc.populacao_exposta}`;
-
-    document.getElementById('insp-n2-prob').textContent = `${n2.probabilidade_alagamento_pct}%`;
-    document.getElementById('insp-n2-prob').style.color = dec.cor_hex;
-    document.getElementById('insp-n2-meta').textContent =
-      `Lâmina: ${n2.lamina_observada_cm} cm • Vento: ${n2.vento_kmh} km/h`;
-
-    document.getElementById('insp-n3-prob').textContent =
-      `${n3.probabilidade_60m_pct}% (${n3.lead_time_estimado_min} min)`;
-    document.getElementById('insp-n3-meta').textContent =
-      `Nowcast 60m (Solo + Radar): ${n3.nowcast_60m_mm} mm → Lâmina: ${n3.lamina_prevista_60m_cm} cm`;
-
-    document.getElementById('insp-chuva').textContent =
-      `${n2.chuva_5m_idw_mm || 0} / ${n2.chuva_1h_idw_mm} / ${n2.chuva_24h_idw_mm} mm`;
-    document.getElementById('insp-limiares').textContent =
-      `Limiares (15m/1h/24h): ${n1.limiares_chuva_mm['15m']} / ${n1.limiares_chuva_mm['1h']} / ${n1.limiares_chuva_mm['24h']} mm`;
-
-    document.getElementById('insp-drenagem').textContent =
-      `Sobrecarga: ${(n2.razao_sobrecarga_drenagem * 100).toFixed(0)}%`;
-    document.getElementById('insp-remanso').textContent =
-      `Cap. Efetiva: ${n2.capacidade_efetiva_mm_h} mm/h • Remanso: ${n2.indice_remanso_mare}`;
-
-    document.getElementById('insp-cameras').textContent = pc.cameras_pmpu.join(', ');
-    document.getElementById('insp-chamados').textContent =
-      `Câmera Confirmada: ${n2.confirmacao_camera_pmpu ? 'SIM' : 'NÃO'} • 40199: ${n2.chamados_40199_1h}`;
   }
 
   function renderizarTabelaEstacoes() {
@@ -2179,23 +2087,6 @@
       `;
       tbody.appendChild(tr);
     });
-  }
-
-  async function registrarFeedback(acao) {
-    const pc = stateData.pontos_criticos.find(x => x.id_ponto === selectedPointId);
-    if (!pc) return;
-    const toast = document.getElementById('feedback-toast');
-    toast.textContent = `✓ Retroalimentação registrada para ${pc.bairro}: ${acao}`;
-    const tbody = document.getElementById('feedback-log-tbody');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${new Date().toLocaleTimeString('pt-BR')}</td>
-      <td><b>${pc.bairro} (${pc.id_ponto})</b></td>
-      <td><span class="level-badge" style="background:${pc.decisao_operacional.cor_hex}">${pc.decisao_operacional.nivel}</span></td>
-      <td><b>${acao}</b></td>
-    `;
-    tbody.prepend(tr);
-    setTimeout(() => { toast.textContent = ''; }, 4500);
   }
 </script>
 </body>
