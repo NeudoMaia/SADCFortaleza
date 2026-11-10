@@ -23,8 +23,17 @@ if str(SRC_DIR) not in sys.path:
 from sadc_fortaleza.data_pipeline.plugfield_client import processar_painel_tempo_real
 
 
+import socket
+
+
 class SADCThreadingHTTPServer(ThreadingHTTPServer):
-    allow_reuse_address = False
+    allow_reuse_address = True
+    daemon_threads = True
+
+
+class SADCThreadingHTTPServerV6(ThreadingHTTPServer):
+    address_family = socket.AF_INET6
+    allow_reuse_address = True
     daemon_threads = True
 
 
@@ -132,23 +141,38 @@ class SADCRequestHandler(BaseHTTPRequestHandler):
         self._send_file(PUBLIC_DIR / "index.html", "text/html; charset=utf-8", clear_cache=True)
 
 
-def iniciar_servidor(porta_principal: int = 3005, porta_espelho: int = 3006) -> None:
-    server_main = SADCThreadingHTTPServer(("0.0.0.0", porta_principal), SADCRequestHandler)
+def _iniciar_porta_dual_stack(porta: int, em_background: bool = True) -> SADCThreadingHTTPServer | None:
+    srv_v4 = None
+    try:
+        srv_v4 = SADCThreadingHTTPServer(("0.0.0.0", porta), SADCRequestHandler)
+        if em_background:
+            threading.Thread(target=srv_v4.serve_forever, daemon=True).start()
+    except OSError as exc:
+        print(f"[AVISO] IPv4 porta {porta}: {exc}", flush=True)
 
     try:
-        server_mirror = SADCThreadingHTTPServer(("0.0.0.0", porta_espelho), SADCRequestHandler)
-        t_mirror = threading.Thread(target=server_mirror.serve_forever, daemon=True)
-        t_mirror.start()
+        srv_v6 = SADCThreadingHTTPServerV6(("::1", porta), SADCRequestHandler)
+        threading.Thread(target=srv_v6.serve_forever, daemon=True).start()
     except OSError:
         pass
 
+    return srv_v4
+
+
+def iniciar_servidor(porta_principal: int = 3005, porta_espelho: int = 3006) -> None:
+    server_main = _iniciar_porta_dual_stack(porta_principal, em_background=False)
+    _iniciar_porta_dual_stack(porta_espelho, em_background=True)
+
     print("================================================================", flush=True)
-    print("  SADC-FORTALEZA v2.2 | Defesa Civil de Fortaleza + Radar FUNCEME", flush=True)
-    print(f"  Painel Dinâmico (Principal): http://localhost:{porta_principal}/?v=2.2", flush=True)
-    print(f"  Painel Dinâmico (Espelho)  : http://localhost:{porta_espelho}/", flush=True)
-    print("  Login padrão: admin.defesacivil | Senha padrão: admindc", flush=True)
+    print("  SADC-FORTALEZA v2.4 | Defesa Civil + Radar FUNCEME + Abrigos SME", flush=True)
+    print(f"  Painel Dinamico (Principal): http://localhost:{porta_principal}/?v=2.4", flush=True)
+    print(f"  Painel Dinamico (Espelho)  : http://localhost:{porta_espelho}/", flush=True)
+    print("  Login padrao: admin.defesacivil | Senha padrao: admindc", flush=True)
     print("================================================================", flush=True)
-    server_main.serve_forever()
+    if server_main is not None:
+        server_main.serve_forever()
+    else:
+        threading.Event().wait()
 
 
 if __name__ == "__main__":

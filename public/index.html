@@ -324,42 +324,29 @@
       margin-top: 4px;
     }
 
-    /* FUNCEME RADAR RMF (GMWR1000SST) DYNAMIC PANEL */
-    .radar-panel {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 15px;
-      margin-bottom: 16px;
-    }
-    .radar-grid {
+    /* SYMMETRIC SIDE-BY-SIDE MAPS: RADAR FUNCEME (LEFT) + PLUVIÔMETROS DEFESA CIVIL (RIGHT) */
+    .maps-symmetry-grid {
       display: grid;
-      grid-template-columns: 1.32fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 16px;
       align-items: stretch;
+      margin-bottom: 16px;
     }
     @media (max-width: 1150px) {
-      .radar-grid { grid-template-columns: 1fr; }
+      .maps-symmetry-grid { grid-template-columns: 1fr; }
     }
-    .radar-viewer-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      background: var(--bg-sub);
-      border: 1px solid var(--border);
+    .map-symmetric-stage {
+      width: 100%;
+      height: 430px;
       border-radius: 10px;
-      padding: 10px;
-    }
-    .radar-stage {
-      position: relative;
-      border-radius: 8px;
       overflow: hidden;
       border: 1px solid var(--border);
-      background: #020617;
-      height: 295px;
-      width: 100%;
+      position: relative;
+      background: #e2e8f0;
+      z-index: 1;
     }
-    #radar-funceme-map {
+    #radar-funceme-map,
+    #map-container {
       width: 100%;
       height: 100%;
     }
@@ -368,61 +355,46 @@
       height: 100%;
       border: none;
       display: none;
-      background: #0f172a;
+      background: #f8fafc;
     }
-    .radar-overlay-top {
-      position: absolute;
-      top: 8px;
-      left: 10px;
-      right: 10px;
-      z-index: 500;
-      pointer-events: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .radar-chip {
-      background: rgba(15, 23, 42, 0.88);
-      color: #f8fafc;
-      border: 1px solid rgba(56, 189, 248, 0.45);
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 0.7rem;
-      font-weight: 800;
-      backdrop-filter: blur(4px);
-    }
-    .radar-controls-bar {
+    .radar-player-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
       flex-wrap: wrap;
-      background: var(--bg-card);
+      background: var(--bg-sub);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 6px 10px;
+      margin-top: 10px;
     }
     .radar-ctrl-btn {
       padding: 4px 9px;
       border-radius: 6px;
       border: 1px solid var(--border);
-      background: var(--bg-sub);
+      background: var(--bg-card);
       color: var(--text);
       font-size: 0.72rem;
       font-weight: 800;
       cursor: pointer;
     }
-    .radar-ctrl-btn:hover {
+    .radar-ctrl-btn:hover, .radar-ctrl-btn.active {
       border-color: var(--accent);
       color: var(--accent);
     }
     .radar-slider {
       flex: 1;
-      min-width: 110px;
+      min-width: 90px;
       accent-color: #0284c7;
       cursor: pointer;
+    }
+    .radar-time-tag {
+      font-size: 0.71rem;
+      font-weight: 800;
+      color: #38bdf8;
+      white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
     }
     .radar-legend-bar {
       display: flex;
@@ -431,29 +403,35 @@
       gap: 10px;
       background: #ffffff;
       border-radius: 7px;
-      padding: 3px 10px;
+      padding: 4px 10px;
       border: 1px solid #cbd5e1;
+      margin-top: 8px;
+    }
+    .radar-legend-bar span {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #1e293b;
+      white-space: nowrap;
     }
     .radar-legend-bar img {
-      max-height: 36px;
+      max-height: 28px;
       width: auto;
       max-width: 100%;
       object-fit: contain;
       display: block;
-      margin: 0 auto;
     }
     .radar-layer-pills {
       display: flex;
-      gap: 6px;
+      gap: 5px;
       flex-wrap: wrap;
     }
     .radar-pill-btn {
-      padding: 5px 10px;
+      padding: 4px 9px;
       border-radius: 7px;
       border: 1px solid var(--border);
       background: var(--bg-sub);
       color: var(--muted);
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.15s;
@@ -463,76 +441,57 @@
       color: #fff;
       border-color: #38bdf8;
     }
-    .radar-cross-box {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 10px;
-      background: var(--bg-sub);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 13px;
-    }
-    .radar-metrics-grid {
+    .radar-metrics-strip {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 8px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 1200px) {
+      .radar-metrics-strip { grid-template-columns: repeat(3, 1fr); }
     }
     .radar-metric-item {
-      background: var(--bg-card);
+      background: var(--bg-sub);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 7px 9px;
+      padding: 7px 10px;
     }
     .radar-metric-item span {
       display: block;
-      font-size: 0.64rem;
+      font-size: 0.63rem;
       font-weight: 800;
       text-transform: uppercase;
       color: var(--muted);
     }
     .radar-metric-item strong {
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       font-weight: 900;
       margin-top: 2px;
       display: block;
     }
-    .corridor-list {
+    .corridor-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 1100px) {
+      .corridor-grid { grid-template-columns: repeat(2, 1fr); }
     }
     .corridor-card {
-      background: var(--bg-card);
+      background: var(--bg-sub);
       border: 1px solid var(--border);
       border-left: 3px solid #10b981;
       border-radius: 7px;
-      padding: 6px 8px;
+      padding: 6px 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 6px;
-    }
-    .corridor-card-title {
-      font-size: 0.68rem;
-      font-weight: 800;
-      color: var(--text);
-      line-height: 1.2;
-    }
-    .corridor-card-sub {
-      font-size: 0.63rem;
-      color: var(--muted);
-      font-weight: 600;
-    }
-    .corridor-card-val {
-      text-align: right;
-      font-size: 0.74rem;
-      font-weight: 900;
-      white-space: nowrap;
-    }
+      font-size: 0.72rem;
     }
 
-    /* MAIN SPLIT (MAP + NEIGHBORHOOD RANKING LIST) */
+    /* MAIN SPLIT (GENERIC TWO-COLUMN) */
     .main-split {
       display: grid;
       grid-template-columns: 1.48fr 1fr;
@@ -556,31 +515,22 @@
       justify-content: space-between;
       align-items: center;
       padding-bottom: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       border-bottom: 1px solid var(--border);
       gap: 8px;
       flex-wrap: wrap;
     }
     .card-title {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    #map-container {
-      width: 100%;
-      height: 580px;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      position: relative;
-      z-index: 1;
-    }
     .map-layer-bar {
       display: flex;
-      gap: 10px;
+      gap: 9px;
       flex-wrap: wrap;
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       font-weight: 700;
       color: var(--muted);
       align-items: center;
@@ -588,19 +538,22 @@
     .map-layer-bar label {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       cursor: pointer;
       user-select: none;
     }
 
-    /* NEIGHBORHOOD PLUVIOMETRY RANKING LIST (DCCALOR STYLE ADAPTED TO RAINFALL EVERY 5 MIN) */
+    /* STATIONS & PLUVIOMETRIC IMPACT LIST BELOW MAPS */
     .bairro-search-row {
       display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
+      gap: 10px;
+      margin-bottom: 12px;
+      align-items: center;
+      flex-wrap: wrap;
     }
     .bairro-search-input {
       flex: 1;
+      min-width: 260px;
       padding: 8px 12px;
       border-radius: 8px;
       border: 1px solid var(--border);
@@ -610,13 +563,13 @@
       outline: none;
     }
     .bairro-search-input:focus { border-color: var(--accent); }
-    .bairro-list-scroll {
-      height: 455px;
-      overflow-y: auto;
-      padding-right: 4px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .bairro-list-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 1050px) {
+      .bairro-list-grid { grid-template-columns: 1fr; }
     }
     .bairro-item {
       background: var(--bg-sub);
@@ -952,187 +905,154 @@
       </div>
     </section>
 
-    <!-- ABA 1: RADAR METEOROLÓGICO FUNCEME DINÂMICO + MAPA + LISTA DE BAIRROS (PADRÃO DCCALOR PLUVIOMETRIA 5 MIN) -->
+    <!-- ABA 1: MAPA DO RADAR FUNCEME & MAPA DOS PLUVIÔMETROS LADO A LADO EM SIMETRIA + LISTA DE ESTAÇÕES E IMPACTOS PLUVIOMÉTRICOS ABAIXO -->
     <section id="tab-mapa" class="tab-pane">
 
-      <!-- PAINEL SUPERIOR: RADAR METEOROLÓGICO FUNCEME (GMWR1000SST - FORTALEZA/RMF) DINÂMICO E MENSURAÇÃO DE PLUVIOMETRIA -->
-      <div class="radar-panel">
-        <div class="card-header" style="margin-bottom:10px">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <span class="card-title" style="color:#38bdf8">📡 Monitoramento Dinâmico por Radar Meteorológico FUNCEME (GMWR1000SST — Fortaleza/RMF)</span>
-            <span class="level-badge" style="background:#0284c7" id="radar-api-badge">RADAR FUNCEME AO VIVO • 20 VARREDURAS (5 MIN)</span>
-            <a href="https://radar.funceme.br/radar/GMWR1000SST/prsf/RADAR_FORTALEZARMF/20/true/2/0" target="_blank" rel="noopener noreferrer" style="font-size:0.72rem;color:#38bdf8;font-weight:700;text-decoration:underline">
-              ↗ Abrir Portal Radar FUNCEME Oficial
-            </a>
+      <!-- LINHA SUPERIOR SIMÉTRICA (50% / 50% LADO A LADO): MAPA DO RADAR FUNCEME (ESQUERDA) + MAPA DOS PLUVIÔMETROS (DIREITA) -->
+      <div class="maps-symmetry-grid">
+
+        <!-- COLUNA ESQUERDA (50%): MAPA DE CHUVA AGORA DO RADAR METEOROLÓGICO FUNCEME (TEMA CLARO ORIGINAL OU SATÉLITE, SEM TEXTO SOBRE A IMAGEM) -->
+        <div class="card">
+          <div class="card-header">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span class="card-title" style="color:#38bdf8">📡 Radar Meteorológico FUNCEME — Chuva Agora (RMF)</span>
+              <span class="level-badge" style="background:#0284c7" id="radar-api-badge">20 VARREDURAS (5 MIN)</span>
+            </div>
+            <div class="radar-layer-pills">
+              <button type="button" class="radar-pill-btn active" data-radar-prod="prsf">Chuva Agora (PRSF)</button>
+              <button type="button" class="radar-pill-btn" data-radar-prod="acum_horario">Acum. 1h</button>
+              <button type="button" class="radar-pill-btn" data-radar-prod="acum_diario">Acum. 24h</button>
+              <button type="button" class="radar-pill-btn" data-radar-prod="portal_funceme">Portal FUNCEME</button>
+            </div>
           </div>
-          <div class="radar-layer-pills">
-            <button type="button" class="radar-pill-btn active" data-radar-prod="prsf">1. Chuva Agora (PRSF • 20 Varreduras / 5 min)</button>
-            <button type="button" class="radar-pill-btn" data-radar-prod="acum_horario">2. Acumulado Horário (ACUM-H • mm/1h)</button>
-            <button type="button" class="radar-pill-btn" data-radar-prod="acum_diario">3. Acumulado Diário (ACUM-D • mm/24h)</button>
-            <button type="button" class="radar-pill-btn" data-radar-prod="portal_funceme">4. Portal FUNCEME Embutido</button>
+
+          <div class="map-symmetric-stage">
+            <div id="radar-funceme-map"></div>
+            <iframe id="radar-funceme-iframe" src="about:blank" title="Portal Oficial Radar FUNCEME"></iframe>
+          </div>
+
+          <!-- Barra de Controles de Animação Temporal e Seletor de Fundo (Tema Claro Original FUNCEME ou Satélite) -->
+          <div class="radar-player-bar" id="radar-player-controls">
+            <button type="button" class="radar-ctrl-btn active" id="radar-btn-play" title="Reproduzir / Pausar animação das 20 varreduras de 5 min">⏸ Play</button>
+            <button type="button" class="radar-ctrl-btn" id="radar-btn-prev" title="Varredura anterior (-5 min)">⏮</button>
+            <button type="button" class="radar-ctrl-btn" id="radar-btn-next" title="Próxima varredura (+5 min)">⏭</button>
+            <input type="range" id="radar-frame-slider" class="radar-slider" min="0" max="19" value="19" />
+            <span class="radar-time-tag" id="radar-frame-counter">20/20</span>
+            <span class="radar-time-tag" id="radar-frame-timestamp">--:-- BRT</span>
+            <select id="radar-speed-select" class="radar-ctrl-btn" style="padding:3px 6px" title="Velocidade da animação">
+              <option value="900">1x</option>
+              <option value="500" selected>2x</option>
+              <option value="250">3x</option>
+            </select>
+            <select id="radar-basemap-select" class="radar-ctrl-btn" style="padding:3px 6px" title="Tema Claro Original FUNCEME ou Imagem de Satélite">
+              <option value="osm" selected>Fundo: Tema Claro Original FUNCEME</option>
+              <option value="carto_light">Fundo: Tema Claro Limpo (CARTO)</option>
+              <option value="satelite_hibrido">🛰️ Fundo: Satélite + Rótulos</option>
+              <option value="satelite_puro">🛰️ Fundo: Imagem de Satélite</option>
+            </select>
+          </div>
+
+          <!-- Escala Oficial da FUNCEME Abaixo da Imagem (Imagem Limpa) -->
+          <div class="radar-legend-bar" id="radar-legend-box">
+            <span>Escala Oficial FUNCEME (dBZ / mm):</span>
+            <img id="radar-legend-img" src="/legenda_chuva_agora.png" alt="Legenda Oficial Radar FUNCEME" />
           </div>
         </div>
 
-        <div class="radar-grid">
-          <!-- Coluna Esquerda do Painel Radar: Mapa Georreferenciado Animado com 20 Frames das Imagens de Radar da FUNCEME -->
-          <div class="radar-map-wrap">
-            <div id="radar-funceme-map"></div>
-            <iframe id="radar-funceme-iframe" class="radar-iframe-view" src="about:blank" title="Portal Oficial Radar FUNCEME"></iframe>
-
-            <!-- Barra Superior sobre o Radar -->
-            <div class="radar-top-overlay" id="radar-top-overlay-bar">
-              <div class="radar-top-badge">
-                <span class="live-dot"></span>
-                <span id="radar-prod-title">Radar RMF Fortaleza (Eusébio) • Varredura PPI 5 min</span>
-              </div>
-              <div class="radar-top-badge">
-                <span id="radar-frame-timestamp" style="color:#38bdf8">--/--/---- --:-- BRT</span>
-              </div>
-            </div>
-
-            <!-- Legenda Oficial de Refletividade (dBZ) / Acumulado da FUNCEME -->
-            <div class="radar-legend-overlay" id="radar-legend-box">
-              <span>Escala Oficial FUNCEME (dBZ → Taxa de Chuva Marshall-Palmer Z=200R¹·⁶):</span>
-              <img id="radar-legend-img" src="/legenda_chuva_agora.png" alt="Legenda Oficial Radar FUNCEME" />
-            </div>
-
-            <!-- Controles de Animação Temporal (20 Varreduras de 5 em 5 Minutos) + Seletor Opcional de Imagem de Satélite -->
-            <div class="radar-player-bar" id="radar-player-controls">
-              <button type="button" class="radar-ctrl-btn active" id="radar-btn-play" title="Reproduzir / Pausar animação de deslocamento de células de chuva">⏸ Play</button>
-              <button type="button" class="radar-ctrl-btn" id="radar-btn-prev" title="Varredura anterior (-5 min)">⏮</button>
-              <button type="button" class="radar-ctrl-btn" id="radar-btn-next" title="Próxima varredura (+5 min)">⏭</button>
-              <input type="range" id="radar-frame-slider" class="radar-slider" min="0" max="19" value="19" />
-              <span class="radar-time-tag" id="radar-frame-counter">20 / 20</span>
-              <select id="radar-speed-select" class="radar-ctrl-btn" style="padding:3px 6px" title="Velocidade da animação do radar (padrão FUNCEME: 2)">
-                <option value="900">Vel. 1x</option>
-                <option value="500" selected>Vel. 2x</option>
-                <option value="250">Vel. 3x</option>
+        <!-- COLUNA DIREITA (50%): MAPA GEORREFERENCIADO DOS 11 PLUVIÔMETROS EM SIMETRIA COM O RADAR -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title" style="color:#38bdf8">📍 Mapa dos 11 Pluviômetros Automáticos (Defesa Civil)</span>
+            <div class="map-layer-bar">
+              <select id="basemap-select" class="sim-select" style="padding:4px 8px;font-size:0.71rem" title="Selecionar estilo do mapa base (Tema Claro ou Imagem de Satélite)">
+                <option value="carto_light" selected>Mapa: Tema Claro (Padrão)</option>
+                <option value="osm">Mapa: Tema Claro Original (OSM)</option>
+                <option value="satelite_hibrido">🛰️ Mapa: Satélite + Rótulos</option>
+                <option value="satelite_puro">🛰️ Mapa: Imagem de Satélite</option>
+                <option value="carto_voyager">Mapa: CARTO Voyager</option>
               </select>
-              <select id="radar-basemap-select" class="radar-ctrl-btn" style="padding:3px 6px" title="Design opcional do mapa de fundo do Radar FUNCEME (incluindo Imagem de Satélite)">
-                <option value="carto_dark" selected>Fundo: Escuro Radar</option>
-                <option value="satelite_hibrido">🛰️ Fundo: Satélite + Rótulos</option>
-                <option value="satelite_puro">🛰️ Fundo: Imagem de Satélite</option>
-                <option value="carto_light">Fundo: CARTO Light</option>
-                <option value="carto_voyager">Fundo: CARTO Voyager</option>
-              </select>
+              <label title="Sobrepor feixe do Radar FUNCEME"><input type="checkbox" id="chk-radar-main" checked /> Radar</label>
+              <label><input type="checkbox" id="chk-estacoes" checked /> 11 Pluviômetros</label>
+              <label><input type="checkbox" id="chk-pontos" checked /> Pontos Críticos</label>
+              <label><input type="checkbox" id="chk-raios" checked /> Raio 2km</label>
+              <label title="Exibir Escolas Municipais / Abrigos SME"><input type="checkbox" id="chk-abrigos" /> Abrigos SME</label>
+              <label><input type="checkbox" id="chk-bairros" /> Bairros</label>
             </div>
           </div>
 
-          <!-- Coluna Direita do Painel Radar: Mensuração Pluviométrica por Imagem de Radar × 11 Pluviômetros e 4 Corredores de Deslocamento -->
-          <div class="radar-cross-box">
-            <div>
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
-                <span style="font-size:0.73rem;font-weight:800;text-transform:uppercase;color:var(--muted)">
-                  Mensuração Pluviométrica via Imagem de Radar × 11 Estações Defesa Civil
-                </span>
-                <span class="level-badge" id="radar-cross-badge" style="background:#10b981">SEM ECOS DE CHUVA</span>
-              </div>
-              <p id="radar-cross-desc" style="font-size:0.78rem;line-height:1.42;color:var(--text)">
-                Sincronizando as 20 varreduras de 5 minutos do Radar FUNCEME (GMWR1000SST) e mensurando refletividade (dBZ) sobre as 11 estações automáticas...
-              </p>
-            </div>
+          <div class="map-symmetric-stage">
+            <div id="map-container"></div>
+          </div>
 
-            <div class="radar-metrics-grid">
-              <div class="radar-metric-item">
-                <span>Refletividade Máx Radar</span>
-                <strong id="radar-m-dbz" style="color:#38bdf8">-- dBZ</strong>
-              </div>
-              <div class="radar-metric-item">
-                <span>Chuva Mensurada (Radar)</span>
-                <strong id="radar-m-rate" style="color:#10b981">0.0 mm/h (0.0 mm/5m)</strong>
-              </div>
-              <div class="radar-metric-item">
-                <span>Chuva Solo (5 min DC)</span>
-                <strong id="radar-m-rain5m">0.0 mm / 5min</strong>
-              </div>
-              <div class="radar-metric-item">
-                <span>Chuva Solo (1h DC)</span>
-                <strong id="radar-m-rain1h">0.0 mm (Méd: 0.0 mm)</strong>
-              </div>
-              <div class="radar-metric-item">
-                <span>Vetor &amp; Chegada (ETA)</span>
-                <strong id="radar-m-eta" style="color:#38bdf8">Sem células em rota</strong>
-              </div>
-              <div class="radar-metric-item">
-                <span>Umidade &amp; Pressão Solo</span>
-                <strong id="radar-m-atm">--% • -- hPa</strong>
-              </div>
+          <!-- Barra Simétrica de Legenda Operacional dos Pluviômetros -->
+          <div class="radar-player-bar" style="justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:0.72rem;font-weight:700">
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-right:4px"></span>Normal (0 mm)</span>
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3b82f6;margin-right:4px"></span>Vigilância</span>
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#eab308;margin-right:4px"></span>Atenção</span>
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f97316;margin-right:4px"></span>Alerta</span>
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-right:4px"></span>Alarme</span>
             </div>
+            <span class="level-badge" id="radar-cross-badge" style="background:#10b981">SINCRONIZADO</span>
+          </div>
 
-            <div>
-              <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:5px">
-                Monitoramento de Eventos em Deslocamento para Fortaleza (Corredores de Aproximação Barlavento):
-              </div>
-              <div class="corridor-grid" id="radar-corridors-grid">
-                <!-- Preenchido dinamicamente com os 4 setores de aproximação (Leste, Nordeste, Sudeste, Sudoeste) -->
-              </div>
-            </div>
+          <div class="radar-legend-bar" style="background:var(--bg-sub);border-color:var(--border)">
+            <span id="ref-pluv-station" style="color:var(--text)">Ref. Pluviométrica: --</span>
+            <span id="ref-pluv-value" style="color:#38bdf8">Ciclo Automático: 5 min (0.0 mm)</span>
           </div>
         </div>
       </div>
 
-      <!-- GRID PRINCIPAL: MAPA GEORREFERENCIADO (ESQUERDA) + LISTA DE BAIRROS & ENDEREÇOS DE REFERÊNCIA (DIREITA) -->
-      <div class="main-split">
-        <!-- Coluna Esquerda: Mapa Leaflet com Chave Pública CARTO Oficial + Opção Imagem de Satélite + Feixe do Radar FUNCEME -->
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Mapa Georreferenciado — 11 Estações Defesa Civil, Feixe Radar, Abrigos SME &amp; Pontos Críticos</span>
-            <div class="map-layer-bar">
-              <select id="basemap-select" class="sim-select" style="padding:4px 8px;font-size:0.72rem" title="Selecionar estilo do mapa base (CARTO Oficial ou Imagem de Satélite)">
-                <option value="carto_light">Mapa: CARTO Light (Chave Oficial DCCALOR)</option>
-                <option value="satelite_hibrido">🛰️ Mapa: Imagem de Satélite + Rótulos (Híbrido)</option>
-                <option value="satelite_puro">🛰️ Mapa: Imagem de Satélite Pura (Esri)</option>
-                <option value="carto_voyager">Mapa: CARTO Voyager Detalhado</option>
-                <option value="carto_dark">Mapa: CARTO Escuro (Noturno)</option>
-                <option value="osm">Mapa: OpenStreetMap Oficial</option>
-              </select>
-              <label title="Sobrepor imagem em tempo real do Radar FUNCEME sobre o mapa de Fortaleza"><input type="checkbox" id="chk-radar-main" checked /> Feixe Radar FUNCEME</label>
-              <label><input type="checkbox" id="chk-estacoes" checked /> 11 Estações</label>
-              <label title="Exibir Escolas Municipais / Abrigos Temporários SME no mapa"><input type="checkbox" id="chk-abrigos" checked /> Escolas / Abrigos SME</label>
-              <label><input type="checkbox" id="chk-pontos" checked /> Pontos Críticos</label>
-              <label><input type="checkbox" id="chk-raios" checked /> Raio 2km IDW</label>
-              <label><input type="checkbox" id="chk-bairros" /> 121 Bairros</label>
+      <!-- SEÇÃO INFERIOR (ABAIXO DOS DOIS MAPAS SIMÉTRICOS): LISTA DE ESTAÇÕES E BAIRROS COM OS RESPECTIVOS IMPACTOS PLUVIOMÉTRICOS -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="card-title">📊 Estações Automáticas &amp; Bairros com os Respectivos Impactos Pluviométricos (Ciclo 5 Minutos + Radar FUNCEME)</span>
+            <div id="radar-cross-desc" style="font-size:0.74rem;color:var(--muted);font-weight:600;margin-top:2px">
+              Alimentação automática a cada 5 minutos pelas 11 estações da Defesa Civil (Plugfield) cruzada com a refletividade do Radar FUNCEME (dBZ e mm/h).
             </div>
           </div>
-          <div id="map-container"></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:0.73rem;color:var(--muted);flex-wrap:wrap;gap:8px">
-            <div>
-              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#003594;border:2px solid #38bdf8;margin-right:4px"></span> Estação Defesa Civil (PCD)
-              <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#0f766e;border:1.5px solid #2dd4bf;margin-left:10px;margin-right:4px"></span> 🏫 Escola / Abrigo SME
-              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-left:10px;margin-right:4px"></span> Normal (0 mm)
-              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3b82f6;margin-left:8px;margin-right:4px"></span> Vigilância
-              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#eab308;margin-left:8px;margin-right:4px"></span> Atenção
-              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f97316;margin-left:8px;margin-right:4px"></span> Alerta
-              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-left:8px;margin-right:4px"></span> Alarme
-            </div>
-            <div>Chave CARTO + Satélite + Radar FUNCEME + Escolas SME Ativos • Clique em qualquer bairro, estação ou abrigo</div>
+          <span class="live-dot" title="Monitoramento automático a cada 5 minutos"></span>
+        </div>
+
+        <!-- Faixa Resumo de Mensuração Pluviométrica (Radar × Pluviômetros) -->
+        <div class="radar-metrics-strip">
+          <div class="radar-metric-item">
+            <span>Refletividade Máx Radar</span>
+            <strong id="radar-m-dbz" style="color:#38bdf8">-- dBZ</strong>
+          </div>
+          <div class="radar-metric-item">
+            <span>Chuva Mensurada (Radar)</span>
+            <strong id="radar-m-rate" style="color:#10b981">0.0 mm/h</strong>
+          </div>
+          <div class="radar-metric-item">
+            <span>Chuva Solo (5 min DC)</span>
+            <strong id="radar-m-rain5m">0.0 mm / 5min</strong>
+          </div>
+          <div class="radar-metric-item">
+            <span>Chuva Solo (1h DC)</span>
+            <strong id="radar-m-rain1h">0.0 mm</strong>
+          </div>
+          <div class="radar-metric-item">
+            <span>Vetor &amp; Chegada (ETA)</span>
+            <strong id="radar-m-eta" style="color:#38bdf8">Sem células severas</strong>
+          </div>
+          <div class="radar-metric-item">
+            <span>Umidade &amp; Pressão Solo</span>
+            <strong id="radar-m-atm">--% • -- hPa</strong>
           </div>
         </div>
 
-        <!-- Coluna Direita: Lista de Bairros com Endereço da Estação como Ponto de Referência e Pluviometria a cada 5 Minutos (Padrão DCCALOR) -->
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <span class="card-title">Monitoramento Pluviométrico por Bairro (Ciclo 5 Min + Radar)</span>
-              <div style="font-size:0.71rem;color:var(--muted);font-weight:600;margin-top:2px">
-                Pluviômetro Automático (5m) + Mensuração Radar FUNCEME (dBZ / mm/h) &amp; Endereço de Referência (Padrão DCCALOR)
-              </div>
-            </div>
-            <span class="live-dot" title="Alimentação automática a cada 5 minutos pelas 11 estações Plugfield + Radar FUNCEME"></span>
-          </div>
+        <!-- Corredores de Deslocamento para Fortaleza -->
+        <div class="corridor-grid" id="radar-corridors-grid"></div>
 
-          <div class="bairro-search-row">
-            <input type="text" id="bairro-filter-input" class="bairro-search-input" placeholder="🔍 Filtrar por bairro (ex: Aldeota, Jacarecanga, Montese) ou endereço de referência..." />
-          </div>
+        <!-- Busca e Grade das 11 Estações com Impactos Pluviométricos por Bairro -->
+        <div class="bairro-search-row">
+          <input type="text" id="bairro-filter-input" class="bairro-search-input" placeholder="🔍 Filtrar estação ou bairro (ex: Jacarecanga, Padre Andrade, Aldeota, Itaoca, Montese, Messejana)..." />
+        </div>
 
-          <div class="bairro-list-scroll" id="bairro-ranking-list">
-            <!-- Preenchido dinamicamente a cada 5 minutos com as 11 estações, seus bairros, endereços de referência e leitura do radar -->
-          </div>
-
-          <div class="bairro-list-footer">
-            <span id="ref-pluv-station">Ref. Máxima Pluviométrica: --</span>
-            <span id="ref-pluv-value" style="color:#38bdf8">Ciclo Automático: 5 min (0.0 mm)</span>
-          </div>
+        <div class="bairro-list-grid" id="bairro-ranking-list">
+          <!-- Preenchido dinamicamente a cada 5 minutos com as 11 estações, seus bairros, endereços de referência e impactos pluviométricos -->
         </div>
       </div>
     </section>
@@ -1567,9 +1487,9 @@
     slider.value = String(currentRadarFrameIdx);
 
     document.getElementById('radar-frame-counter').textContent =
-      `${currentRadarFrameIdx + 1} / ${radarFrames.length}`;
+      `${currentRadarFrameIdx + 1}/${radarFrames.length}`;
     document.getElementById('radar-frame-timestamp').textContent =
-      `${frame.horario_brt} (${frame.indice}/${frame.total})`;
+      `${frame.horario_brt}`;
   }
 
   function initRadarFuncemeMap() {
@@ -1577,9 +1497,10 @@
     radarMap = L.map('radar-funceme-map', {
       zoomControl: true,
       attributionControl: false
-    }).setView([-3.78, -38.50], 9);
+    }).setView([-3.77, -38.52], 10);
 
-    definirCamadaBaseRadar('carto_dark');
+    // Cor original do portal Radar FUNCEME (Tema Claro OSM) ou Satélite opcional
+    definirCamadaBaseRadar('osm');
 
     document.getElementById('radar-basemap-select').addEventListener('change', e => {
       definirCamadaBaseRadar(e.target.value);
@@ -1588,7 +1509,7 @@
     // Anel de cobertura do Radar RMF Fortaleza (Eusébio: -3.89299, -38.45739)
     L.circle([-3.89299, -38.45739], {
       radius: 120000,
-      color: '#38bdf8',
+      color: '#0284c7',
       weight: 1.2,
       opacity: 0.45,
       dashArray: '6, 6',
@@ -1599,7 +1520,7 @@
     // Anel de vigilância metropolitana (45 km ao redor de Fortaleza)
     L.circle([-3.765, -38.535], {
       radius: 45000,
-      color: '#10b981',
+      color: '#059669',
       weight: 1.0,
       opacity: 0.4,
       dashArray: '3, 5',
@@ -1613,7 +1534,7 @@
       .then(geo => {
         if (geo && radarMap) {
           L.geoJSON(geo, {
-            style: { color: '#38bdf8', weight: 2.0, opacity: 0.9, fillColor: '#38bdf8', fillOpacity: 0.05 },
+            style: { color: '#1d4ed8', weight: 2.2, opacity: 0.9, fillColor: '#3b82f6', fillOpacity: 0.03 },
             interactive: false
           }).addTo(radarMap);
         }
@@ -1633,7 +1554,6 @@
     const rf = stateData.radar_funceme;
     const iframeEl = document.getElementById('radar-funceme-iframe');
     const mapEl = document.getElementById('radar-funceme-map');
-    const topBar = document.getElementById('radar-top-overlay-bar');
     const legendBox = document.getElementById('radar-legend-box');
     const controlsBar = document.getElementById('radar-player-controls');
 
@@ -1643,7 +1563,6 @@
         radarTimer = null;
       }
       mapEl.style.display = 'none';
-      topBar.style.display = 'none';
       legendBox.style.display = 'none';
       controlsBar.style.display = 'none';
       iframeEl.style.display = 'block';
@@ -1655,7 +1574,6 @@
 
     iframeEl.style.display = 'none';
     mapEl.style.display = 'block';
-    topBar.style.display = 'flex';
     legendBox.style.display = 'flex';
     controlsBar.style.display = 'flex';
     if (radarMap) {
@@ -1666,9 +1584,8 @@
     const prodObj = prods[activeRadarProductKey] || prods.prsf;
     if (!prodObj) return;
 
-    document.getElementById('radar-prod-title').textContent = prodObj.titulo;
     const legendImg = document.getElementById('radar-legend-img');
-    if (legendImg.getAttribute('src') !== prodObj.legenda_url) {
+    if (legendImg && legendImg.getAttribute('src') !== prodObj.legenda_url) {
       legendImg.setAttribute('src', prodObj.legenda_url);
     }
 
@@ -1679,7 +1596,7 @@
     }
   }
 
-  // 5. FILTRO DE BAIRROS NA LISTA LATERAL
+  // 5. FILTRO DE BAIRROS NA LISTA ABAIXO DOS MAPAS
   document.getElementById('bairro-filter-input').addEventListener('input', () => {
     renderizarListaBairrosPluviometria();
   });
@@ -1709,7 +1626,10 @@
     }).addTo(map);
 
     stationsLayer.addTo(map);
-    sheltersLayer.addTo(map);
+    const chkAbr = document.getElementById('chk-abrigos');
+    if (chkAbr && chkAbr.checked) {
+      sheltersLayer.addTo(map);
+    }
     radiusLayer.addTo(map);
     pointsLayer.addTo(map);
 
@@ -1977,13 +1897,13 @@
       item.innerHTML = `
         <div class="bairro-item-left">
           <div class="bairro-item-title">
-            <span>${idx + 1}. ${est.bairro}</span>
+            <span>${idx + 1}. PCD ${est.nome_curto} — ${est.bairro}</span>
             <span class="level-badge" style="background:${est.cor_pluviometrica || '#10b981'}">${est.nivel_pluviometrico || 'NORMAL'}</span>
             ${sonicTag}
           </div>
-          <span class="bairro-ref-addr">📍 Ref: ${est.endereco_referencia || est.nome}</span>
+          <span class="bairro-ref-addr">📍 Endereço / Ref: ${est.endereco_referencia || est.nome} (${est.bacia_hidrografica})</span>
           <div class="bairro-sec-areas">
-            <b>Bairros Cobertos (${est.bairros_secundarios.length}):</b> ${est.bairros_secundarios.join(', ')}
+            <b>Bairros com Impacto Pluviométrico (${est.bairros_secundarios.length}):</b> ${est.bairros_secundarios.join(', ')}
           </div>
         </div>
         <div class="bairro-item-right">
@@ -1991,9 +1911,12 @@
             ${Number(est.chuva_5m_mm || 0).toFixed(1)} mm <span style="font-size:0.68rem;font-weight:700;opacity:0.8">/ 5m</span>
           </div>
           <div class="bairro-rain-sub">
-            1h: <b>${Number(est.chuva_1h_estimada_mm || 0).toFixed(1)} mm</b> • Radar: <b style="color:#38bdf8">${radarDbz}</b>
+            10m: <b>${Number(est.chuva_10m_mm || 0).toFixed(1)} mm</b> • 1h: <b>${Number(est.chuva_1h_estimada_mm || 0).toFixed(1)} mm</b> • 24h: <b>${Number(est.chuva_24h_mm || 0).toFixed(1)} mm</b>
           </div>
-          <div class="pluv-bar-bg" title="Nível Pluviométrico Automático (${est.indice_saturacao_pluviometrica_pct || 0}%)">
+          <div class="bairro-rain-sub" style="margin-top:2px">
+            Radar: <b style="color:#38bdf8">${radarDbz}</b> • Sat: <b>${est.indice_saturacao_pluviometrica_pct || 0}%</b>
+          </div>
+          <div class="pluv-bar-bg" title="Impacto Pluviométrico / Saturação da Microbacia (${est.indice_saturacao_pluviometrica_pct || 0}%)">
             <div class="pluv-bar-fill" style="width:${Math.max(6, est.indice_saturacao_pluviometrica_pct || 0)}%;background:${est.cor_pluviometrica || '#10b981'}"></div>
           </div>
         </div>
@@ -2007,6 +1930,9 @@
           const m = stationMarkersById[est.plugfield_id];
           if (m) m.openPopup();
         }
+        if (radarMap) {
+          radarMap.setView([est.latitude, est.longitude], 12, { animate: true });
+        }
       });
 
       container.appendChild(item);
@@ -2016,13 +1942,13 @@
     if (stateData.estacoes_defesa_civil.length > 0) {
       const topEst = stateData.estacoes_defesa_civil[0];
       document.getElementById('ref-pluv-station').textContent =
-        `Ref. Pluviométrica: ${topEst.bairro} (${topEst.endereco_referencia.split('—')[0].trim()})`;
+        `Ref. Pluviométrica: PCD ${topEst.nome_curto} — ${topEst.bairro} (${topEst.endereco_referencia.split('—')[0].trim()})`;
       document.getElementById('ref-pluv-value').textContent =
-        `Solo 5m: ${Number(topEst.chuva_5m_mm || 0).toFixed(1)} mm | Radar: ${Number(topEst.taxa_chuva_radar_mm_h || 0).toFixed(1)} mm/h`;
+        `Solo 5m: ${Number(topEst.chuva_5m_mm || 0).toFixed(1)} mm | 1h: ${Number(topEst.chuva_1h_estimada_mm || 0).toFixed(1)} mm | Radar: ${Number(topEst.taxa_chuva_radar_mm_h || 0).toFixed(1)} mm/h`;
     }
   }
 
-  // 10. RENDERIZAR MAPA GEORREFERENCIADO PRINCIPAL
+  // 10. RENDERIZAR MAPA GEORREFERENCIADO PRINCIPAL (MARCADORES CIRCULARES LIMPOS SEM TEXTOS SOBRE A IMAGEM)
   function renderizarMapa() {
     if (!map || !stateData) return;
     stationsLayer.clearLayers();
@@ -2033,30 +1959,37 @@
     shelterMarkersById = {};
 
     stateData.estacoes_defesa_civil.forEach(est => {
-      const borderCol = est.cor_pluviometrica || '#38bdf8';
+      const borderCol = est.cor_pluviometrica || '#10b981';
+      const isSelected = est.plugfield_id === selectedStationPfId;
+      const sizePx = isSelected ? 24 : 20;
       const iconHtml = `
         <div style="
+          width:${sizePx}px;
+          height:${sizePx}px;
+          border-radius:50%;
           background:#003594;
-          color:#fff;
-          border:2px solid ${borderCol};
-          border-radius:8px;
-          padding:2px 7px;
-          font-size:10px;
-          font-weight:800;
-          white-space:nowrap;
+          border:3px solid ${borderCol};
           box-shadow:0 2px 6px rgba(0,0,0,0.45);
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          cursor:pointer;
         ">
-          PCD ${est.nome_curto}: ${Number(est.chuva_5m_mm || 0).toFixed(1)}mm
+          <div style="width:6px;height:6px;border-radius:50%;background:#ffffff;"></div>
         </div>
       `;
       const icon = L.divIcon({
         html: iconHtml,
         className: '',
-        iconSize: [116, 22],
-        iconAnchor: [58, 11]
+        iconSize: [sizePx, sizePx],
+        iconAnchor: [sizePx / 2, sizePx / 2]
       });
 
       const marker = L.marker([est.latitude, est.longitude], { icon });
+      marker.bindTooltip(
+        `<b>PCD ${est.nome_curto} (${est.bairro})</b><br/>Solo 5m: ${Number(est.chuva_5m_mm || 0).toFixed(1)} mm • 1h: ${Number(est.chuva_1h_estimada_mm || 0).toFixed(1)} mm • Radar: ${est.dbz_radar ?? 0} dBZ`,
+        { direction: 'top', offset: [0, -8] }
+      );
       const sonicLine = est.nivel_liquido_sonico_m !== null
         ? `<br/><b>Nível Sônico Canal (20M):</b> ${est.nivel_liquido_sonico_m} m`
         : '';
@@ -2093,35 +2026,41 @@
       }).addTo(radiusLayer);
     });
 
-    // Renderizar Escolas / Abrigos Temporários SME no Mapa (Polos Prioritários + Unidade Selecionada)
+    // Renderizar Escolas / Abrigos Temporários SME no Mapa (Marcadores circulares limpos)
     const listaAbrigos = stateData.abrigos_temporarios || [];
     listaAbrigos.forEach(abr => {
       if (!abr.eh_polo_prioritario && abr.id_abrigo !== selectedShelterId) return;
       const borderCol = abr.cor_hex || '#2dd4bf';
       const isFocused = abr.id_abrigo === selectedShelterId;
+      const sSize = isFocused ? 24 : 18;
       const iconHtml = `
         <div style="
+          width:${sSize}px;
+          height:${sSize}px;
+          border-radius:50%;
           background:${isFocused ? '#0f172a' : '#0f766e'};
           color:#ffffff;
           border:2px solid ${borderCol};
-          border-radius:6px;
-          padding:2px 6px;
-          font-size:9.5px;
-          font-weight:800;
-          white-space:nowrap;
-          box-shadow:0 2px 6px rgba(0,0,0,0.45);
-        " title="${abr.nome_escola}">
-          🏫 ${abr.bairro} (${abr.capacidade_familias} fam.)
-        </div>
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          font-size:10px;
+          box-shadow:0 2px 5px rgba(0,0,0,0.4);
+          cursor:pointer;
+        ">🏫</div>
       `;
       const icon = L.divIcon({
         html: iconHtml,
         className: '',
-        iconSize: [120, 20],
-        iconAnchor: [60, 10]
+        iconSize: [sSize, sSize],
+        iconAnchor: [sSize / 2, sSize / 2]
       });
 
       const sMarker = L.marker([abr.latitude, abr.longitude], { icon });
+      sMarker.bindTooltip(
+        `<b>🏫 ${abr.nome_escola}</b><br/>Bairro: ${abr.bairro} • Cap: ${abr.capacidade_familias} famílias`,
+        { direction: 'top', offset: [0, -8] }
+      );
       sMarker.bindPopup(`
         <div style="font-family:sans-serif;font-size:12px;line-height:1.45;min-width:265px">
           <strong style="color:#0f766e;font-size:13px">🏫 ${abr.nome_escola}</strong><br/>
