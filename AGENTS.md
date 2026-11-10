@@ -18,7 +18,10 @@
   - Áreas-piloto obrigatórias: **Jacarecanga**, **Padre Andrade**, **Aldeota** e **Itaoca** (além de **Aerolândia** e **Messejana**).
 
 ## 3. Estado Atual do Painel Operacional (`v2.5.0-symmetric-maps-clean-markers`)
-- **Servidor Web**: `app_server.py` usando `SADCThreadingHTTPServer` e `SADCThreadingHTTPServerV6` (dual-stack IPv4 `0.0.0.0` + IPv6 `::1`, cabeçalhos `Clear-Site-Data: "cache"` e `Cache-Control: no-store`) nas portas **`3005`** (`http://localhost:3005/?v=2.5`) e **`3006`** (`http://localhost:3006/`).
+- **Produção na Nuvem (Vercel + GitHub Auto-Deploy)**:
+  - **URL Pública Oficial (Vercel)**: `https://sadc-fortaleza.vercel.app/` (vinculada a `neudo-maias-projects/sadc-fortaleza` e ao repositório `NeudoMaia/SADCFortaleza`).
+  - **Endpoints Serverless ([api/status.py](file:///c:/Users/elineldo.pinheiro/Desktop/SADCFortaleza/api/status.py) e [api/health.py](file:///c:/Users/elineldo.pinheiro/Desktop/SADCFortaleza/api/health.py))**: Conectados em tempo real a `PLUGFIELD_LIVE_API` (11 estações), `ONLINE_API_FUNCEME_GMWR1000SST` (20 varreduras do radar) e às `457` Unidades Escolares SME/ASSEPLAN.
+- **Servidor Web Local**: `app_server.py` usando `SADCThreadingHTTPServer` e `SADCThreadingHTTPServerV6` (dual-stack IPv4 `0.0.0.0` + IPv6 `::1`, cabeçalhos `Clear-Site-Data: "cache"` e `Cache-Control: no-store`) nas portas **`3005`** (`http://localhost:3005/?v=2.5`) e **`3006`** (`http://localhost:3006/`).
 - **Credenciais Padrão da Interface (`public/index.html`)**:
   - Usuário: `admin.defesacivil` | Senha: `admindc`
   - Brasão vetorial oficial da Defesa Civil de Fortaleza (padrão `DCCALOR`).
