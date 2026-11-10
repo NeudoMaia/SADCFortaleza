@@ -1,0 +1,9 @@
+.git
+.env
+__pycache__
+*.pyc
+outputs/
+tests/
+docs/
+scripts/
+run_pilot_pipeline.py
