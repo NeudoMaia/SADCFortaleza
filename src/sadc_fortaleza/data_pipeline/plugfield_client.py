@@ -20,6 +20,7 @@ import urllib.request
 from PIL import Image
 
 from sadc_fortaleza.config import (
+    ABRIGOS_ESCOLAS_FORTALEZA,
     CARTO_API_KEY_PUBLICA,
     ESTACOES_FORTALEZA,
     FUNCEME_RADAR_API_URL,
@@ -1030,6 +1031,173 @@ def processar_painel_tempo_real(
 
     nivel_max_municipio = pontos_avaliados[0]["decisao_operacional"]["nivel"] if pontos_avaliados else "NORMAL"
 
+    # Avaliar Rede Oficial de Escolas Municipais / Abrigos Temporários por Bairro (SME / ASSEPLAN — 457 Unidades + 14 Polos Prioritários)
+    mapa_est_por_id = {int(e["plugfield_id"]): e for e in estacoes}
+    ids_polos_prioritarios = {abr.id_abrigo: abr for abr in ABRIGOS_ESCOLAS_FORTALEZA}
+
+    caminho_sme_json = Path(__file__).resolve().parents[3] / "data" / "escolas_rede_municipal_fortaleza.json"
+    unidades_sme_raw: List[Dict[str, object]] = []
+    if caminho_sme_json.exists():
+        try:
+            dados_sme = json.loads(caminho_sme_json.read_text(encoding="utf-8"))
+            unidades_sme_raw = list(dados_sme.get("unidades_escolares") or [])
+        except Exception:
+            unidades_sme_raw = []
+
+    abrigos_avaliados: List[Dict[str, object]] = []
+    if unidades_sme_raw:
+        for u in unidades_sme_raw:
+            id_abr = str(u.get("id_abrigo", ""))
+            polo_ref = ids_polos_prioritarios.get(id_abr)
+            eh_polo = polo_ref is not None
+            pf_id = int(u.get("estacao_referencia_plugfield", 8642))
+            est_ref = mapa_est_por_id.get(pf_id, estacoes[0] if estacoes else {})
+
+            lat_u = float(polo_ref.latitude if polo_ref else u.get("latitude", -3.765))
+            lon_u = float(polo_ref.longitude if polo_ref else u.get("longitude", -38.535))
+            dist_est = _distancia_km(
+                lat_u,
+                lon_u,
+                float(est_ref.get("latitude", lat_u)),
+                float(est_ref.get("longitude", lon_u)),
+            )
+
+            ch_5m = float(est_ref.get("chuva_5m_mm", 0.0))
+            ch_1h = float(est_ref.get("chuva_1h_estimada_mm", 0.0))
+            ch_24h = float(est_ref.get("chuva_24h_mm", 0.0))
+            dbz_loc = float(est_ref.get("dbz_radar", 0.0))
+            taxa_rad_loc = float(est_ref.get("taxa_chuva_radar_mm_h", 0.0))
+
+            cap_fam = int(polo_ref.capacidade_familias if polo_ref else u.get("capacidade_familias", 50))
+            cap_pes = int(polo_ref.capacidade_pessoas if polo_ref else u.get("capacidade_pessoas", 200))
+            tipo_sme = str(u.get("tipo", "PAT"))
+
+            if ch_1h >= 28.0 or ch_5m >= 6.5:
+                status_abrigo = "ACIONAMENTO IMEDIATO (ACOLHIMENTO ATIVO)"
+                nivel_abrigo = "EMERGENCIA"
+                cor_abrigo = "#ef4444"
+                prioridade_ord = 3
+                familias_estimadas = min(cap_fam, max(6, int(round(cap_fam * 0.40)))) if (eh_polo or tipo_sme == "PAT") else 0
+                orientacao = (
+                    "Chuva severa/alagamento na bacia: abrir unidade escolar imediatamente com equipe SDHDS/Defesa Civil "
+                    "para acolher famílias do bairro até o sinistro passar."
+                )
+            elif ch_1h >= 16.0 or ch_5m >= 3.5 or taxa_rad_loc >= 18.0:
+                status_abrigo = "ABERTURA PREVENTIVA RECOMENDADA"
+                nivel_abrigo = "ALERTA"
+                cor_abrigo = "#f97316"
+                prioridade_ord = 2
+                familias_estimadas = min(cap_fam, max(4, int(round(cap_fam * 0.18)))) if (eh_polo or tipo_sme == "PAT") else 0
+                orientacao = (
+                    "Chuva intensa na região: acionar direção escolar (Telefones OI / VoIP) e logística SDHDS para abertura preventiva "
+                    "caso haja necessidade de encaminhamento temporário de famílias."
+                )
+            elif ch_1h >= 6.0 or ch_5m >= 1.2 or taxa_rad_loc >= 6.0:
+                status_abrigo = "SOBREAVISO (CHUVA NA BACIA)"
+                nivel_abrigo = "ATENCAO"
+                cor_abrigo = "#eab308"
+                prioridade_ord = 1
+                familias_estimadas = 0
+                orientacao = (
+                    "Chuva moderada na bacia: manter direção da escola e Distrito Educacional em sobreaviso preventivo "
+                    "acompanhando a evolução nos próximos 30 minutos."
+                )
+            else:
+                status_abrigo = "DISPONÍVEL (RETAGUARDA POR BAIRRO)"
+                nivel_abrigo = "DISPONIVEL"
+                cor_abrigo = "#10b981"
+                prioridade_ord = 0
+                familias_estimadas = 0
+                orientacao = (
+                    "Unidade escolar oficial SME mapeada no bairro e apta para encaminhamento temporário de famílias "
+                    "em caso de evento de chuva forte."
+                )
+
+            abrigos_avaliados.append(
+                {
+                    "id_abrigo": id_abr,
+                    "eh_polo_prioritario": eh_polo,
+                    "pagina_pdf": int(u.get("pagina_pdf", 1)),
+                    "tipo": tipo_sme,
+                    "tipo_estrutura": str(u.get("tipo_descricao", "Escola Municipal")),
+                    "modalidade_abrigo": str(u.get("modalidade_abrigo", "Abrigo Temporário")),
+                    "distrito_educacao": str(u.get("distrito_educacao", "I")),
+                    "regional": str(u.get("regional", "SER I")),
+                    "cod_sme": str(u.get("cod_sme", "")),
+                    "inep": str(u.get("inep", "")),
+                    "nome_escola": str(u.get("nome_escola", "")),
+                    "endereco": str(u.get("endereco", "")),
+                    "bairro": str(u.get("bairro", "")),
+                    "bairros_atendidos": list(polo_ref.bairros_atendidos) if polo_ref else [str(u.get("bairro", ""))],
+                    "cep": str(u.get("cep", "—")),
+                    "telefones_oi": str(u.get("telefones_oi", "—")),
+                    "telefone_voip": str(u.get("telefone_voip", "—")),
+                    "email": str(u.get("email", "—")),
+                    "contato_acionamento": str(u.get("contato_emergencia", "")),
+                    "latitude": lat_u,
+                    "longitude": lon_u,
+                    "bacia_hidrografica": str(est_ref.get("bacia_hidrografica", u.get("bacia_hidrografica", ""))),
+                    "estacao_referencia_id": pf_id,
+                    "estacao_referencia_nome": str(est_ref.get("nome_curto", u.get("estacao_referencia_nome", ""))),
+                    "estacao_referencia_endereco": str(est_ref.get("endereco_referencia", u.get("estacao_referencia_endereco", ""))),
+                    "dist_estacao_km": round(dist_est, 2),
+                    "chuva_5m_bacia_mm": round(ch_5m, 1),
+                    "chuva_1h_bacia_mm": round(ch_1h, 1),
+                    "chuva_24h_bacia_mm": round(ch_24h, 1),
+                    "dbz_radar_bacia": round(dbz_loc, 1),
+                    "taxa_radar_bacia_mm_h": round(taxa_rad_loc, 1),
+                    "capacidade_familias": cap_fam,
+                    "capacidade_pessoas": cap_pes,
+                    "salas_apoio": int(polo_ref.salas_apoio) if polo_ref else (10 if tipo_sme == "PAT" else 6),
+                    "recursos_disponiveis": list(polo_ref.recursos_disponiveis)
+                    if polo_ref
+                    else (
+                        ["Quadra/Pátio Coberto", "Refeitório/Cozinha", "Salas de Aula", "Banheiros M/F"]
+                        if tipo_sme == "PAT"
+                        else ["Salas de Apoio", "Cozinha/Refeitório", "Banheiros"]
+                    ),
+                    "status_abrigo": status_abrigo,
+                    "nivel_abrigo": nivel_abrigo,
+                    "cor_hex": cor_abrigo,
+                    "prioridade_ordem": prioridade_ord,
+                    "familias_encaminhamento_estimado": familias_estimadas,
+                    "orientacao_operacional": orientacao,
+                }
+            )
+
+    abrigos_avaliados.sort(
+        key=lambda a: (
+            1 if a.get("eh_polo_prioritario") else 0,
+            int(a["prioridade_ordem"]),
+            1 if a.get("tipo") == "PAT" else 0,
+            float(a["chuva_1h_bacia_mm"]),
+            int(a["capacidade_familias"]),
+        ),
+        reverse=True,
+    )
+
+    bairros_distintos = sorted({str(a["bairro"]) for a in abrigos_avaliados if a.get("bairro")})
+    polos_prioritarios_lista = [a for a in abrigos_avaliados if a.get("eh_polo_prioritario")]
+
+    resumo_abrigos = {
+        "fonte_oficial": "SME / ASSEPLAN — Relação das Unidades Escolares da Rede Municipal de Fortaleza (12 páginas)",
+        "url_pdf_oficial": "/relacao_unidades_escolares_rede_municipal_fortaleza.pdf",
+        "total_escolas_abrigos": len(abrigos_avaliados),
+        "total_escolas_patrimoniais_pat": sum(1 for a in abrigos_avaliados if a.get("tipo") == "PAT"),
+        "total_polos_prioritarios": len(polos_prioritarios_lista),
+        "total_bairros_atendidos": len(bairros_distintos),
+        "bairros_disponiveis": bairros_distintos,
+        "capacidade_total_familias": sum(int(a["capacidade_familias"]) for a in abrigos_avaliados),
+        "capacidade_total_pessoas": sum(int(a["capacidade_pessoas"]) for a in abrigos_avaliados),
+        "capacidade_polos_familias": sum(int(a["capacidade_familias"]) for a in polos_prioritarios_lista),
+        "capacidade_polos_pessoas": sum(int(a["capacidade_pessoas"]) for a in polos_prioritarios_lista),
+        "total_salas_apoio": sum(int(a["salas_apoio"]) for a in abrigos_avaliados),
+        "abrigos_acionamento_ou_alerta": sum(1 for a in abrigos_avaliados if int(a["prioridade_ordem"]) >= 2),
+        "polos_acionamento_ou_alerta": sum(1 for a in polos_prioritarios_lista if int(a["prioridade_ordem"]) >= 2),
+        "abrigos_em_sobreaviso": sum(1 for a in abrigos_avaliados if int(a["prioridade_ordem"]) == 1),
+        "familias_encaminhamento_previsto": sum(int(a["familias_encaminhamento_estimado"]) for a in polos_prioritarios_lista),
+    }
+
     return {
         "sucesso": True,
         "modo_operacao": "SIMULACAO_EVENTO_CHUVOSO" if modo_simulacao else "TEMPO_REAL_PLUGFIELD",
@@ -1043,6 +1211,8 @@ def processar_painel_tempo_real(
         "radar_funceme": radar_monitoramento,
         "estacoes_defesa_civil": estacoes,
         "pontos_criticos": pontos_avaliados,
+        "abrigos_temporarios": abrigos_avaliados,
+        "resumo_abrigos": resumo_abrigos,
         "indicadores_modelo_validado": {
             "nome_modelo": "Ensemble Híbrido Multi-Bacia Calibrado (Níveis 1, 2 e 3 + Radar FUNCEME)",
             "recall_teste_pct": 99.8,

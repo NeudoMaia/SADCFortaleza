@@ -888,9 +888,9 @@
         <h1>
           <span style="color:#38bdf8">SADC-FORTALEZA</span>
           <span style="font-weight:400;color:var(--muted)">|</span>
-          <span>Monitoramento Pluviométrico (5 min), Satélite NASA &amp; Alagamentos</span>
+          <span>Monitoramento Pluviométrico (5 min), Radar FUNCEME &amp; Abrigos por Bairro</span>
         </h1>
-        <p>11 PCDs Defesa Civil (Plugfield) • API Satelital NASA • Maré Mucuripe • 103 Câmeras PMPU • Canal 40199</p>
+        <p>11 PCDs Defesa Civil (Plugfield) • Radar FUNCEME (RMF) • 14 Escolas/Abrigos Temporários • Maré Mucuripe • Canal 40199</p>
       </div>
     </div>
 
@@ -917,7 +917,7 @@
   <nav class="subbar">
     <div class="nav-tabs">
       <button type="button" class="tab-btn active" data-tab="tab-mapa">1. Radar FUNCEME (RMF), Mapa &amp; Pluviometria por Bairro</button>
-      <button type="button" class="tab-btn" data-tab="tab-estacoes">2. Rede de 11 Estações Automáticas + Radar (dBZ / mm/h)</button>
+      <button type="button" class="tab-btn" data-tab="tab-abrigos">2. Abrigos Temporários &amp; Escolas de Apoio por Bairro</button>
       <button type="button" class="tab-btn" data-tab="tab-modelos">3. Eficácia dos Modelos &amp; Retroalimentação 40199</button>
     </div>
     <div style="font-size:0.76rem;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:12px">
@@ -1076,7 +1076,7 @@
         <!-- Coluna Esquerda: Mapa Leaflet com Chave Pública CARTO Oficial + Opção Imagem de Satélite + Feixe do Radar FUNCEME -->
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Mapa Georreferenciado — 11 Estações Defesa Civil, Feixe Radar &amp; Pontos Críticos</span>
+            <span class="card-title">Mapa Georreferenciado — 11 Estações Defesa Civil, Feixe Radar, Abrigos SME &amp; Pontos Críticos</span>
             <div class="map-layer-bar">
               <select id="basemap-select" class="sim-select" style="padding:4px 8px;font-size:0.72rem" title="Selecionar estilo do mapa base (CARTO Oficial ou Imagem de Satélite)">
                 <option value="carto_light">Mapa: CARTO Light (Chave Oficial DCCALOR)</option>
@@ -1088,6 +1088,7 @@
               </select>
               <label title="Sobrepor imagem em tempo real do Radar FUNCEME sobre o mapa de Fortaleza"><input type="checkbox" id="chk-radar-main" checked /> Feixe Radar FUNCEME</label>
               <label><input type="checkbox" id="chk-estacoes" checked /> 11 Estações</label>
+              <label title="Exibir Escolas Municipais / Abrigos Temporários SME no mapa"><input type="checkbox" id="chk-abrigos" checked /> Escolas / Abrigos SME</label>
               <label><input type="checkbox" id="chk-pontos" checked /> Pontos Críticos</label>
               <label><input type="checkbox" id="chk-raios" checked /> Raio 2km IDW</label>
               <label><input type="checkbox" id="chk-bairros" /> 121 Bairros</label>
@@ -1097,13 +1098,14 @@
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:0.73rem;color:var(--muted);flex-wrap:wrap;gap:8px">
             <div>
               <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#003594;border:2px solid #38bdf8;margin-right:4px"></span> Estação Defesa Civil (PCD)
+              <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#0f766e;border:1.5px solid #2dd4bf;margin-left:10px;margin-right:4px"></span> 🏫 Escola / Abrigo SME
               <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-left:10px;margin-right:4px"></span> Normal (0 mm)
               <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3b82f6;margin-left:8px;margin-right:4px"></span> Vigilância
               <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#eab308;margin-left:8px;margin-right:4px"></span> Atenção
               <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f97316;margin-left:8px;margin-right:4px"></span> Alerta
               <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-left:8px;margin-right:4px"></span> Alarme
             </div>
-            <div>Chave CARTO + Satélite + Radar FUNCEME Ativos • Clique em qualquer bairro ou estação para focar</div>
+            <div>Chave CARTO + Satélite + Radar FUNCEME + Escolas SME Ativos • Clique em qualquer bairro, estação ou abrigo</div>
           </div>
         </div>
 
@@ -1135,35 +1137,96 @@
       </div>
     </section>
 
-    <!-- ABA 2: REDE DE 11 ESTAÇÕES AUTOMÁTICAS DA DEFESA CIVIL (PLUGFIELD) + MENSURAÇÃO RADAR FUNCEME -->
-    <section id="tab-estacoes" class="tab-pane" style="display:none">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Telemetria em Tempo Real — 11 Estações Automáticas da Defesa Civil (Plugfield) + Radar FUNCEME</span>
-          <span style="font-size:0.76rem;color:var(--muted)">Alimentação automática a cada 5 minutos: Pluviometria Solo, Mensuração Radar (dBZ / mm/h), Endereço de Referência, Temp, Umidade, Vento e Nível Sônico</span>
+    <!-- ABA 2: ABRIGOS TEMPORÁRIOS & RELAÇÃO DAS UNIDADES ESCOLARES DA REDE MUNICIPAL DE FORTALEZA POR BAIRRO (SME / ASSEPLAN) -->
+    <section id="tab-abrigos" class="tab-pane" style="display:none">
+      <!-- KPIs de Contingência de Abrigos Temporários -->
+      <div class="kpi-row" style="margin-bottom:14px">
+        <div class="kpi-box">
+          <span class="kpi-label">Rede Escolar Municipal Mapeada (SME / ASSEPLAN)</span>
+          <div class="kpi-value" style="color:#38bdf8" id="abrigo-kpi-total">457 Unidades</div>
+          <div class="kpi-foot" id="abrigo-kpi-total-sub">280 Escolas Patrimoniais (PAT) • 97 Bairros Atendidos</div>
         </div>
-        <div class="table-wrap">
+        <div class="kpi-box">
+          <span class="kpi-label">Polos Prioritários de Abrigo (11 Bacias)</span>
+          <div class="kpi-value" style="color:#10b981" id="abrigo-kpi-capacidade">14 Escolas-Polo</div>
+          <div class="kpi-foot" id="abrigo-kpi-capacidade-sub">Capacidade Imediata: 930 Famílias (Rede Total: 22.535 Famílias)</div>
+        </div>
+        <div class="kpi-box">
+          <span class="kpi-label">Escolas em Alerta / Abertura Recomendada Agora</span>
+          <div class="kpi-value" id="abrigo-kpi-recomendados">0 Unidades</div>
+          <div class="kpi-foot" id="abrigo-kpi-recomendados-sub">Cruzamento automático com chuva 5m/1h + Radar FUNCEME</div>
+        </div>
+        <div class="kpi-box">
+          <span class="kpi-label">Estimativa de Famílias p/ Encaminhamento</span>
+          <div class="kpi-value" id="abrigo-kpi-familias">0 Famílias</div>
+          <div class="kpi-foot" id="abrigo-kpi-familias-sub">Acolhimento temporário até o sinistro / chuva forte passar</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <span class="card-title" style="color:#38bdf8">🏫 Relação das Unidades Escolares da Rede Municipal de Fortaleza — Abrigos Temporários por Bairro</span>
+              <span class="level-badge" style="background:#0284c7">FONTE OFICIAL: SME / ASSEPLAN (457 UNIDADES • DISTRITOS I A VI)</span>
+              <a href="/relacao_unidades_escolares_rede_municipal_fortaleza.pdf" target="_blank" rel="noopener noreferrer" style="font-size:0.73rem;color:#38bdf8;font-weight:700;text-decoration:underline">
+                📄 Abrir Planilha PDF Oficial SME / ASSEPLAN (12 Páginas)
+              </a>
+            </div>
+            <div style="font-size:0.74rem;color:var(--muted);margin-top:3px">
+              Lista oficial de escolas definidas por bairro com Código SME, INEP, Endereço, CEP, Telefones OI / VoIP e E-mail, integrada à pluviometria de 5 minutos da estação da Defesa Civil mais próxima para encaminhamento seguro de famílias até a chuva forte passar.
+            </div>
+          </div>
+          <span id="abrigo-count-badge" style="font-size:0.76rem;font-weight:800;color:#38bdf8">Exibindo: -- unidades</span>
+        </div>
+
+        <!-- Barra de Filtros por Bairro, Distrito Educacional, Tipo de Unidade e Status Pluviométrico -->
+        <div style="display:grid;grid-template-columns:1.6fr 1fr 0.9fr 1.2fr;gap:10px;margin-bottom:12px">
+          <input
+            type="text"
+            id="abrigo-search-input"
+            class="bairro-search-input"
+            placeholder="🔍 Buscar por bairro, nome da escola, endereço, COD SME, INEP ou telefone..."
+          />
+          <select id="abrigo-bairro-filter" class="sim-select" style="width:100%">
+            <option value="TODOS">📍 Bairro: Todos os 97 Bairros da Rede SME</option>
+          </select>
+          <select id="abrigo-distrito-filter" class="sim-select" style="width:100%">
+            <option value="TODOS">🏛️ Distrito de Educação: Todos (I a VI)</option>
+            <option value="I">Distrito de Educação I (SER I)</option>
+            <option value="II">Distrito de Educação II (SER II)</option>
+            <option value="III">Distrito de Educação III (SER III)</option>
+            <option value="IV">Distrito de Educação IV (SER IV)</option>
+            <option value="V">Distrito de Educação V (SER V)</option>
+            <option value="VI">Distrito de Educação VI (SER VI)</option>
+          </select>
+          <select id="abrigo-tipo-filter" class="sim-select" style="width:100%">
+            <option value="TODOS" selected>🏫 Exibir: Todas as 457 Unidades da Rede SME</option>
+            <option value="POLOS">⭐ Polos Prioritários de Abrigo por Estação (14)</option>
+            <option value="PAT">PAT — Escolas Patrimoniais EI/EF (280)</option>
+            <option value="CEI">CEI — Centros de Educação Infantil (106)</option>
+            <option value="CRC">CRC — Creches Municipais / Conveniadas (51)</option>
+            <option value="ANE">ANE — Anexos Escolares (13)</option>
+            <option value="ESP">ESP — Educação Especial / Acessível (7)</option>
+            <option value="ACIONAMENTO">🚨 Somente com Chuva / Recomendadas Agora</option>
+          </select>
+        </div>
+
+        <div class="table-wrap" style="max-height:600px;overflow-y:auto">
           <table>
             <thead>
               <tr>
-                <th>ID Plugfield</th>
-                <th>Estação / Bairro Principal</th>
-                <th>Endereço de Referência da Estação</th>
-                <th>Bacia Hidrográfica</th>
-                <th>Chuva 5m (Solo)</th>
-                <th>Radar FUNCEME (dBZ / mm/h)</th>
-                <th>Chuva 10m</th>
-                <th>Chuva 1h</th>
-                <th>Chuva 24h</th>
-                <th>Chuva Ano</th>
-                <th>Temp / Umidade</th>
-                <th>Vento / Rajada</th>
-                <th>Pressão</th>
-                <th>Nível Sônico</th>
-                <th>Status Pluviométrico</th>
+                <th>Tipo / Distrito</th>
+                <th>COD / INEP</th>
+                <th>Unidade Escolar (Rede Municipal SME) &amp; Capacidade</th>
+                <th>Bairro &amp; Estação Defesa Civil Ref.</th>
+                <th>Endereço Completo &amp; CEP</th>
+                <th>Telefones OI / VoIP's &amp; E-mail SME</th>
+                <th>Chuva Agora no Bairro (Solo 5m/1h + Radar)</th>
+                <th>Status p/ Encaminhamento de Famílias &amp; Ação</th>
               </tr>
             </thead>
-            <tbody id="stations-tbody"></tbody>
+            <tbody id="abrigos-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -1306,9 +1369,13 @@
   let baseTileLayer = null;
   let mainRadarOverlay = null;
   let stationsLayer = L.layerGroup();
+  let sheltersLayer = L.layerGroup();
   let pointsLayer = L.layerGroup();
   let radiusLayer = L.layerGroup();
   let stationMarkersById = {};
+  let shelterMarkersById = {};
+  let selectedShelterId = null;
+  let bairrosSelectPopulated = false;
   let municipioLayer = null;
   let bairrosLayer = null;
   let countdownSeconds = 300; // Ciclo automático de 5 minutos (300 segundos)
@@ -1642,6 +1709,7 @@
     }).addTo(map);
 
     stationsLayer.addTo(map);
+    sheltersLayer.addTo(map);
     radiusLayer.addTo(map);
     pointsLayer.addTo(map);
 
@@ -1667,6 +1735,9 @@
     });
     document.getElementById('chk-estacoes').addEventListener('change', e => {
       if (e.target.checked) map.addLayer(stationsLayer); else map.removeLayer(stationsLayer);
+    });
+    document.getElementById('chk-abrigos').addEventListener('change', e => {
+      if (e.target.checked) map.addLayer(sheltersLayer); else map.removeLayer(sheltersLayer);
     });
     document.getElementById('chk-pontos').addEventListener('change', e => {
       if (e.target.checked) map.addLayer(pointsLayer); else map.removeLayer(pointsLayer);
@@ -1758,7 +1829,7 @@
     renderizarPainelRadarFunceme();
     renderizarMapa();
     renderizarListaBairrosPluviometria();
-    renderizarTabelaEstacoes();
+    renderizarAbrigosTemporarios();
   }
 
   // 8. RENDERIZAR PAINEL DINÂMICO DO RADAR METEOROLÓGICO FUNCEME E MENSURAÇÃO DE PLUVIOMETRIA
@@ -1955,9 +2026,11 @@
   function renderizarMapa() {
     if (!map || !stateData) return;
     stationsLayer.clearLayers();
+    sheltersLayer.clearLayers();
     pointsLayer.clearLayers();
     radiusLayer.clearLayers();
     stationMarkersById = {};
+    shelterMarkersById = {};
 
     stateData.estacoes_defesa_civil.forEach(est => {
       const borderCol = est.cor_pluviometrica || '#38bdf8';
@@ -2020,6 +2093,53 @@
       }).addTo(radiusLayer);
     });
 
+    // Renderizar Escolas / Abrigos Temporários SME no Mapa (Polos Prioritários + Unidade Selecionada)
+    const listaAbrigos = stateData.abrigos_temporarios || [];
+    listaAbrigos.forEach(abr => {
+      if (!abr.eh_polo_prioritario && abr.id_abrigo !== selectedShelterId) return;
+      const borderCol = abr.cor_hex || '#2dd4bf';
+      const isFocused = abr.id_abrigo === selectedShelterId;
+      const iconHtml = `
+        <div style="
+          background:${isFocused ? '#0f172a' : '#0f766e'};
+          color:#ffffff;
+          border:2px solid ${borderCol};
+          border-radius:6px;
+          padding:2px 6px;
+          font-size:9.5px;
+          font-weight:800;
+          white-space:nowrap;
+          box-shadow:0 2px 6px rgba(0,0,0,0.45);
+        " title="${abr.nome_escola}">
+          🏫 ${abr.bairro} (${abr.capacidade_familias} fam.)
+        </div>
+      `;
+      const icon = L.divIcon({
+        html: iconHtml,
+        className: '',
+        iconSize: [120, 20],
+        iconAnchor: [60, 10]
+      });
+
+      const sMarker = L.marker([abr.latitude, abr.longitude], { icon });
+      sMarker.bindPopup(`
+        <div style="font-family:sans-serif;font-size:12px;line-height:1.45;min-width:265px">
+          <strong style="color:#0f766e;font-size:13px">🏫 ${abr.nome_escola}</strong><br/>
+          <span style="color:#0284c7;font-size:11px;font-weight:700">📍 ${abr.endereco} — ${abr.bairro} (CEP: ${abr.cep || '—'})</span><br/>
+          <span style="color:#64748b;font-size:11px">Tipo: ${abr.tipo} (${abr.regional}) • COD SME: ${abr.cod_sme} • INEP: ${abr.inep}</span>
+          <hr style="margin:6px 0;border:none;border-top:1px solid #e2e8f0"/>
+          <b>Status p/ Acolhimento:</b> <span style="color:${abr.cor_hex};font-weight:800">${abr.status_abrigo}</span><br/>
+          <b>Capacidade Estimada:</b> ${abr.capacidade_familias} famílias (${abr.capacidade_pessoas} pessoas) • ${abr.salas_apoio} salas<br/>
+          <b>Estação Defesa Civil Ref.:</b> PCD ${abr.estacao_referencia_nome} (${abr.dist_estacao_km} km)<br/>
+          <b>Pluviometria no Bairro:</b> Solo 5m: ${abr.chuva_5m_bacia_mm} mm | 1h: ${abr.chuva_1h_bacia_mm} mm | Radar: ${abr.dbz_radar_bacia} dBZ<br/>
+          <b>Telefones OI / VoIP:</b> ${abr.telefones_oi} ${abr.telefone_voip && abr.telefone_voip !== '-' ? ' / ' + abr.telefone_voip : ''}<br/>
+          <b>E-mail SME:</b> ${abr.email || '—'}
+        </div>
+      `);
+      sheltersLayer.addLayer(sMarker);
+      shelterMarkersById[abr.id_abrigo] = sMarker;
+    });
+
     stateData.pontos_criticos.forEach(pc => {
       const cor = pc.decisao_operacional.cor_hex;
       const isSel = pc.id_ponto === selectedPointId;
@@ -2054,36 +2174,227 @@
     });
   }
 
-  function renderizarTabelaEstacoes() {
-    const tbody = document.getElementById('stations-tbody');
-    tbody.innerHTML = '';
-    stateData.estacoes_defesa_civil.forEach(est => {
+  // 11. RENDERIZAR ABA 2: ABRIGOS TEMPORÁRIOS & UNIDADES ESCOLARES DA REDE MUNICIPAL POR BAIRRO (SME / ASSEPLAN)
+  ['abrigo-search-input', 'abrigo-bairro-filter', 'abrigo-distrito-filter', 'abrigo-tipo-filter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', renderizarAbrigosTemporarios);
+      el.addEventListener('change', renderizarAbrigosTemporarios);
+    }
+  });
+
+  function focarAbrigoNoMapa(idAbrigo) {
+    if (!stateData || !stateData.abrigos_temporarios) return;
+    const abr = stateData.abrigos_temporarios.find(a => a.id_abrigo === idAbrigo);
+    if (!abr) return;
+    selectedShelterId = idAbrigo;
+
+    // Alternar para a Aba 1 (Mapa Principal)
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-tab') === 'tab-mapa');
+    });
+    document.querySelectorAll('.tab-pane').forEach(p => {
+      p.style.display = (p.id === 'tab-mapa') ? 'block' : 'none';
+    });
+
+    const chkAbr = document.getElementById('chk-abrigos');
+    if (chkAbr && !chkAbr.checked) {
+      chkAbr.checked = true;
+      if (map) map.addLayer(sheltersLayer);
+    }
+
+    renderizarMapa();
+    setTimeout(() => {
+      if (map) {
+        map.invalidateSize();
+        map.setView([abr.latitude, abr.longitude], 15, { animate: true });
+        const m = shelterMarkersById[idAbrigo];
+        if (m) m.openPopup();
+      }
+    }, 150);
+  }
+
+  function acionarAbrigoOperacional(idAbrigo) {
+    if (!stateData || !stateData.abrigos_temporarios) return;
+    const abr = stateData.abrigos_temporarios.find(a => a.id_abrigo === idAbrigo);
+    if (!abr) return;
+
+    const logTbody = document.getElementById('feedback-log-tbody');
+    if (logTbody) {
       const tr = document.createElement('tr');
-      const sonicBadge = est.nivel_liquido_sonico_m !== null
-        ? `<b style="color:#38bdf8">${est.nivel_liquido_sonico_m} m</b>`
-        : '<span style="color:var(--muted)">—</span>';
-      const radarCol = (est.dbz_radar !== null && est.dbz_radar !== undefined && est.dbz_radar > 5)
-        ? `<b style="color:#38bdf8">${est.dbz_radar} dBZ</b> (${est.taxa_chuva_radar_mm_h || 0} mm/h)`
-        : `<span style="color:var(--muted)">0 dBZ (0.0 mm/h)</span>`;
+      tr.style.background = 'rgba(16,185,129,0.12)';
       tr.innerHTML = `
-        <td><code>${est.plugfield_id}</code></td>
+        <td>${new Date().toLocaleTimeString('pt-BR')}</td>
+        <td><b>🏫 ${abr.nome_escola} (${abr.bairro})</b></td>
+        <td><span class="level-badge" style="background:${abr.cor_hex || '#0284c7'}">ABRIGO ACIONADO</span></td>
+        <td>Acionamento de contingência p/ acolhimento de até ${abr.capacidade_familias} famílias (${abr.endereco} • ${abr.contato_acionamento})</td>
+      `;
+      logTbody.insertBefore(tr, logTbody.firstChild);
+    }
+
+    const btn = document.getElementById(`btn-acionar-${idAbrigo}`);
+    if (btn) {
+      btn.textContent = '✓ Abrigo em Prontidão';
+      btn.style.background = '#10b981';
+      btn.style.color = '#ffffff';
+    }
+  }
+
+  function renderizarAbrigosTemporarios() {
+    if (!stateData) return;
+    const todosAbrigos = stateData.abrigos_temporarios || [];
+    const res = stateData.resumo_abrigos || {};
+
+    // Popular o seletor de 97 bairros da lista oficial da SME na primeira carga
+    if (!bairrosSelectPopulated && Array.isArray(res.bairros_disponiveis) && res.bairros_disponiveis.length > 0) {
+      const bSel = document.getElementById('abrigo-bairro-filter');
+      res.bairros_disponiveis.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b;
+        opt.textContent = `Bairro: ${b}`;
+        bSel.appendChild(opt);
+      });
+      bairrosSelectPopulated = true;
+    }
+
+    // Atualizar KPIs da Aba 2
+    document.getElementById('abrigo-kpi-total').textContent =
+      `${res.total_escolas_abrigos || todosAbrigos.length} Unidades`;
+    document.getElementById('abrigo-kpi-total-sub').textContent =
+      `${res.total_escolas_patrimoniais_pat || 280} Escolas Patrimoniais (PAT) • ${res.total_bairros_atendidos || 97} Bairros`;
+
+    document.getElementById('abrigo-kpi-capacidade').textContent =
+      `${res.total_polos_prioritarios || 14} Polos (${res.capacidade_polos_familias || 930} Fam.)`;
+    document.getElementById('abrigo-kpi-capacidade-sub').textContent =
+      `Capacidade Total da Rede SME (457 Unid.): ${(res.capacidade_total_familias || 22535).toLocaleString('pt-BR')} Famílias`;
+
+    const recCount = res.abrigos_acionamento_ou_alerta || 0;
+    const sobCount = res.abrigos_em_sobreaviso || 0;
+    const kpiRec = document.getElementById('abrigo-kpi-recomendados');
+    kpiRec.textContent = recCount > 0
+      ? `${recCount} em Alerta / Abertura`
+      : (sobCount > 0 ? `${sobCount} em Sobreaviso` : '0 Acionamentos (Normal)');
+    kpiRec.style.color = recCount > 0 ? '#f97316' : (sobCount > 0 ? '#eab308' : '#10b981');
+
+    const famPrev = res.familias_encaminhamento_previsto || 0;
+    const kpiFam = document.getElementById('abrigo-kpi-familias');
+    kpiFam.textContent = `${famPrev} Famílias (~${famPrev * 4} Pessoas)`;
+    kpiFam.style.color = famPrev > 0 ? '#f97316' : '#38bdf8';
+
+    // Filtragem
+    const termo = (document.getElementById('abrigo-search-input').value || '').trim().toLowerCase();
+    const bairroFiltro = document.getElementById('abrigo-bairro-filter').value || 'TODOS';
+    const distritoFiltro = document.getElementById('abrigo-distrito-filter').value || 'TODOS';
+    const tipoFiltro = document.getElementById('abrigo-tipo-filter').value || 'TODOS';
+
+    const filtrados = todosAbrigos.filter(abr => {
+      if (bairroFiltro !== 'TODOS' && abr.bairro !== bairroFiltro) return false;
+      if (distritoFiltro !== 'TODOS' && abr.distrito_educacao !== distritoFiltro) return false;
+      if (tipoFiltro === 'POLOS' && !abr.eh_polo_prioritario) return false;
+      if (tipoFiltro === 'ACIONAMENTO' && (abr.prioridade_ordem || 0) < 1) return false;
+      if (['PAT', 'CEI', 'CRC', 'ANE', 'ESP'].includes(tipoFiltro) && abr.tipo !== tipoFiltro) return false;
+
+      if (!termo) return true;
+      const alvo = [
+        abr.nome_escola,
+        abr.bairro,
+        abr.endereco,
+        abr.cod_sme,
+        abr.inep,
+        abr.cep,
+        abr.telefones_oi,
+        abr.telefone_voip,
+        abr.email,
+        abr.estacao_referencia_nome,
+        ...(abr.bairros_atendidos || [])
+      ].join(' ').toLowerCase();
+      return alvo.includes(termo);
+    });
+
+    document.getElementById('abrigo-count-badge').textContent =
+      `Exibindo: ${filtrados.length} de ${todosAbrigos.length} unidades escolares`;
+
+    const tbody = document.getElementById('abrigos-tbody');
+    tbody.innerHTML = '';
+
+    filtrados.forEach(abr => {
+      const tr = document.createElement('tr');
+      if (abr.eh_polo_prioritario) {
+        tr.style.background = 'rgba(56, 189, 248, 0.05)';
+      }
+
+      const poloTag = abr.eh_polo_prioritario
+        ? `<span class="level-badge" style="background:#0284c7;margin-left:5px">⭐ POLO DEFESA CIVIL</span>`
+        : '';
+
+      const radarInfo = (abr.dbz_radar_bacia && abr.dbz_radar_bacia > 5)
+        ? `<span style="color:#38bdf8;font-weight:700">${abr.dbz_radar_bacia} dBZ (${abr.taxa_radar_bacia_mm_h} mm/h)</span>`
+        : `<span style="color:var(--muted)">0 dBZ (0.0 mm/h)</span>`;
+
+      const voipStr = (abr.telefone_voip && abr.telefone_voip !== '-' && abr.telefone_voip !== '—')
+        ? `<div style="font-size:0.71rem;color:#38bdf8"><b>VoIP:</b> ${abr.telefone_voip}</div>`
+        : '';
+
+      tr.innerHTML = `
         <td>
-          <b>${est.nome_curto}</b>
-          <div style="font-size:0.7rem;color:var(--muted)">Cobertura: ${est.bairros_secundarios.slice(0, 4).join(', ')}</div>
+          <span class="level-badge" style="background:${abr.tipo === 'PAT' ? '#0f766e' : '#475569'}">${abr.tipo}</span>
+          <div style="font-size:0.71rem;color:var(--muted);margin-top:3px;font-weight:700">Distrito ${abr.distrito_educacao}</div>
         </td>
-        <td style="font-size:0.76rem;color:#38bdf8;font-weight:700">${est.endereco_referencia || '—'}</td>
-        <td>${est.bacia_hidrografica}</td>
-        <td><b>${est.chuva_5m_mm} mm</b></td>
-        <td>${radarCol}</td>
-        <td><b>${est.chuva_10m_mm} mm</b></td>
-        <td><b>${est.chuva_1h_estimada_mm} mm</b></td>
-        <td>${est.chuva_24h_mm} mm</td>
-        <td>${est.chuva_ano_mm} mm</td>
-        <td>${est.temperatura_c}°C / ${est.umidade_pct}%</td>
-        <td>${est.vento_kmh} / ${est.rajada_kmh} km/h (${est.direcao_vento_cardeal})</td>
-        <td>${est.pressao_hpa} hPa</td>
-        <td>${sonicBadge}</td>
-        <td><span class="level-badge" style="background:${est.cor_pluviometrica || '#10b981'}">${est.nivel_pluviometrico || 'NORMAL'}</span></td>
+        <td>
+          <div><b>COD:</b> <code>${abr.cod_sme}</code></div>
+          <div style="font-size:0.7rem;color:var(--muted)">INEP: ${abr.inep}</div>
+        </td>
+        <td>
+          <div style="font-weight:800;font-size:0.8rem;color:var(--text)">
+            ${abr.nome_escola} ${poloTag}
+          </div>
+          <div style="font-size:0.71rem;color:#10b981;font-weight:700;margin-top:2px">
+            Capacidade: ~${abr.capacidade_familias} famílias (${abr.capacidade_pessoas} pessoas) • ${abr.modalidade_abrigo}
+          </div>
+        </td>
+        <td>
+          <div style="font-weight:800;color:#38bdf8">${abr.bairro}</div>
+          <div style="font-size:0.7rem;color:var(--muted)">
+            Ref. Pluviométrica: <b>PCD ${abr.estacao_referencia_nome}</b> (${abr.dist_estacao_km} km • ${abr.bacia_hidrografica})
+          </div>
+        </td>
+        <td>
+          <div style="font-weight:700;font-size:0.76rem">${abr.endereco}</div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px">CEP: ${abr.cep} • Pág. PDF: ${abr.pagina_pdf}</div>
+          <button
+            type="button"
+            class="radar-ctrl-btn"
+            style="font-size:0.68rem;padding:2px 7px"
+            onclick="focarAbrigoNoMapa('${abr.id_abrigo}')"
+          >
+            📍 Ver Escola no Mapa
+          </button>
+        </td>
+        <td>
+          <div style="font-size:0.74rem"><b>OI:</b> ${abr.telefones_oi}</div>
+          ${voipStr}
+          <div style="font-size:0.68rem;color:var(--muted);word-break:break-all;margin-top:2px">${abr.email}</div>
+        </td>
+        <td>
+          <div style="font-weight:800;font-size:0.8rem">Solo 5m: ${abr.chuva_5m_bacia_mm} mm</div>
+          <div style="font-size:0.72rem">Acum. 1h: <b>${abr.chuva_1h_bacia_mm} mm</b></div>
+          <div style="font-size:0.71rem">Radar: ${radarInfo}</div>
+        </td>
+        <td>
+          <span class="level-badge" style="background:${abr.cor_hex || '#10b981'}">${abr.status_abrigo}</span>
+          <div style="font-size:0.69rem;color:var(--muted);margin:4px 0;max-width:250px;line-height:1.3">
+            ${abr.orientacao_operacional}
+          </div>
+          <button
+            type="button"
+            id="btn-acionar-${abr.id_abrigo}"
+            class="radar-ctrl-btn"
+            style="font-size:0.68rem;padding:3px 8px;border-color:${abr.cor_hex || '#38bdf8'}"
+            onclick="acionarAbrigoOperacional('${abr.id_abrigo}')"
+          >
+            🏫 Acionar p/ Encaminhamento
+          </button>
+        </td>
       `;
       tbody.appendChild(tr);
     });

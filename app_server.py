@@ -70,9 +70,10 @@ class SADCRequestHandler(BaseHTTPRequestHandler):
             self._send_json(
                 {
                     "status": "online",
-                    "version": "2.2.0-funceme-radar-rmf",
+                    "version": "2.4.0-funceme-radar-sme-abrigos",
                     "system": "SADC-Fortaleza - Defesa Civil de Fortaleza",
                     "stations_count": 11,
+                    "sme_schools_count": 457,
                 }
             )
             return
@@ -87,8 +88,22 @@ class SADCRequestHandler(BaseHTTPRequestHandler):
                 mare_simulada_m=mare_m,
                 foco_bairro_simulacao=foco,
             )
-            payload["versao_painel"] = "2.2.0-funceme-radar-rmf"
+            payload["versao_painel"] = "2.4.0-funceme-radar-sme-abrigos"
             self._send_json(payload)
+            return
+
+        if route.endswith("relacao_unidades_escolares_rede_municipal_fortaleza.pdf"):
+            self._send_file(
+                PUBLIC_DIR / "relacao_unidades_escolares_rede_municipal_fortaleza.pdf",
+                "application/pdf",
+            )
+            return
+
+        if route.endswith("escolas_rede_municipal_fortaleza.json"):
+            self._send_file(
+                PUBLIC_DIR / "escolas_rede_municipal_fortaleza.json",
+                "application/json; charset=utf-8",
+            )
             return
 
         if route.endswith("legenda_chuva_agora.png"):
