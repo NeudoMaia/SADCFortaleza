@@ -32,8 +32,9 @@ class handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         route = parsed.path
+        qs = parse_qs(parsed.query)
 
-        if route == "/api/health":
+        if "health" in route or "health" in qs:
             self._send_json(
                 {
                     "status": "online",
@@ -45,18 +46,13 @@ class handler(BaseHTTPRequestHandler):
             )
             return
 
-        if route in ("/api/status", "/api/stations", "/api", "/api/"):
-            qs = parse_qs(parsed.query)
-            chuva_1h = float(qs["chuva_1h"][0]) if "chuva_1h" in qs else None
-            mare_m = float(qs["mare"][0]) if "mare" in qs else None
-            foco = qs.get("bairro", ["TODOS"])[0]
-            payload = processar_painel_tempo_real(
-                chuva_simulada_1h_mm=chuva_1h,
-                mare_simulada_m=mare_m,
-                foco_bairro_simulacao=foco,
-            )
-            payload["versao_painel"] = "2.5.0-symmetric-maps-clean-markers"
-            self._send_json(payload)
-            return
-
-        self._send_json({"error": "Endpoint nao encontrado", "path": route}, status=404)
+        chuva_1h = float(qs["chuva_1h"][0]) if "chuva_1h" in qs else None
+        mare_m = float(qs["mare"][0]) if "mare" in qs else None
+        foco = qs.get("bairro", ["TODOS"])[0]
+        payload = processar_painel_tempo_real(
+            chuva_simulada_1h_mm=chuva_1h,
+            mare_simulada_m=mare_m,
+            foco_bairro_simulacao=foco,
+        )
+        payload["versao_painel"] = "2.5.0-symmetric-maps-clean-markers"
+        self._send_json(payload)
